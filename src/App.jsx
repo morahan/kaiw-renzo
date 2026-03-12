@@ -1,5 +1,153 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import './App.css'
+
+// Command Palette Component
+function CommandPalette({ isOpen, onClose, onAction }) {
+  const [query, setQuery] = useState('')
+  const [selected, setSelected] = useState(0)
+  const inputRef = useRef(null)
+
+  const commands = [
+    { id: 'new', label: 'New Article', icon: '✍️', shortcut: 'N', category: 'Create' },
+    { id: 'prompt', label: 'Random Prompt', icon: '💡', shortcut: 'P', category: 'Create' },
+    { id: 'trends', label: 'View Trends', icon: '🔥', shortcut: 'T', category: 'Research' },
+    { id: 'analytics', label: 'Analytics', icon: '📊', shortcut: 'A', category: 'View' },
+    { id: 'voice', label: 'Voice Brief', icon: '🎙️', shortcut: 'V', category: 'Tools' },
+    { id: 'search', label: 'Search Articles', icon: '🔍', shortcut: '/', category: 'Search' },
+    { id: 'export', label: 'Export Data', icon: '📤', shortcut: 'E', category: 'Tools' },
+    { id: 'settings', label: 'Settings', icon: '⚙️', shortcut: ',', category: 'Config' },
+  ]
+
+  const filtered = useMemo(() => {
+    if (!query) return commands
+    return commands.filter(c => 
+      c.label.toLowerCase().includes(query.toLowerCase()) ||
+      c.category.toLowerCase().includes(query.toLowerCase())
+    )
+  }, [query])
+
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus()
+      setQuery('')
+      setSelected(0)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isOpen) return
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSelected(prev => Math.min(prev + 1, filtered.length - 1))
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSelected(prev => Math.max(prev - 1, 0))
+      }
+      if (e.key === 'Enter' && filtered[selected]) {
+        onAction(filtered[selected].id)
+        onClose()
+      }
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, filtered, selected, onAction, onClose])
+
+  if (!isOpen) return null
+
+  const grouped = filtered.reduce((acc, cmd) => {
+    if (!acc[cmd.category]) acc[cmd.category] = []
+    acc[cmd.category].push(cmd)
+    return acc
+  }, {})
+
+  let globalIndex = 0
+
+  return (
+    <div className="command-overlay" onClick={onClose}>
+      <div className="command-palette" onClick={e => e.stopPropagation()}>
+        <div className="command-input-wrap">
+          <span className="command-icon">⌘</span>
+          <input
+            ref={inputRef}
+            type="text"
+            className="command-input"
+            placeholder="Type a command..."
+            value={query}
+            onChange={e => { setQuery(e.target.value); setSelected(0) }}
+          />
+        </div>
+        <div className="command-list">
+          {Object.entries(grouped).map(([category, cmds]) => (
+            <div key={category} className="command-group">
+              <div className="command-group-label">{category}</div>
+              {cmds.map((cmd) => {
+                const idx = globalIndex++
+                return (
+                  <div
+                    key={cmd.id}
+                    className={`command-item ${selected === idx ? 'selected' : ''}`}
+                    onClick={() => { onAction(cmd.id); onClose() }}
+                    onMouseEnter={() => setSelected(idx)}
+                  >
+                    <span className="command-item-icon">{cmd.icon}</span>
+                    <span className="command-item-label">{cmd.label}</span>
+                    <span className="command-item-shortcut">{cmd.shortcut}</span>
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+          {filtered.length === 0 && (
+            <div className="command-empty">No commands found</div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Category Breakdown Chart
+function CategoryChart({ articles }) {
+  const categories = useMemo(() => {
+    const counts = {}
+    articles.forEach(a => {
+      counts[a.category] = (counts[a.category] || 0) + 1
+    })
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])
+  }, [articles])
+
+  const total = categories.reduce((sum, [, count]) => sum + count, 0)
+
+  return (
+    <div className="category-chart">
+      {categories.map(([cat, count], i) => {
+        const pct = Math.round((count / total) * 100)
+        const color = categoryColors[cat] || '#a1a1aa'
+        return (
+          <div key={cat} className="category-bar-wrap">
+            <div className="category-bar-label">
+              <span>{cat}</span>
+              <span>{count} ({pct}%)</span>
+            </div>
+            <div className="category-bar-track">
+              <div
+                className="category-bar-fill"
+                style={{
+                  width: `${pct}%`,
+                  background: `linear-gradient(90deg, ${color}, ${color}80)`,
+                  animationDelay: `${i * 0.1}s`
+                }}
+              />
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 // Writing prompt component
 function WritingPrompt({ onClose }) {
@@ -209,6 +357,9 @@ function App() {
   const [likedArticles, setLikedArticles] = useState({})
   const [expandedArticle, setExpandedArticle] = useState(null)
   const [hoveredMetric, setHoveredMetric] = useState(null)
+  const [showCommandPalette, setShowCommandPalette] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [articleFilter, setArticleFilter] = useState('all')
   const inputRef = useRef(null)
 
   useEffect(() => {
@@ -242,12 +393,76 @@ function App() {
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      
+      // Command palette
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setShowCommandPalette(true)
+        return
+      }
+      
       const key = e.key.toUpperCase()
       if (key === 'N') setShowPrompt(true)
-      if (key === 'ESCAPE') setShowPrompt(false)
+      if (key === 'P') setShowPrompt(true)
+      if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
+      if (key === 'ESCAPE') {
+        setShowPrompt(false)
+        setShowCommandPalette(false)
+        setSearchQuery('')
+      }
     }
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [])
+
+  const handleCommand = (actionId) => {
+    switch(actionId) {
+      case 'new':
+      case 'prompt':
+        setShowPrompt(true)
+        break
+      case 'trends':
+        document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth' })
+        break
+      case 'analytics':
+        document.querySelector('.feed-section')?.scrollIntoView({ behavior: 'smooth' })
+        break
+      case 'search':
+        document.getElementById('article-search')?.focus()
+        break
+      case 'voice':
+        setShowPrompt(true)
+        break
+      default:
+        break
+    }
+  }
+
+  // Filter articles
+  const filteredArticles = useMemo(() => {
+    let filtered = recentArticles
+    
+    if (articleFilter !== 'all') {
+      filtered = filtered.filter(a => a.category === articleFilter)
+    }
+    
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      filtered = filtered.filter(a => 
+        a.title.toLowerCase().includes(q) ||
+        a.category.toLowerCase().includes(q)
+      )
+    }
+    
+    return filtered
+  }, [recentArticles, articleFilter, searchQuery])
+
+  // Get productivity hour
+  const productivityHour = useMemo(() => {
+    const hours = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+    const weights = [3, 5, 8, 12, 15, 18, 14, 10, 8, 6, 5, 4, 6, 8, 10, 12, 14, 16, 18, 15, 10, 6]
+    const maxIdx = weights.indexOf(Math.max(...weights))
+    return hours[maxIdx]
   }, [])
 
   const hour = currentTime.getHours()
@@ -292,6 +507,11 @@ function App() {
   return (
     <div className="app">
       {showPrompt && <WritingPrompt onClose={() => setShowPrompt(false)} />}
+      <CommandPalette 
+        isOpen={showCommandPalette} 
+        onClose={() => setShowCommandPalette(false)}
+        onAction={handleCommand}
+      />
       
       <div 
         className="gradient-orb"
@@ -311,9 +531,13 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v2.1</span>
+          <span className="logo-badge">v2.2</span>
         </div>
         <div className="header-right">
+          <button className="cmd-hint" onClick={() => setShowCommandPalette(true)}>
+            <span className="cmd-icon">⌘</span>
+            <span>K</span>
+          </button>
           <div className="tip-banner">
             <span className="tip-icon">💡</span>
             <span className="tip-text">{tips[activeTip]}</span>
@@ -445,16 +669,76 @@ function App() {
           </div>
         </section>
 
+        {/* Category Breakdown */}
+        <section className="category-section">
+          <div className="section-header">
+            <h2 className="section-title">
+              <span className="section-icon">📊</span>
+              Category Breakdown
+            </h2>
+          </div>
+          <CategoryChart articles={recentArticles} />
+        </section>
+
+        {/* Productivity Insight */}
+        <section className="insight-section">
+          <div className="insight-card">
+            <div className="insight-icon">⏰</div>
+            <div className="insight-content">
+              <span className="insight-label">Peak Productivity Hour</span>
+              <span className="insight-value">{productivityHour}:00 {productivityHour >= 12 ? 'PM' : 'AM'}</span>
+            </div>
+            <div className="insight-sub">You write best in the evening hours</div>
+          </div>
+        </section>
+
         <section className="feed-section">
           <div className="section-header">
             <h2 className="section-title">
               <span className="section-icon">📡</span>
               Recent Articles
             </h2>
-            <span className="article-count">{recentArticles.length} published</span>
+            <span className="article-count">{filteredArticles.length} of {recentArticles.length}</span>
           </div>
+          
+          {/* Search and Filter Bar */}
+          <div className="article-filters">
+            <div className="search-box">
+              <span className="search-icon">🔍</span>
+              <input
+                id="article-search"
+                type="text"
+                placeholder="Search articles... (press /)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+              {searchQuery && (
+                <button className="search-clear" onClick={() => setSearchQuery('')}>×</button>
+              )}
+            </div>
+            <div className="filter-pills">
+              <button 
+                className={`filter-pill ${articleFilter === 'all' ? 'active' : ''}`}
+                onClick={() => setArticleFilter('all')}
+              >
+                All
+              </button>
+              {Object.keys(categoryColors).map(cat => (
+                <button
+                  key={cat}
+                  className={`filter-pill ${articleFilter === cat ? 'active' : ''}`}
+                  onClick={() => setArticleFilter(cat)}
+                  style={{ '--pill-color': categoryColors[cat] }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+          
           <div className="articles-list">
-            {recentArticles.map((article, index) => (
+            {filteredArticles.map((article, index) => (
               <div 
                 key={index} 
                 className={`article-card ${expandedArticle === index ? 'expanded' : ''}`}
@@ -569,7 +853,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.1 • Press N for quick actions</p>
+        <p className="footer-version">v2.2 • Press ⌘K for commands</p>
       </footer>
     </div>
   )
