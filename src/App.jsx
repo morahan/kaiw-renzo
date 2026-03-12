@@ -136,6 +136,233 @@ function ContentFormulaRef({ isOpen, onClose }) {
   )
 }
 
+// ========== NEW COMPONENTS (v2.6) ==========
+
+// Writing Session Timer (Pomodoro-style)
+function WritingTimer({ onComplete, onSave }) {
+  const [minutes, setMinutes] = useState(25)
+  const [seconds, setSeconds] = useState(0)
+  const [isRunning, setIsRunning] = useState(false)
+  const [isBreak, setIsBreak] = useState(false)
+  const [sessions, setSessions] = useState(() => {
+    const saved = localStorage.getItem('renzo-timer-sessions')
+    return saved ? JSON.parse(saved) : 0
+  })
+  const [wordsInSession, setWordsInSession] = useState(0)
+  
+  useEffect(() => {
+    let interval
+    if (isRunning && (minutes > 0 || seconds > 0)) {
+      interval = setInterval(() => {
+        if (seconds === 0) {
+          if (minutes === 0) {
+            // Timer complete
+            if (!isBreak) {
+              setSessions(s => {
+                const newS = s + 1
+                localStorage.setItem('renzo-timer-sessions', JSON.stringify(newS))
+                return newS
+              })
+              onComplete?.()
+              new Audio('/ beep.mp3').play().catch(() => {})
+            }
+            setIsBreak(!isBreak)
+            setMinutes(isBreak ? 25 : 5)
+            setSeconds(0)
+            setIsRunning(false)
+          } else {
+            setMinutes(m => m - 1)
+            setSeconds(59)
+          }
+        } else {
+          setSeconds(s => s - 1)
+        }
+      }, 1000)
+    }
+    return () => clearInterval(interval)
+  }, [isRunning, minutes, seconds, isBreak, onComplete])
+  
+  const toggleTimer = () => setIsRunning(!isRunning)
+  const resetTimer = () => {
+    setIsRunning(false)
+    setMinutes(isBreak ? 25 : 25)
+    setSeconds(0)
+  }
+  
+  const progress = ((25 * 60) - (minutes * 60 + seconds)) / (25 * 60) * 100
+  const displayTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  
+  return (
+    <div className="writing-timer">
+      <div className="timer-header">
+        <span className="timer-icon">⏱️</span>
+        <span className="timer-label">{isBreak ? 'Break Time' : 'Writing Session'}</span>
+        <span className="timer-sessions">🍅 {sessions} sessions</span>
+      </div>
+      <div className="timer-display">
+        <svg className="timer-ring" viewBox="0 0 100 100">
+          <circle className="timer-bg" cx="50" cy="50" r="45" />
+          <circle 
+            className="timer-fill" 
+            cx="50" 
+            cy="50" 
+            r="45" 
+            style={{ 
+              strokeDashoffset: 283 - (283 * progress / 100),
+              stroke: isBreak ? '#22c55e' : '#ef4444'
+            }}
+          />
+        </svg>
+        <span className="timer-time">{displayTime}</span>
+      </div>
+      <div className="timer-controls">
+        <button className="timer-btn primary" onClick={toggleTimer}>
+          {isRunning ? 'Pause' : 'Start'}
+        </button>
+        <button className="timer-btn" onClick={resetTimer}>Reset</button>
+      </div>
+    </div>
+  )
+}
+
+// Topic Generator - generates random article topics
+function TopicGenerator({ onClose }) {
+  const topics = [
+    { category: "Longevity", topic: "Why your biological age might be older than you think", hook: "You're not as young as you feel — and science proves it" },
+    { category: "Training", topic: "The optimal workout frequency no one talks about", hook: "More isn't better. Here's the magic number." },
+    { category: "Science", topic: "Mitochondrial dysfunction: the root cause of aging", hook: "Your cells are slowly suffocating — and you don't even know it" },
+    { category: "Recovery", topic: "Sleep hacking: advanced recovery techniques", hook: "Eight hours is for amateurs. Here's what actually works." },
+    { category: "Metrics", topic: "Why HRV is the most underrated fitness metric", hook: "Your heart rate variability is telling you something. Are you listening?" },
+    { category: "Training", topic: "The myth of progressive overload", hook: "Add weight. Add reps. Add sets. Wrong." },
+    { category: "Longevity", topic: "Epigenetic clocks: measuring true biological age", hook: "Your DNA is older than your birth certificate suggests" },
+    { category: "Science", topic: "The gut-muscle axis: why your microbiome matters", hook: "You have more bacteria in your gut than cells in your body — and they're controlling your gains" },
+    { category: "Recovery", topic: "Cold exposure: beyond the ice bath hype", hook: "Wim Hof is onto something. But not for the reasons you think." },
+    { category: "Training", topic: "Time under tension vs. mechanical tension", hook: "Slow reps aren't always better. Here's the research." },
+    { category: "Metrics", topic: "The VO2 max revolution", hook: "It's the best predictor of longevity. Here's how to improve yours." },
+    { category: "Longevity", topic: "Senolytics: killing zombie cells", hook: "Your body is full of dead cells that are slowly killing you" },
+  ]
+  
+  const [generated, setGenerated] = useState(null)
+  const [generating, setGenerating] = useState(false)
+  
+  const generateTopic = () => {
+    setGenerating(true)
+    setTimeout(() => {
+      const random = topics[Math.floor(Math.random() * topics.length)]
+      setGenerated(random)
+      setGenerating(false)
+    }, 600)
+  }
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content topic-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>💡 Topic Generator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="topic-content">
+          {generated ? (
+            <div className="generated-topic">
+              <span className="topic-category" style={{ color: categoryColors[generated.category] }}>
+                {generated.category}
+              </span>
+              <h4 className="topic-title">{generated.topic}</h4>
+              <div className="topic-hook">
+                <span className="hook-label">Hook:</span>
+                <p>{generated.hook}</p>
+              </div>
+              <div className="topic-actions">
+                <button className="topic-copy-btn" onClick={() => navigator.clipboard.writeText(generated.topic)}>
+                  📋 Copy Topic
+                </button>
+                <button className="topic-copy-hook" onClick={() => navigator.clipboard.writeText(generated.hook)}>
+                  📋 Copy Hook
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="topic-placeholder">
+              <span>💡</span>
+              <p>Need a new article idea?</p>
+            </div>
+          )}
+          <button 
+            className={`generate-btn ${generating ? 'loading' : ''}`}
+            onClick={generateTopic}
+            disabled={generating}
+          >
+            {generating ? 'Generating...' : '💡 Generate Topic'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Clipboard History - saves copied headlines/hooks
+function ClipboardHistory({ isOpen, onClose }) {
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem('renzo-clipboard-history')
+    return saved ? JSON.parse(saved) : []
+  })
+  
+  const addToHistory = (text) => {
+    const newHistory = [{ text, time: new Date().toISOString() }, ...history].slice(0, 10)
+    setHistory(newHistory)
+    localStorage.setItem('renzo-clipboard-history', JSON.stringify(newHistory))
+  }
+  
+  const clearHistory = () => {
+    setHistory([])
+    localStorage.removeItem('renzo-clipboard-history')
+  }
+  
+  const copyItem = (text) => {
+    navigator.clipboard.writeText(text)
+  }
+  
+  const formatTime = (iso) => {
+    const mins = Math.floor((new Date() - new Date(iso)) / 60000)
+    if (mins < 1) return 'Just now'
+    if (mins < 60) return `${mins}m ago`
+    return `${Math.floor(mins / 60)}h ago`
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content clipboard-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📋 Clipboard History</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="clipboard-list">
+          {history.length === 0 ? (
+            <div className="clipboard-empty">
+              <p>No saved clips yet.</p>
+              <span>Copy headlines or hooks to save them here.</span>
+            </div>
+          ) : (
+            history.map((item, i) => (
+              <div key={i} className="clipboard-item" onClick={() => copyItem(item.text)}>
+                <p className="clipboard-text">{item.text}</p>
+                <span className="clipboard-time">{formatTime(item.time)}</span>
+              </div>
+            ))
+          )}
+        </div>
+        {history.length > 0 && (
+          <button className="clipboard-clear" onClick={clearHistory}>
+            Clear History
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ========== EXISTING COMPONENTS ==========
 
 // Activity Timeline Component
@@ -1096,6 +1323,8 @@ function App() {
     return localStorage.getItem('renzo-sound') !== 'false'
   })
   const [showFormula, setShowFormula] = useState(false)
+  const [showTopicGenerator, setShowTopicGenerator] = useState(false)
+  const [showClipboard, setShowClipboard] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -1210,6 +1439,8 @@ function App() {
       if (key === 'V') setShowVirality(true)
       if (key === 'W') setShowQuickWrite(true)
       if (key === 'F') setShowFormula(true)
+      if (key === 'G') setShowTopicGenerator(true)
+      if (key === 'C' && !e.metaKey && !e.ctrlKey) setShowClipboard(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -1220,6 +1451,8 @@ function App() {
         setShowVirality(false)
         setShowQuickWrite(false)
         setShowFormula(false)
+        setShowTopicGenerator(false)
+        setShowClipboard(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -1361,6 +1594,8 @@ function App() {
           onSave={saveQuickWrite}
         />
       )}
+      {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
+      <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <CommandPalette 
         isOpen={showCommandPalette} 
         onClose={() => setShowCommandPalette(false)}
@@ -1444,10 +1679,24 @@ function App() {
           <DailyQuote />
           <StudySpotlight />
           <QuickStatGenerator />
-          <button className="formula-btn" onClick={() => setShowFormula(true)}>
+          <WritingTimer onComplete={() => addToast('Session complete! Take a break ☕', 'success')} />
+        </section>
+        
+        <section className="feature-buttons-row">
+          <button className="feature-btn" onClick={() => setShowFormula(true)}>
             <span>📝</span>
             <span>Formula</span>
-            <span className="formula-hint">Press F</span>
+            <span className="feature-hint">F</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowTopicGenerator(true)}>
+            <span>💡</span>
+            <span>Topic</span>
+            <span className="feature-hint">G</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowClipboard(true)}>
+            <span>📋</span>
+            <span>Clips</span>
+            <span className="feature-hint">C</span>
           </button>
         </section>
 
