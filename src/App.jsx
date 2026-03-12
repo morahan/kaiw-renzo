@@ -1,6 +1,143 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import './App.css'
 
+// ========== NEW FEATURES ==========
+
+// Daily Quote Component
+function DailyQuote() {
+  const quotes = [
+    { text: "Write drunk, edit sober.", author: "Hemingway" },
+    { text: "The first draft is just you telling yourself the story.", author: "Terry Pratchett" },
+    { text: "You can always edit a bad page. You can't edit a blank page.", author: "Jodi Picoult" },
+    { text: "Start writing, no matter what. The water does not flow until the faucet is turned on.", author: "Louis L'Amour" },
+    { text: "The scariest moment is always just before you start.", author: "Stephen King" },
+    { text: "Writing is thinking. To write well is to think clearly.", author: "David McCullough" },
+    { text: "Don't tell me the moon is shining; show me the glint of light on broken glass.", author: "Anton Chekhov" },
+    { text: "Cut the deadwood. Kill your darlings.", author: "Stephen King" },
+  ]
+  const [quote] = useState(quotes[Math.floor(Math.random() * quotes.length)])
+  
+  return (
+    <div className="daily-quote">
+      <span className="quote-icon">"</span>
+      <p className="quote-text">{quote.text}</p>
+      <span className="quote-author">— {quote.author}</span>
+    </div>
+  )
+}
+
+// Study Spotlight Component
+function StudySpotlight() {
+  const studies = [
+    { title: "Muscle Protein Synthesis", finding: "Leucine threshold of ~2.5g triggers maximum MPS", source: "JISSN 2013" },
+    { title: "Sleep & Recovery", finding: "8+ hours sleep doubles testosterone recovery", source: "Sleep 2011" },
+    { title: "HIIT vs Steady State", finding: "HIIT burns 25% more fat in half the time", source: "JAP 2009" },
+    { title: "Protein Pacing", finding: "4 meals/day optimizes muscle protein synthesis", source: "AJCN 2009" },
+    { title: "Strength Training & Bone", finding: "Resistance training increases bone density 1-3%", source: "Osteoporosis Int 2007" },
+    { title: "Creatine & Brain", finding: "Creatine improves cognitive performance under stress", source: "Nutritional Neuroscience 2020" },
+    { title: "Sarcopenia Prevention", finding: "Adults lose 3-8% muscle mass per decade after 30", source: "JAMA 2004" },
+    { title: "Cortisol & Training", finding: "Morning cortisol peaks can impair evening workouts", source: "Endocrine 2015" },
+  ]
+  const [study, setStudy] = useState(() => studies[Math.floor(Math.random() * studies.length)])
+  const [expanded, setExpanded] = useState(false)
+  
+  const refreshStudy = () => {
+    const newStudy = studies[Math.floor(Math.random() * studies.length)]
+    setStudy(newStudy)
+    setExpanded(false)
+  }
+  
+  return (
+    <div className="study-spotlight" onClick={() => setExpanded(!expanded)}>
+      <div className="study-header">
+        <span className="study-icon">🔬</span>
+        <span className="study-label">Study Spotlight</span>
+        <button className="study-refresh" onClick={(e) => { e.stopPropagation(); refreshStudy() }}>↻</button>
+      </div>
+      <div className="study-title">{study.title}</div>
+      {expanded && (
+        <div className="study-expanded">
+          <p className="study-finding">{study.finding}</p>
+          <span className="study-source">{study.source}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Quick Stat Generator
+function QuickStatGenerator() {
+  const stats = [
+    "73% of people quit their fitness routine within 6 months",
+    "Muscle remains metabolically active for 72 hours post-workout",
+    "The average person walks 3,000-4,000 steps per day",
+    "Sleep deprivation can reduce testosterone by 15% in one week",
+    "Creatine monohydrate is the most researched supplement in history",
+    "Fast-twitch fibers fatigue 10x faster than slow-twitch",
+    "Your gut microbiome produces 10% of your daily energy",
+    "Resistance training maintains bone density better than cardio",
+    "Protein thermic effect is 20-30% vs 5-10% for carbs/fat",
+    "HRV is a stronger predictor of overtraining than resting HR",
+  ]
+  const [stat, setStat] = useState(stats[Math.floor(Math.random() * stats.length)])
+  const [animating, setAnimating] = useState(false)
+  
+  const generateStat = () => {
+    setAnimating(true)
+    setTimeout(() => {
+      setStat(stats[Math.floor(Math.random() * stats.length)])
+      setAnimating(false)
+    }, 200)
+  }
+  
+  return (
+    <div className="quick-stat">
+      <div className="quick-stat-header">
+        <span className="stat-icon">📊</span>
+        <span className="stat-label">Quick Stat</span>
+      </div>
+      <p className={`quick-stat-text ${animating ? 'animating' : ''}`}>{stat}</p>
+      <button className="stat-generate-btn" onClick={generateStat}>Generate New</button>
+    </div>
+  )
+}
+
+// Content Formula Reference
+function ContentFormulaRef({ isOpen, onClose }) {
+  const formula = [
+    { step: 1, name: "Hook", desc: "Grab attention in first 7 words", example: "Nobody talks about ___ but it's killing your gains" },
+    { step: 2, name: "Problem", desc: "Define the pain point clearly", example: "You're training hard but seeing nothing" },
+    { step: 3, name: "Science", desc: "Cite research, explain mechanism", example: "Study shows 2.5g leucine triggers max MPS" },
+    { step: 4, name: "Solution", desc: "Actionable, specific advice", example: "Eat 30g protein per meal, 4x daily" },
+    { step: 5, name: "CTA", desc: "One clear action, tie back to hook", example: "Start tonight. Your muscles will thank you." },
+  ]
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content formula-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📝 Content Formula</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="formula-grid">
+          {formula.map(f => (
+            <div key={f.step} className="formula-step">
+              <div className="step-number">{f.step}</div>
+              <div className="step-name">{f.name}</div>
+              <div className="step-desc">{f.desc}</div>
+              <div className="step-example">{f.example}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== EXISTING COMPONENTS ==========
+
 // Activity Timeline Component
 function ActivityTimeline({ activities }) {
   const getActivityIcon = (type) => {
@@ -958,6 +1095,7 @@ function App() {
   const [soundEnabled, setSoundEnabled] = useState(() => {
     return localStorage.getItem('renzo-sound') !== 'false'
   })
+  const [showFormula, setShowFormula] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -1071,6 +1209,7 @@ function App() {
       if (key === 'H') setShowShortcuts(true)
       if (key === 'V') setShowVirality(true)
       if (key === 'W') setShowQuickWrite(true)
+      if (key === 'F') setShowFormula(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -1080,6 +1219,7 @@ function App() {
         setShowShortcuts(false)
         setShowVirality(false)
         setShowQuickWrite(false)
+        setShowFormula(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -1206,6 +1346,7 @@ function App() {
 
       {showPrompt && <WritingPrompt onClose={() => setShowPrompt(false)} />}
       {showHotTake && <HotTakeGenerator onClose={() => setShowHotTake(false)} />}
+      {showFormula && <ContentFormulaRef isOpen={showFormula} onClose={() => setShowFormula(false)} />}
       {showQuickDraft && (
         <QuickDraftModal 
           onClose={() => setShowQuickDraft(false)} 
@@ -1248,6 +1389,18 @@ function App() {
         </div>
         <div className="header-right">
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
+          <button 
+            className="sound-toggle" 
+            onClick={() => { 
+              const newVal = !soundEnabled
+              setSoundEnabled(newVal)
+              localStorage.setItem('renzo-sound', newVal)
+              addToast(newVal ? 'Sound enabled' : 'Sound muted', 'info')
+            }}
+            title={soundEnabled ? 'Mute sound' : 'Enable sound'}
+          >
+            {soundEnabled ? '🔊' : '🔇'}
+          </button>
           <button className="cmd-hint" onClick={() => setShowCommandPalette(true)}>
             <span className="cmd-icon">⌘</span>
             <span>K</span>
@@ -1284,6 +1437,18 @@ function App() {
               <span className="writing-text">Ready to create</span>
             </div>
           </div>
+        </section>
+
+        {/* New Feature Cards Row */}
+        <section className="new-features-row">
+          <DailyQuote />
+          <StudySpotlight />
+          <QuickStatGenerator />
+          <button className="formula-btn" onClick={() => setShowFormula(true)}>
+            <span>📝</span>
+            <span>Formula</span>
+            <span className="formula-hint">Press F</span>
+          </button>
         </section>
 
         {/* Quick Actions Panel */}
