@@ -1385,7 +1385,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v2.4</span>
+          <span className="logo-badge">v2.5</span>
         </div>
         <div className="header-right">
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
@@ -1797,7 +1797,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.4 • Press ⌘K for commands</p>
+        <p className="footer-version">v2.5 • Press ⌘K for commands, F for formula</p>
       </footer>
     </div>
   )
