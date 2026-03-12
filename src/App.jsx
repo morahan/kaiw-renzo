@@ -13,20 +13,13 @@ function ViralityCalculator({ onClose }) {
       let points = 0
       const lower = text.toLowerCase()
       
-      // Myth-busting triggers
       if (lower.includes('myth') || lower.includes('scam') || lower.includes('wrong') || lower.includes('lie')) points += 25
-      // Numbers and stats
       if (/\d+%/.test(text)) points += 20
       if (/\d+/.test(text) && !/\d+%/.test(text)) points += 10
-      // Power words
       if (/\b(shocking|secret|hidden|truth|actually|really)\b/.test(lower)) points += 15
-      // Questions
       if (text.includes('?')) points += 10
-      // Comparison
       if (/\b(vs|versus|beats|better than)\b/.test(lower)) points += 20
-      // Negative/controversial
       if (/\b(overrated|failed|bad|waste)\b/.test(lower)) points += 15
-      // "What nobody tells you" style
       if (/\b(nobody|never|always)\b/.test(lower)) points += 10
       
       points = Math.min(points, 100)
@@ -106,8 +99,6 @@ function ViralityCalculator({ onClose }) {
 
 // Energy Meter Component
 function EnergyMeter({ level, setLevel }) {
-  const [isDragging, setIsDragging] = useState(false)
-  
   const getEnergyColor = (l) => {
     if (l >= 80) return '#22c55e'
     if (l >= 50) return '#f97316'
@@ -121,7 +112,7 @@ function EnergyMeter({ level, setLevel }) {
   }
 
   return (
-    <div className="energy-meter" onClick={() => setLevel(isDragging ? level : level === 100 ? 20 : Math.min(level + 20, 100))}>
+    <div className="energy-meter" onClick={() => setLevel(level === 100 ? 20 : Math.min(level + 20, 100))}>
       <div className="energy-icon">{getEnergyEmoji(level)}</div>
       <div className="energy-bar-wrap">
         <div 
@@ -137,6 +128,152 @@ function EnergyMeter({ level, setLevel }) {
   )
 }
 
+// Notion Sync Status Component
+function NotionSyncStatus({ onSync }) {
+  const [syncing, setSyncing] = useState(false)
+  const [lastSync, setLastSync] = useState(() => {
+    const saved = localStorage.getItem('renzo-last-sync')
+    return saved ? new Date(saved) : null
+  })
+
+  const handleSync = async () => {
+    setSyncing(true)
+    // Simulate sync
+    await new Promise(r => setTimeout(r, 1500))
+    setLastSync(new Date())
+    localStorage.setItem('renzo-last-sync', new Date().toISOString())
+    setSyncing(false)
+    onSync?.()
+  }
+
+  const formatTime = (date) => {
+    if (!date) return 'Never'
+    const mins = Math.floor((new Date() - date) / 60000)
+    if (mins < 1) return 'Just now'
+    if (mins < 60) return `${mins}m ago`
+    const hours = Math.floor(mins / 60)
+    if (hours < 24) return `${hours}h ago`
+    return date.toLocaleDateString()
+  }
+
+  return (
+    <button className="sync-btn" onClick={handleSync} disabled={syncing}>
+      <span className={`sync-icon ${syncing ? 'spinning' : ''}`}>🔄</span>
+      <span className="sync-text">
+        {syncing ? 'Syncing...' : lastSync ? `Synced ${formatTime(lastSync)}` : 'Sync Now'}
+      </span>
+    </button>
+  )
+}
+
+// Weekly Goals Component
+function WeeklyGoals() {
+  const goals = [
+    { target: 5, current: 3, label: 'Articles', icon: '📄' },
+    { target: 6000, current: 4200, label: 'Words', icon: '📝', isWords: true },
+    { target: 4, current: 2, label: 'Published', icon: '🚀' },
+  ]
+
+  return (
+    <div className="goals-grid">
+      {goals.map((goal, i) => {
+        const pct = Math.min((goal.current / goal.target) * 100, 100)
+        const isWords = goal.isWords
+        return (
+          <div key={i} className="goal-card">
+            <div className="goal-header">
+              <span className="goal-icon">{goal.icon}</span>
+              <span className="goal-label">{goal.label}</span>
+            </div>
+            <div className="goal-numbers">
+              <span className="goal-current">
+                {isWords ? (goal.current / 1000).toFixed(1) + 'k' : goal.current}
+              </span>
+              <span className="goal-separator">/</span>
+              <span className="goal-target">
+                {isWords ? (goal.target / 1000) + 'k' : goal.target}
+              </span>
+            </div>
+            <div className="goal-progress">
+              <div 
+                className="goal-bar" 
+                style={{ 
+                  width: `${pct}%`,
+                  background: pct >= 100 ? 'var(--accent-green)' : 'linear-gradient(90deg, var(--accent), var(--accent-purple))'
+                }} 
+              />
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// Hot Take Generator
+function HotTakeGenerator({ onClose }) {
+  const [take, setTake] = useState('')
+  const [generating, setGenerating] = useState(false)
+
+  const hotTakes = [
+    "Zone 2 training is overrated — polarized training beats it for most people",
+    "You don't need 10,000 steps. You need 3 hard sessions and 7k steps.",
+    "Creatine is the most underutilized supplement in fitness",
+    "Sleep is the best PED. Everything else is marginal",
+    "The fitness industry lies about what sustainable progress looks like",
+    "Strength training beats cardio for fat loss — fight me",
+    "Most people train too much, not too little",
+    "The 'best' workout is the one you'll actually do — butcience says..."
+  ]
+
+  const generateTake = () => {
+    setGenerating(true)
+    setTimeout(() => {
+      const randomTake = hotTakes[Math.floor(Math.random() * hotTakes.length)]
+      setTake(randomTake)
+      setGenerating(false)
+    }, 800)
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content hot-take-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🔥 Hot Take Generator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="hot-take-content">
+          {take ? (
+            <div className="hot-take-text">
+              <p>{take}</p>
+            </div>
+          ) : (
+            <div className="hot-take-placeholder">
+              <span>🔥</span>
+              <p>Ready to spark some controversy?</p>
+            </div>
+          )}
+          <button 
+            className={`generate-btn ${generating ? 'loading' : ''}`}
+            onClick={generateTake}
+            disabled={generating}
+          >
+            {generating ? 'Generating...' : '🔥 Generate Take'}
+          </button>
+          {take && (
+            <button className="copy-take-btn" onClick={() => {
+              navigator.clipboard.writeText(take)
+              onClose()
+            }}>
+              📋 Copy to Clipboard
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Command Palette Component
 function CommandPalette({ isOpen, onClose, onAction }) {
   const [query, setQuery] = useState('')
@@ -146,11 +283,13 @@ function CommandPalette({ isOpen, onClose, onAction }) {
   const commands = [
     { id: 'new', label: 'New Draft', icon: '📝', shortcut: 'D', category: 'Create' },
     { id: 'prompt', label: 'Random Prompt', icon: '💡', shortcut: 'P', category: 'Create' },
+    { id: 'hottake', label: 'Hot Take Generator', icon: '🔥', shortcut: 'H', category: 'Create' },
     { id: 'trends', label: 'View Trends', icon: '🔥', shortcut: 'T', category: 'Research' },
     { id: 'analytics', label: 'Analytics', icon: '📊', shortcut: 'A', category: 'View' },
     { id: 'voice', label: 'Voice Brief', icon: '🎙️', shortcut: 'V', category: 'Tools' },
     { id: 'search', label: 'Search Articles', icon: '🔍', shortcut: '/', category: 'Search' },
-    { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: '⌨️', shortcut: 'H', category: 'Help' },
+    { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: '⌨️', shortcut: '?', category: 'Help' },
+    { id: 'sync', label: 'Sync with Notion', icon: '🔄', shortcut: 'S', category: 'Tools' },
     { id: 'export', label: 'Export Data', icon: '📤', shortcut: 'E', category: 'Tools' },
     { id: 'settings', label: 'Settings', icon: '⚙️', shortcut: ',', category: 'Config' },
   ]
@@ -401,14 +540,17 @@ function QuickDraftModal({ onClose, onSave }) {
 function ShortcutsPanel({ onClose }) {
   const shortcuts = [
     { key: '⌘ K', action: 'Open command palette' },
-    { key: 'N', action: 'New article / prompt' },
+    { key: '⌘ K + type', action: 'Search commands' },
+    { key: 'N', action: 'Random writing prompt' },
     { key: 'P', action: 'Random writing prompt' },
+    { key: 'H', action: 'Generate hot take' },
+    { key: 'D', action: 'Open quick draft' },
     { key: 'T', action: 'Jump to trending topics' },
     { key: 'A', action: 'Jump to analytics' },
-    { key: 'V', action: 'Voice brief' },
+    { key: 'S', action: 'Sync with Notion' },
     { key: '/', action: 'Focus search' },
+    { key: '?', action: 'Show shortcuts' },
     { key: 'Esc', action: 'Close modal / clear' },
-    { key: 'D', action: 'Open quick draft' },
   ]
 
   return (
@@ -534,26 +676,8 @@ function AnimatedCounter({ end, duration = 1500, suffix = '' }) {
 // Recent articles data
 const recentArticles = [
   {
-    title: "The Protein Timing Myth: When You Actually Eat Matters Way Less Than How Much",
-    date: "2026-03-12",
-    words: 1180,
-    status: "Published",
-    category: "Science",
-    engagement: 8.4,
-    reads: 15200
-  },
-  {
-    title: "Sleep Quality Beats Sleep Quantity — Here's How to Measure It",
-    date: "2026-03-11",
-    words: 1056,
-    status: "Published",
-    category: "Recovery",
-    engagement: 8.7,
-    reads: 18900
-  },
-  {
     title: "The Exercise Variety Effect: Why Doing Just One Type of Workout Is Cutting Your Lifespan Short",
-    date: "2026-03-10",
+    date: "2026-02-19",
     words: 1069,
     status: "Published",
     category: "Longevity",
@@ -562,7 +686,7 @@ const recentArticles = [
   },
   {
     title: "Altitude Masks Are a Scam — But Real Hypoxic Training Changes Everything",
-    date: "2026-03-09",
+    date: "2026-02-18",
     words: 1247,
     status: "Published",
     category: "Training",
@@ -571,7 +695,7 @@ const recentArticles = [
   },
   {
     title: "Fascia: The Forgotten Tissue That Explains Why You're Stiff, Sore, and Stuck",
-    date: "2026-03-08",
+    date: "2026-02-18",
     words: 1208,
     status: "Published",
     category: "Science",
@@ -580,7 +704,7 @@ const recentArticles = [
   },
   {
     title: "Heart Rate Variability: The Hidden Fitness Metric That Predicts Your Health",
-    date: "2026-03-07",
+    date: "2026-02-17",
     words: 1241,
     status: "Published",
     category: "Metrics",
@@ -589,7 +713,7 @@ const recentArticles = [
   },
   {
     title: "Forget Lifespan — Your Musclespan Determines How Well You Age",
-    date: "2026-03-06",
+    date: "2026-02-17",
     words: 1381,
     status: "Published",
     category: "Longevity",
@@ -598,7 +722,7 @@ const recentArticles = [
   },
   {
     title: "Why Zone 2 Training Is Overrated (And What Actually Works)",
-    date: "2026-03-05",
+    date: "2026-02-16",
     words: 1156,
     status: "Published",
     category: "Training",
@@ -608,16 +732,16 @@ const recentArticles = [
 ]
 
 const metrics = {
-  totalArticles: 31,
-  currentStreak: 22,
-  totalWords: 36200,
-  avgWordsPerArticle: 1168,
+  totalArticles: 24,
+  currentStreak: 18,
+  totalWords: 28450,
+  avgWordsPerArticle: 1185,
   topCategory: "Longevity",
-  lastArticleDate: "2026-03-12",
-  publishedThisMonth: 12,
+  lastArticleDate: "2026-02-19",
+  publishedThisMonth: 8,
   topPerformer: "Musclespan",
-  totalReads: 198000,
-  avgEngagement: 8.8
+  totalReads: 142000,
+  avgEngagement: 8.6
 }
 
 const trendingTopics = [
@@ -646,9 +770,10 @@ const tips = [
 
 const quickActions = [
   { label: "New Draft", icon: "📝", action: "new", shortcut: "D" },
+  { label: "Hot Take", icon: "🔥", action: "hottake", shortcut: "T" },
   { label: "Writing Prompt", icon: "💡", action: "prompt", shortcut: "P" },
   { label: "Virality Score", icon: "🎯", action: "virality", shortcut: "V" },
-  { label: "Check Trends", icon: "🔥", action: "trends", shortcut: "T" },
+  { label: "Check Trends", icon: "📈", action: "trends", shortcut: "R" },
   { label: "Shortcuts", icon: "⌨️", action: "shortcuts", shortcut: "H" }
 ]
 
@@ -671,8 +796,8 @@ function App() {
   const [todaysFocus, setTodaysFocus] = useState('')
   const [toasts, setToasts] = useState([])
   const [drafts, setDrafts] = useState([])
+  const [showHotTake, setShowHotTake] = useState(false)
   const [energyLevel, setEnergyLevel] = useState(80)
-  const [easterEgg, setEasterEgg] = useState(false)
   const inputRef = useRef(null)
 
   // Toast helpers
@@ -749,6 +874,7 @@ function App() {
       const key = e.key.toUpperCase()
       if (key === 'N') setShowPrompt(true)
       if (key === 'P') setShowPrompt(true)
+      if (key === 'T') setShowHotTake(true)
       if (key === 'D') setShowQuickDraft(true)
       if (key === 'H') setShowShortcuts(true)
       if (key === 'V') setShowVirality(true)
@@ -760,11 +886,6 @@ function App() {
         setShowQuickDraft(false)
         setShowShortcuts(false)
         setShowVirality(false)
-      }
-      
-      // Easter egg: type "renzo"
-      if (e.key === 'r' || e.key === 'R') {
-        setTimeout(() => setEasterEgg(true), 100)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -782,6 +903,9 @@ function App() {
       case 'virality':
         setShowVirality(true)
         break
+      case 'hottake':
+        setShowHotTake(true)
+        break
       case 'trends':
         document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth' })
         break
@@ -793,6 +917,9 @@ function App() {
         break
       case 'voice':
         setShowPrompt(true)
+        break
+      case 'sync':
+        addToast('Syncing with Notion...', 'info')
         break
       case 'settings':
         setShowShortcuts(true)
@@ -883,6 +1010,7 @@ function App() {
       </div>
 
       {showPrompt && <WritingPrompt onClose={() => setShowPrompt(false)} />}
+      {showHotTake && <HotTakeGenerator onClose={() => setShowHotTake(false)} />}
       {showQuickDraft && (
         <QuickDraftModal 
           onClose={() => setShowQuickDraft(false)} 
@@ -915,9 +1043,10 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v2.4</span>
+          <span className="logo-badge">v2.3</span>
         </div>
         <div className="header-right">
+          <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
           <button className="cmd-hint" onClick={() => setShowCommandPalette(true)}>
             <span className="cmd-icon">⌘</span>
             <span>K</span>
@@ -966,7 +1095,14 @@ function App() {
               <button 
                 key={i} 
                 className="action-btn"
-                onClick={() => setShowPrompt(true)}
+                onClick={() => {
+                  if (action.action === 'new') setShowQuickDraft(true)
+                  else if (action.action === 'prompt') setShowPrompt(true)
+                  else if (action.action === 'hottake') setShowHotTake(true)
+                  else if (action.action === 'trends') document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth' })
+                  else if (action.action === 'shortcuts') setShowShortcuts(true)
+                  else if (action.action === 'sync') addToast('Syncing with Notion...', 'info')
+                }}
               >
                 <span className="action-icon">{action.icon}</span>
                 <span className="action-label">{action.label}</span>
@@ -974,6 +1110,17 @@ function App() {
               </button>
             ))}
           </div>
+        </section>
+
+        {/* Weekly Goals */}
+        <section className="goals-section">
+          <div className="section-header">
+            <h2 className="section-title">
+              <span className="section-icon">🎯</span>
+              This Week's Goals
+            </h2>
+          </div>
+          <WeeklyGoals />
         </section>
 
         <section className="metrics-grid">
@@ -1268,7 +1415,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.4 • Press ⌘K for commands • Press V for virality</p>
+        <p className="footer-version">v2.3 • Press ⌘K for commands</p>
       </footer>
     </div>
   )
