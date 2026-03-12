@@ -8,12 +8,13 @@ function CommandPalette({ isOpen, onClose, onAction }) {
   const inputRef = useRef(null)
 
   const commands = [
-    { id: 'new', label: 'New Article', icon: '✍️', shortcut: 'N', category: 'Create' },
+    { id: 'new', label: 'New Draft', icon: '📝', shortcut: 'D', category: 'Create' },
     { id: 'prompt', label: 'Random Prompt', icon: '💡', shortcut: 'P', category: 'Create' },
     { id: 'trends', label: 'View Trends', icon: '🔥', shortcut: 'T', category: 'Research' },
     { id: 'analytics', label: 'Analytics', icon: '📊', shortcut: 'A', category: 'View' },
     { id: 'voice', label: 'Voice Brief', icon: '🎙️', shortcut: 'V', category: 'Tools' },
     { id: 'search', label: 'Search Articles', icon: '🔍', shortcut: '/', category: 'Search' },
+    { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: '⌨️', shortcut: 'H', category: 'Help' },
     { id: 'export', label: 'Export Data', icon: '📤', shortcut: 'E', category: 'Tools' },
     { id: 'settings', label: 'Settings', icon: '⚙️', shortcut: ',', category: 'Config' },
   ]
@@ -180,6 +181,155 @@ function WritingPrompt({ onClose }) {
   )
 }
 
+// Toast Notification Component
+function Toast({ message, type, onClose }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3000)
+    return () => clearTimeout(timer)
+  }, [onClose])
+
+  return (
+    <div className={`toast toast-${type}`}>
+      <span className="toast-icon">
+        {type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}
+      </span>
+      <span className="toast-message">{message}</span>
+      <button className="toast-close" onClick={onClose}>×</button>
+    </div>
+  )
+}
+
+// Quick Draft Modal Component
+function QuickDraftModal({ onClose, onSave }) {
+  const [title, setTitle] = useState('')
+  const [category, setCategory] = useState('Longevity')
+  const [hook, setHook] = useState('')
+
+  const handleSave = () => {
+    if (title.trim()) {
+      onSave({ title, category, hook, date: new Date().toISOString() })
+      onClose()
+    }
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content draft-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📝 Quick Draft</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="draft-form">
+          <div className="draft-field">
+            <label>Article Title</label>
+            <input
+              type="text"
+              placeholder="Enter a compelling title..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="draft-field">
+            <label>Category</label>
+            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="Longevity">Longevity</option>
+              <option value="Training">Training</option>
+              <option value="Science">Science</option>
+              <option value="Metrics">Metrics</option>
+              <option value="Recovery">Recovery</option>
+            </select>
+          </div>
+          <div className="draft-field">
+            <label>Hook / Opening Line</label>
+            <textarea
+              placeholder="Write your attention-grabbing first sentence..."
+              value={hook}
+              onChange={(e) => setHook(e.target.value)}
+              rows={3}
+            />
+          </div>
+        </div>
+        <div className="draft-actions">
+          <button className="draft-cancel" onClick={onClose}>Cancel</button>
+          <button className="draft-save" onClick={handleSave} disabled={!title.trim()}>
+            Save Draft
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Keyboard Shortcuts Panel
+function ShortcutsPanel({ onClose }) {
+  const shortcuts = [
+    { key: '⌘ K', action: 'Open command palette' },
+    { key: 'N', action: 'New article / prompt' },
+    { key: 'P', action: 'Random writing prompt' },
+    { key: 'T', action: 'Jump to trending topics' },
+    { key: 'A', action: 'Jump to analytics' },
+    { key: 'V', action: 'Voice brief' },
+    { key: '/', action: 'Focus search' },
+    { key: 'Esc', action: 'Close modal / clear' },
+    { key: 'D', action: 'Open quick draft' },
+  ]
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content shortcuts-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>⌨️ Keyboard Shortcuts</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="shortcuts-list">
+          {shortcuts.map((shortcut, i) => (
+            <div key={i} className="shortcut-item">
+              <kbd className="shortcut-key">{shortcut.key}</kbd>
+              <span className="shortcut-action">{shortcut.action}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Today's Focus Component
+function TodaysFocus({ focus, setFocus, onSave }) {
+  const [isEditing, setIsEditing] = useState(!focus)
+  const [tempFocus, setTempFocus] = useState(focus || '')
+
+  const handleSave = () => {
+    setFocus(tempFocus)
+    setIsEditing(false)
+    onSave?.(tempFocus)
+  }
+
+  if (isEditing) {
+    return (
+      <div className="focus-editor">
+        <input
+          type="text"
+          placeholder="What's your writing focus today?"
+          value={tempFocus}
+          onChange={(e) => setTempFocus(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+          autoFocus
+        />
+        <button className="focus-save" onClick={handleSave}>Save</button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="focus-display" onClick={() => setIsEditing(true)}>
+      <span className="focus-label">🎯 Today's Focus</span>
+      <span className="focus-text">{focus || 'Click to set your focus...'}</span>
+    </div>
+  )
+}
+
 // Live Clock Component
 function LiveClock() {
   const [time, setTime] = useState(new Date())
@@ -341,10 +491,10 @@ const tips = [
 ]
 
 const quickActions = [
-  { label: "New Article", icon: "✍️", action: "new", shortcut: "N" },
+  { label: "New Draft", icon: "📝", action: "new", shortcut: "D" },
+  { label: "Writing Prompt", icon: "💡", action: "prompt", shortcut: "P" },
   { label: "Check Trends", icon: "🔥", action: "trends", shortcut: "T" },
-  { label: "View Analytics", icon: "📊", action: "analytics", shortcut: "A" },
-  { label: "Voice Brief", icon: "🎙️", action: "voice", shortcut: "V" }
+  { label: "Shortcuts", icon: "⌨️", action: "shortcuts", shortcut: "H" }
 ]
 
 function App() {
@@ -360,7 +510,44 @@ function App() {
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [articleFilter, setArticleFilter] = useState('all')
+  const [showQuickDraft, setShowQuickDraft] = useState(false)
+  const [showShortcuts, setShowShortcuts] = useState(false)
+  const [todaysFocus, setTodaysFocus] = useState('')
+  const [toasts, setToasts] = useState([])
+  const [drafts, setDrafts] = useState([])
   const inputRef = useRef(null)
+
+  // Toast helpers
+  const addToast = (message, type = 'info') => {
+    const id = Date.now()
+    setToasts(prev => [...prev, { id, message, type }])
+  }
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id))
+  }
+
+  // Load from localStorage
+  useEffect(() => {
+    const savedFocus = localStorage.getItem('renzo-focus')
+    const savedDrafts = localStorage.getItem('renzo-drafts')
+    if (savedFocus) setTodaysFocus(savedFocus)
+    if (savedDrafts) setDrafts(JSON.parse(savedDrafts))
+  }, [])
+
+  // Save drafts to localStorage
+  const saveDraft = (draft) => {
+    const newDrafts = [draft, ...drafts]
+    setDrafts(newDrafts)
+    localStorage.setItem('renzo-drafts', JSON.stringify(newDrafts))
+    addToast('Draft saved successfully!', 'success')
+  }
+
+  // Save focus to localStorage
+  const saveFocus = (focus) => {
+    setTodaysFocus(focus)
+    localStorage.setItem('renzo-focus', focus)
+    addToast('Focus updated!', 'success')
+  }
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -404,11 +591,15 @@ function App() {
       const key = e.key.toUpperCase()
       if (key === 'N') setShowPrompt(true)
       if (key === 'P') setShowPrompt(true)
+      if (key === 'D') setShowQuickDraft(true)
+      if (key === 'H') setShowShortcuts(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
         setShowCommandPalette(false)
         setSearchQuery('')
+        setShowQuickDraft(false)
+        setShowShortcuts(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -418,6 +609,8 @@ function App() {
   const handleCommand = (actionId) => {
     switch(actionId) {
       case 'new':
+        setShowQuickDraft(true)
+        break
       case 'prompt':
         setShowPrompt(true)
         break
@@ -432,6 +625,9 @@ function App() {
         break
       case 'voice':
         setShowPrompt(true)
+        break
+      case 'settings':
+        setShowShortcuts(true)
         break
       default:
         break
@@ -506,7 +702,26 @@ function App() {
 
   return (
     <div className="app">
+      {/* Toast Notifications */}
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <Toast 
+            key={toast.id} 
+            message={toast.message} 
+            type={toast.type} 
+            onClose={() => removeToast(toast.id)} 
+          />
+        ))}
+      </div>
+
       {showPrompt && <WritingPrompt onClose={() => setShowPrompt(false)} />}
+      {showQuickDraft && (
+        <QuickDraftModal 
+          onClose={() => setShowQuickDraft(false)} 
+          onSave={saveDraft}
+        />
+      )}
+      {showShortcuts && <ShortcutsPanel onClose={() => setShowShortcuts(false)} />}
       <CommandPalette 
         isOpen={showCommandPalette} 
         onClose={() => setShowCommandPalette(false)}
@@ -531,7 +746,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v2.2</span>
+          <span className="logo-badge">v2.3</span>
         </div>
         <div className="header-right">
           <button className="cmd-hint" onClick={() => setShowCommandPalette(true)}>
@@ -556,6 +771,11 @@ function App() {
               Content engine firing. Science-backed. Never boring. 
               <span className="accent"> Ship or shut up.</span>
             </p>
+            <TodaysFocus 
+              focus={todaysFocus} 
+              setFocus={setTodaysFocus} 
+              onSave={saveFocus}
+            />
           </div>
           <div className="hero-status">
             <div className={`writing-indicator ${writingPulse ? 'active' : ''}`}>
@@ -831,6 +1051,31 @@ function App() {
           </div>
         </section>
 
+        {/* Drafts Section */}
+        {drafts.length > 0 && (
+          <section className="drafts-section">
+            <div className="section-header">
+              <h2 className="section-title">
+                <span className="section-icon">📝</span>
+                Saved Drafts
+              </h2>
+              <span className="article-count">{drafts.length}</span>
+            </div>
+            <div className="drafts-list">
+              {drafts.slice(0, 3).map((draft, i) => (
+                <div key={i} className="draft-card" onClick={() => setShowQuickDraft(true)}>
+                  <div className="draft-category" style={{ color: categoryColors[draft.category] || '#a1a1aa' }}>
+                    {draft.category}
+                  </div>
+                  <div className="draft-title">{draft.title}</div>
+                  {draft.hook && <div className="draft-hook">"{draft.hook.slice(0, 80)}..."</div>}
+                  <div className="draft-date">{formatDate(draft.date)}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="status-bar">
           <div className="status-item">
             <span className="status-indicator online"></span>
@@ -853,7 +1098,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.2 • Press ⌘K for commands</p>
+        <p className="footer-version">v2.3 • Press ⌘K for commands</p>
       </footer>
     </div>
   )
