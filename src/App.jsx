@@ -1,5 +1,159 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import './App.css'
+
+// Activity Timeline Component
+function ActivityTimeline({ activities }) {
+  const getActivityIcon = (type) => {
+    switch(type) {
+      case 'draft': return '📝'
+      case 'article': return '📄'
+      case 'sync': return '🔄'
+      case 'prompt': return '💡'
+      case 'hottake': return '🔥'
+      case 'focus': return '🎯'
+      default: return '•'
+    }
+  }
+  
+  return (
+    <div className="activity-timeline">
+      {activities.map((activity, i) => (
+        <div key={i} className="activity-item" style={{ animationDelay: `${i * 0.05}s` }}>
+          <span className="activity-icon">{getActivityIcon(activity.type)}</span>
+          <span className="activity-text">{activity.text}</span>
+          <span className="activity-time">{activity.time}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// Today's Word Count Tracker
+function WordCountTracker({ onUpdate }) {
+  const [words, setWords] = useState(() => {
+    const saved = localStorage.getItem('renzo-today-words')
+    const savedDate = localStorage.getItem('renzo-today-date')
+    const today = new Date().toDateString()
+    if (saved && savedDate === today) return parseInt(saved) || 0
+    return 0
+  })
+  const [goal] = useState(2000)
+  const [isEditing, setIsEditing] = useState(false)
+  const [inputValue, setInputValue] = useState('')
+  
+  useEffect(() => {
+    localStorage.setItem('renzo-today-words', words)
+    localStorage.setItem('renzo-today-date', new Date().toDateString())
+    onUpdate?.(words)
+  }, [words, onUpdate])
+  
+  const progress = Math.min((words / goal) * 100, 100)
+  
+  const handleAdd = (amount) => {
+    setWords(prev => prev + amount)
+  }
+  
+  const handleManualAdd = () => {
+    const num = parseInt(inputValue)
+    if (num > 0) {
+      setWords(prev => prev + num)
+      setInputValue('')
+      setIsEditing(false)
+    }
+  }
+  
+  return (
+    <div className="word-tracker">
+      <div className="word-tracker-header">
+        <span className="word-tracker-label">Today's Words</span>
+        <span className="word-tracker-goal">Goal: {goal.toLocaleString()}</span>
+      </div>
+      <div className="word-tracker-progress">
+        <div className="word-tracker-bar" style={{ width: `${progress}%` }} />
+      </div>
+      <div className="word-tracker-numbers">
+        <span className="word-tracker-current">{words.toLocaleString()}</span>
+        <span className="word-tracker-sep">/</span>
+        <span className="word-tracker-target">{goal.toLocaleString()}</span>
+        <span className="word-tracker-pct">{Math.round(progress)}%</span>
+      </div>
+      <div className="word-tracker-actions">
+        <button onClick={() => handleAdd(100)}>+100</button>
+        <button onClick={() => handleAdd(250)}>+250</button>
+        <button onClick={() => handleAdd(500)}>+500</button>
+        {isEditing ? (
+          <div className="word-tracker-input-wrap">
+            <input 
+              type="number" 
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Add words..."
+              autoFocus
+            />
+            <button onClick={handleManualAdd} className="add-btn">Add</button>
+          </div>
+        ) : (
+          <button onClick={() => setIsEditing(true)} className="custom-btn">Custom</button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Quick Write Mode - Distraction-free writing
+function QuickWriteMode({ onClose, onSave }) {
+  const [content, setContent] = useState('')
+  const [title, setTitle] = useState('')
+  const textareaRef = useRef(null)
+  
+  const wordCount = useMemo(() => {
+    return content.trim().split(/\s+/).filter(w => w).length
+  }, [content])
+  
+  const handleSave = () => {
+    if (content.trim()) {
+      onSave({ title: title || 'Untitled', content, words: wordCount, date: new Date().toISOString() })
+      onClose()
+    }
+  }
+  
+  useEffect(() => {
+    textareaRef.current?.focus()
+  }, [])
+  
+  return (
+    <div className="quick-write-overlay">
+      <div className="quick-write-container">
+        <div className="quick-write-header">
+          <input
+            type="text"
+            className="quick-write-title"
+            placeholder="Article title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <div className="quick-write-meta">
+            <span className="quick-write-count">{wordCount} words</span>
+            <button className="quick-write-close" onClick={onClose}>×</button>
+          </div>
+        </div>
+        <textarea
+          ref={textareaRef}
+          className="quick-write-content"
+          placeholder="Start writing... (Hook → Problem → Science → Solution → CTA)"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+        <div className="quick-write-footer">
+          <button className="quick-write-cancel" onClick={onClose}>Cancel</button>
+          <button className="quick-write-save" onClick={handleSave} disabled={!content.trim()}>
+            Save Draft ({wordCount} words)
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // Virality Score Calculator
 function ViralityCalculator({ onClose }) {
@@ -798,6 +952,23 @@ function App() {
   const [drafts, setDrafts] = useState([])
   const [showHotTake, setShowHotTake] = useState(false)
   const [energyLevel, setEnergyLevel] = useState(80)
+  const [wordsWritten, setWordsWritten] = useState(0)
+  const [showQuickWrite, setShowQuickWrite] = useState(false)
+  const [todayWordCount, setTodayWordCount] = useState(0)
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    return localStorage.getItem('renzo-sound') !== 'false'
+  })
+  const [activities, setActivities] = useState(() => {
+    const saved = localStorage.getItem('renzo-activities')
+    if (saved) {
+      try { return JSON.parse(saved) } catch { return [] }
+    }
+    return [
+      { type: 'sync', text: 'Notion sync completed', time: '2h ago' },
+      { type: 'article', text: 'Published "Musclespan" article', time: '3h ago' },
+      { type: 'prompt', text: 'Used writing prompt', time: '5h ago' },
+    ]
+  })
   const inputRef = useRef(null)
 
   // Toast helpers
@@ -822,8 +993,29 @@ function App() {
     const newDrafts = [draft, ...drafts]
     setDrafts(newDrafts)
     localStorage.setItem('renzo-drafts', JSON.stringify(newDrafts))
+    addActivity('draft', `Created draft: "${draft.title.slice(0, 30)}..."`)
     addToast('Draft saved successfully!', 'success')
   }
+  
+  // Quick write save
+  const saveQuickWrite = (data) => {
+    const newDrafts = [{ ...data, category: 'Quick Write' }, ...drafts]
+    setDrafts(newDrafts)
+    localStorage.setItem('renzo-drafts', JSON.stringify(newDrafts))
+    setWords(prev => prev + data.words)
+    addActivity('draft', `Wrote ${data.words} words: "${data.title.slice(0, 30)}..."`)
+    addToast(`Saved ${data.words} words!`, 'success')
+  }
+  
+  // Add activity to timeline
+  const addActivity = useCallback((type, text) => {
+    const newActivity = { type, text, time: 'Just now' }
+    setActivities(prev => {
+      const updated = [newActivity, ...prev].slice(0, 10)
+      localStorage.setItem('renzo-activities', JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   // Save focus to localStorage
   const saveFocus = (focus) => {
@@ -878,6 +1070,7 @@ function App() {
       if (key === 'D') setShowQuickDraft(true)
       if (key === 'H') setShowShortcuts(true)
       if (key === 'V') setShowVirality(true)
+      if (key === 'W') setShowQuickWrite(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -886,6 +1079,7 @@ function App() {
         setShowQuickDraft(false)
         setShowShortcuts(false)
         setShowVirality(false)
+        setShowQuickWrite(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -895,10 +1089,11 @@ function App() {
   const handleCommand = (actionId) => {
     switch(actionId) {
       case 'new':
-        setShowQuickDraft(true)
+        setShowQuickWrite(true)
         break
       case 'prompt':
         setShowPrompt(true)
+        addActivity('prompt', 'Opened writing prompt generator')
         break
       case 'virality':
         setShowVirality(true)
@@ -1019,6 +1214,12 @@ function App() {
       )}
       {showShortcuts && <ShortcutsPanel onClose={() => setShowShortcuts(false)} />}
       {showVirality && <ViralityCalculator onClose={() => setShowVirality(false)} />}
+      {showQuickWrite && (
+        <QuickWriteMode 
+          onClose={() => setShowQuickWrite(false)} 
+          onSave={saveQuickWrite}
+        />
+      )}
       <CommandPalette 
         isOpen={showCommandPalette} 
         onClose={() => setShowCommandPalette(false)}
@@ -1043,7 +1244,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v2.3</span>
+          <span className="logo-badge">v2.4</span>
         </div>
         <div className="header-right">
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
@@ -1072,8 +1273,9 @@ function App() {
             <TodaysFocus 
               focus={todaysFocus} 
               setFocus={setTodaysFocus} 
-              onSave={saveFocus}
+              onSave={(f) => { saveFocus(f); addActivity('focus', `Set focus: ${f.slice(0, 30)}`) }}
             />
+            <WordCountTracker onUpdate={setWordsWritten} />
           </div>
           <div className="hero-status">
             <EnergyMeter level={energyLevel} setLevel={setEnergyLevel} />
@@ -1366,6 +1568,21 @@ function App() {
               {metrics.topCategory}
             </span>
           </div>
+          <div className="stat-pill">
+            <span className="stat-label">Today</span>
+            <span className="stat-value">{wordsWritten.toLocaleString()} words</span>
+          </div>
+        </section>
+
+        {/* Activity Timeline */}
+        <section className="activity-section">
+          <div className="section-header">
+            <h2 className="section-title">
+              <span className="section-icon">⚡</span>
+              Activity Feed
+            </h2>
+          </div>
+          <ActivityTimeline activities={activities} />
         </section>
 
         {/* Drafts Section */}
@@ -1415,7 +1632,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.3 • Press ⌘K for commands</p>
+        <p className="footer-version">v2.4 • Press ⌘K for commands</p>
       </footer>
     </div>
   )
