@@ -136,7 +136,110 @@ function ContentFormulaRef({ isOpen, onClose }) {
   )
 }
 
-// ========== NEW COMPONENTS (v2.6) ==========
+// Keyboard Shortcuts Reference
+function KeyboardShortcuts({ isOpen, onClose }) {
+  const shortcuts = [
+    { key: 'F', action: 'Open Content Formula' },
+    { key: 'G', action: 'Generate Topic' },
+    { key: 'C', action: 'Open Clipboard History' },
+    { key: 'K', action: 'Open Command Palette' },
+    { key: 'Q', action: 'Quick Write Mode' },
+    { key: 'S', action: 'Save Draft' },
+    { key: 'N', action: 'New Article' },
+    { key: 'Esc', action: 'Close Modal' },
+    { key: '⏱️', action: 'Start/Stop Timer (in modal)' },
+  ]
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content shortcuts-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>⌨️ Keyboard Shortcuts</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="shortcuts-grid">
+          {shortcuts.map((s, i) => (
+            <div key={i} className="shortcut-item">
+              <kbd className="shortcut-key">{s.key}</kbd>
+              <span className="shortcut-action">{s.action}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Brainstorm Mode - Quick idea generation
+function BrainstormMode({ isOpen, onClose, onSelect }) {
+  const [ideas, setIdeas] = useState([])
+  const [generating, setGenerating] = useState(false)
+  
+  const brainstormTopics = [
+    "The real reason you're not gaining muscle (it's not what you think)",
+    "What happens to your body after 30 days of cold exposure",
+    "The supplement that actually works: science vs. marketing",
+    "Why your sleep tracking is lying to you",
+    "The workout split that most people get wrong",
+    "How to know if you're overtraining (before injury)",
+    "The truth about protein timing",
+    "What VO2 max really means for your health",
+    "Morning vs. evening workouts: what the research says",
+    "The metabolic winter myth",
+  ]
+  
+  const generateIdeas = () => {
+    setGenerating(true)
+    setTimeout(() => {
+      const shuffled = [...brainstormTopics].sort(() => 0.5 - Math.random()).slice(0, 5)
+      setIdeas(shuffled)
+      setGenerating(false)
+    }, 500)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content brainstorm-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🧠 Brainstorm Mode</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="brainstorm-content">
+          {ideas.length === 0 ? (
+            <div className="brainstorm-empty">
+              <span>🧠</span>
+              <p>Need article ideas? Generate some now.</p>
+            </div>
+          ) : (
+            <div className="brainstorm-list">
+              {ideas.map((idea, i) => (
+                <div 
+                  key={i} 
+                  className="brainstorm-item"
+                  onClick={() => { onSelect?.(idea); onClose(); }}
+                >
+                  <span className="brainstorm-number">{i + 1}</span>
+                  <span className="brainstorm-text">{idea}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <button 
+            className={`generate-btn ${generating ? 'loading' : ''}`}
+            onClick={generateIdeas}
+            disabled={generating}
+          >
+            {generating ? 'Brainstorming...' : '🧠 Generate Ideas'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // Writing Session Timer (Pomodoro-style)
 function WritingTimer({ onComplete, onSave }) {
@@ -1325,6 +1428,7 @@ function App() {
   const [showFormula, setShowFormula] = useState(false)
   const [showTopicGenerator, setShowTopicGenerator] = useState(false)
   const [showClipboard, setShowClipboard] = useState(false)
+  const [showBrainstorm, setShowBrainstorm] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -1441,6 +1545,7 @@ function App() {
       if (key === 'F') setShowFormula(true)
       if (key === 'G') setShowTopicGenerator(true)
       if (key === 'C' && !e.metaKey && !e.ctrlKey) setShowClipboard(true)
+      if (key === 'B') setShowBrainstorm(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -1453,6 +1558,7 @@ function App() {
         setShowFormula(false)
         setShowTopicGenerator(false)
         setShowClipboard(false)
+        setShowBrainstorm(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -1596,6 +1702,8 @@ function App() {
       )}
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
+      <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
+      <BrainstormMode isOpen={showBrainstorm} onClose={() => setShowBrainstorm(false)} />
       <CommandPalette 
         isOpen={showCommandPalette} 
         onClose={() => setShowCommandPalette(false)}
@@ -1620,7 +1728,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v2.5</span>
+          <span className="logo-badge">v2.7</span>
         </div>
         <div className="header-right">
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
@@ -1697,6 +1805,11 @@ function App() {
             <span>📋</span>
             <span>Clips</span>
             <span className="feature-hint">C</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowBrainstorm(true)}>
+            <span>🧠</span>
+            <span>Brainstorm</span>
+            <span className="feature-hint">B</span>
           </button>
         </section>
 
@@ -2046,7 +2159,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.5 • Press ⌘K for commands, F for formula</p>
+        <p className="footer-version">v2.7 • Press ⌘K for commands, H for shortcuts</p>
       </footer>
     </div>
   )
