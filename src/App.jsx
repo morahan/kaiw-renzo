@@ -1,5 +1,65 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import './App.css'
+
+// Writing prompt component
+function WritingPrompt({ onClose }) {
+  const prompts = [
+    "Myth-bust: Most people think ___ but the science says ___",
+    "What if everything you knew about ___ was wrong?",
+    "The one metric most people ignore that matters most: ___",
+    "Why your ___ is actually working (but not how you think)",
+    "The hidden mechanism behind ___ that nobody talks about",
+    "3 counter-intuitive findings from the latest research on ___",
+    "The uncomfortable truth about ___ that the fitness industry hides",
+  ]
+  const [prompt] = useState(prompts[Math.floor(Math.random() * prompts.length)])
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content prompt-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>💡 Writing Prompt</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="prompt-text">
+          <p>{prompt}</p>
+        </div>
+        <button className="prompt-copy-btn" onClick={() => navigator.clipboard.writeText(prompt)}>
+          📋 Copy Prompt
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// Live Clock Component
+function LiveClock() {
+  const [time, setTime] = useState(new Date())
+  
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+  
+  const hours = time.getHours()
+  const mins = time.getMinutes()
+  const secs = time.getSeconds()
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  const displayHour = hours % 12 || 12
+  
+  return (
+    <div className="live-clock">
+      <div className="clock-dots">
+        <span className="clock-dot"></span>
+        <span className="clock-dot"></span>
+        <span className="clock-dot"></span>
+      </div>
+      <span className="clock-time">
+        {displayHour}:{mins.toString().padStart(2, '0')}:{secs.toString().padStart(2, '0')} {ampm}
+      </span>
+    </div>
+  )
+}
 
 // Recent articles data - in production this would come from an API
 const recentArticles = [
@@ -72,6 +132,9 @@ function App() {
   const [activeTip, setActiveTip] = useState(0)
   const [writingPulse, setWritingPulse] = useState(false)
   const [viewMode, setViewMode] = useState('dashboard')
+  const [showPrompt, setShowPrompt] = useState(false)
+  const [likedArticles, setLikedArticles] = useState({})
+  const inputRef = useRef(null)
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -114,8 +177,17 @@ function App() {
     })
   }
 
+  const handleLike = (article) => {
+    setLikedArticles(prev => ({
+      ...prev,
+      [article.title]: !prev[article.title]
+    }))
+  }
+
   return (
     <div className="app">
+      {showPrompt && <WritingPrompt onClose={() => setShowPrompt(false)} />}
+      
       <div 
         className="gradient-orb"
         style={{
@@ -141,13 +213,7 @@ function App() {
             <span className="tip-icon">💡</span>
             <span className="tip-text">{tips[activeTip]}</span>
           </div>
-          <div className="timestamp">
-            {currentTime.toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: true 
-            })}
-          </div>
+          <LiveClock />
         </div>
       </header>
 
@@ -227,6 +293,12 @@ function App() {
                   <span className="article-words">{article.words.toLocaleString()} words</span>
                   <span className="article-divider">•</span>
                   <span className="article-read-time">{Math.ceil(article.words / 200)} min read</span>
+                  <button 
+                    className={`article-like ${likedArticles[article.title] ? 'liked' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); handleLike(article); }}
+                  >
+                    {likedArticles[article.title] ? '❤️' : '🤍'}
+                  </button>
                 </div>
               </div>
             ))}
