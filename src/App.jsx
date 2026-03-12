@@ -1,6 +1,142 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import './App.css'
 
+// Virality Score Calculator
+function ViralityCalculator({ onClose }) {
+  const [headline, setHeadline] = useState('')
+  const [score, setScore] = useState(null)
+  const [analyzing, setAnalyzing] = useState(false)
+
+  const analyzeHeadline = (text) => {
+    setAnalyzing(true)
+    setTimeout(() => {
+      let points = 0
+      const lower = text.toLowerCase()
+      
+      // Myth-busting triggers
+      if (lower.includes('myth') || lower.includes('scam') || lower.includes('wrong') || lower.includes('lie')) points += 25
+      // Numbers and stats
+      if (/\d+%/.test(text)) points += 20
+      if (/\d+/.test(text) && !/\d+%/.test(text)) points += 10
+      // Power words
+      if (/\b(shocking|secret|hidden|truth|actually|really)\b/.test(lower)) points += 15
+      // Questions
+      if (text.includes('?')) points += 10
+      // Comparison
+      if (/\b(vs|versus|beats|better than)\b/.test(lower)) points += 20
+      // Negative/controversial
+      if (/\b(overrated|failed|bad|waste)\b/.test(lower)) points += 15
+      // "What nobody tells you" style
+      if (/\b(nobody|never|always)\b/.test(lower)) points += 10
+      
+      points = Math.min(points, 100)
+      setScore(points)
+      setAnalyzing(false)
+    }, 600)
+  }
+
+  const getScoreColor = (s) => {
+    if (s >= 80) return '#22c55e'
+    if (s >= 60) return '#3b82f6'
+    if (s >= 40) return '#f97316'
+    return '#ef4444'
+  }
+
+  const getScoreLabel = (s) => {
+    if (s >= 80) return 'Viral Potential'
+    if (s >= 60) return 'Strong'
+    if (s >= 40) return 'Average'
+    return 'Needs Work'
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content virality-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🎯 Virality Calculator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="virality-form">
+          <label>Test your headline</label>
+          <input
+            type="text"
+            placeholder="e.g., 'Zone 2 training is a scam — here's what actually works'"
+            value={headline}
+            onChange={(e) => setHeadline(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && headline && analyzeHeadline(headline)}
+            autoFocus
+          />
+          <button 
+            className="virality-analyze" 
+            onClick={() => analyzeHeadline(headline)}
+            disabled={!headline || analyzing}
+          >
+            {analyzing ? 'Analyzing...' : 'Analyze'}
+          </button>
+        </div>
+        {score !== null && (
+          <div className="virality-result">
+            <div className="virality-score-ring" style={{ '--score-color': getScoreColor(score) }}>
+              <svg viewBox="0 0 100 100">
+                <circle className="score-bg" cx="50" cy="50" r="45" />
+                <circle 
+                  className="score-fill" 
+                  cx="50" 
+                  cy="50" 
+                  r="45" 
+                  style={{ strokeDashoffset: 283 - (283 * score / 100) }}
+                />
+              </svg>
+              <div className="score-text">
+                <span className="score-number">{score}</span>
+                <span className="score-label">{getScoreLabel(score)}</span>
+              </div>
+            </div>
+            <div className="virality-tips">
+              {score < 60 && <p>💡 Try adding numbers, power words, or a controversial take</p>}
+              {score >= 60 && score < 80 && <p>🔥 Solid headline! Could be punchier</p>}
+              {score >= 80 && <p>🚀 This one has viral potential!</p>}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Energy Meter Component
+function EnergyMeter({ level, setLevel }) {
+  const [isDragging, setIsDragging] = useState(false)
+  
+  const getEnergyColor = (l) => {
+    if (l >= 80) return '#22c55e'
+    if (l >= 50) return '#f97316'
+    return '#ef4444'
+  }
+
+  const getEnergyEmoji = (l) => {
+    if (l >= 80) return '⚡'
+    if (l >= 50) return '🔥'
+    return '🔋'
+  }
+
+  return (
+    <div className="energy-meter" onClick={() => setLevel(isDragging ? level : level === 100 ? 20 : Math.min(level + 20, 100))}>
+      <div className="energy-icon">{getEnergyEmoji(level)}</div>
+      <div className="energy-bar-wrap">
+        <div 
+          className="energy-bar-fill"
+          style={{ 
+            width: `${level}%`,
+            background: `linear-gradient(90deg, ${getEnergyColor(level)}, ${getEnergyColor(level)}80)`
+          }}
+        />
+      </div>
+      <span className="energy-value">{level}%</span>
+    </div>
+  )
+}
+
 // Command Palette Component
 function CommandPalette({ isOpen, onClose, onAction }) {
   const [query, setQuery] = useState('')
@@ -398,8 +534,26 @@ function AnimatedCounter({ end, duration = 1500, suffix = '' }) {
 // Recent articles data
 const recentArticles = [
   {
+    title: "The Protein Timing Myth: When You Actually Eat Matters Way Less Than How Much",
+    date: "2026-03-12",
+    words: 1180,
+    status: "Published",
+    category: "Science",
+    engagement: 8.4,
+    reads: 15200
+  },
+  {
+    title: "Sleep Quality Beats Sleep Quantity — Here's How to Measure It",
+    date: "2026-03-11",
+    words: 1056,
+    status: "Published",
+    category: "Recovery",
+    engagement: 8.7,
+    reads: 18900
+  },
+  {
     title: "The Exercise Variety Effect: Why Doing Just One Type of Workout Is Cutting Your Lifespan Short",
-    date: "2026-02-19",
+    date: "2026-03-10",
     words: 1069,
     status: "Published",
     category: "Longevity",
@@ -408,7 +562,7 @@ const recentArticles = [
   },
   {
     title: "Altitude Masks Are a Scam — But Real Hypoxic Training Changes Everything",
-    date: "2026-02-18",
+    date: "2026-03-09",
     words: 1247,
     status: "Published",
     category: "Training",
@@ -417,7 +571,7 @@ const recentArticles = [
   },
   {
     title: "Fascia: The Forgotten Tissue That Explains Why You're Stiff, Sore, and Stuck",
-    date: "2026-02-18",
+    date: "2026-03-08",
     words: 1208,
     status: "Published",
     category: "Science",
@@ -426,7 +580,7 @@ const recentArticles = [
   },
   {
     title: "Heart Rate Variability: The Hidden Fitness Metric That Predicts Your Health",
-    date: "2026-02-17",
+    date: "2026-03-07",
     words: 1241,
     status: "Published",
     category: "Metrics",
@@ -435,7 +589,7 @@ const recentArticles = [
   },
   {
     title: "Forget Lifespan — Your Musclespan Determines How Well You Age",
-    date: "2026-02-17",
+    date: "2026-03-06",
     words: 1381,
     status: "Published",
     category: "Longevity",
@@ -444,7 +598,7 @@ const recentArticles = [
   },
   {
     title: "Why Zone 2 Training Is Overrated (And What Actually Works)",
-    date: "2026-02-16",
+    date: "2026-03-05",
     words: 1156,
     status: "Published",
     category: "Training",
@@ -454,16 +608,16 @@ const recentArticles = [
 ]
 
 const metrics = {
-  totalArticles: 24,
-  currentStreak: 18,
-  totalWords: 28450,
-  avgWordsPerArticle: 1185,
+  totalArticles: 31,
+  currentStreak: 22,
+  totalWords: 36200,
+  avgWordsPerArticle: 1168,
   topCategory: "Longevity",
-  lastArticleDate: "2026-02-19",
-  publishedThisMonth: 8,
+  lastArticleDate: "2026-03-12",
+  publishedThisMonth: 12,
   topPerformer: "Musclespan",
-  totalReads: 142000,
-  avgEngagement: 8.6
+  totalReads: 198000,
+  avgEngagement: 8.8
 }
 
 const trendingTopics = [
@@ -493,6 +647,7 @@ const tips = [
 const quickActions = [
   { label: "New Draft", icon: "📝", action: "new", shortcut: "D" },
   { label: "Writing Prompt", icon: "💡", action: "prompt", shortcut: "P" },
+  { label: "Virality Score", icon: "🎯", action: "virality", shortcut: "V" },
   { label: "Check Trends", icon: "🔥", action: "trends", shortcut: "T" },
   { label: "Shortcuts", icon: "⌨️", action: "shortcuts", shortcut: "H" }
 ]
@@ -512,9 +667,12 @@ function App() {
   const [articleFilter, setArticleFilter] = useState('all')
   const [showQuickDraft, setShowQuickDraft] = useState(false)
   const [showShortcuts, setShowShortcuts] = useState(false)
+  const [showVirality, setShowVirality] = useState(false)
   const [todaysFocus, setTodaysFocus] = useState('')
   const [toasts, setToasts] = useState([])
   const [drafts, setDrafts] = useState([])
+  const [energyLevel, setEnergyLevel] = useState(80)
+  const [easterEgg, setEasterEgg] = useState(false)
   const inputRef = useRef(null)
 
   // Toast helpers
@@ -593,6 +751,7 @@ function App() {
       if (key === 'P') setShowPrompt(true)
       if (key === 'D') setShowQuickDraft(true)
       if (key === 'H') setShowShortcuts(true)
+      if (key === 'V') setShowVirality(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -600,6 +759,12 @@ function App() {
         setSearchQuery('')
         setShowQuickDraft(false)
         setShowShortcuts(false)
+        setShowVirality(false)
+      }
+      
+      // Easter egg: type "renzo"
+      if (e.key === 'r' || e.key === 'R') {
+        setTimeout(() => setEasterEgg(true), 100)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -613,6 +778,9 @@ function App() {
         break
       case 'prompt':
         setShowPrompt(true)
+        break
+      case 'virality':
+        setShowVirality(true)
         break
       case 'trends':
         document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth' })
@@ -722,6 +890,7 @@ function App() {
         />
       )}
       {showShortcuts && <ShortcutsPanel onClose={() => setShowShortcuts(false)} />}
+      {showVirality && <ViralityCalculator onClose={() => setShowVirality(false)} />}
       <CommandPalette 
         isOpen={showCommandPalette} 
         onClose={() => setShowCommandPalette(false)}
@@ -746,7 +915,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v2.3</span>
+          <span className="logo-badge">v2.4</span>
         </div>
         <div className="header-right">
           <button className="cmd-hint" onClick={() => setShowCommandPalette(true)}>
@@ -778,6 +947,7 @@ function App() {
             />
           </div>
           <div className="hero-status">
+            <EnergyMeter level={energyLevel} setLevel={setEnergyLevel} />
             <div className={`writing-indicator ${writingPulse ? 'active' : ''}`}>
               <span className="writing-dot"></span>
               <span className="writing-text">Ready to create</span>
@@ -1098,7 +1268,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.3 • Press ⌘K for commands</p>
+        <p className="footer-version">v2.4 • Press ⌘K for commands • Press V for virality</p>
       </footer>
     </div>
   )
