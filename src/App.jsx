@@ -3,6 +3,243 @@ import './App.css'
 
 // ========== NEW FEATURES ==========
 
+// Changelog Modal - Version history
+function ChangelogModal({ isOpen, onClose }) {
+  const changelog = [
+    { version: '2.8', date: '2026-03-12', changes: [
+      'Added Export Drafts feature (Markdown/JSON)',
+      'Added Reading Time Estimator',
+      'Added Word Count Goal Widget',
+      'Updated keyboard shortcuts',
+      'Improved performance'
+    ]},
+    { version: '2.7', date: '2026-03-07', changes: [
+      'Added Brainstorm Mode',
+      'Added Topic Generator',
+      'Added Clipboard History',
+      'Added Writing Timer (Pomodoro)',
+      'Added Daily Quote rotation'
+    ]},
+    { version: '2.6', date: '2026-03-05', changes: [
+      'Added Command Palette',
+      'Added Hot Take Generator',
+      'Added Virality Calculator',
+      'Added Quick Write Mode'
+    ]},
+    { version: '2.5', date: '2026-02-28', changes: [
+      'Initial release',
+      'Article dashboard',
+      'Metrics tracking',
+      'Notion sync'
+    ]}
+  ]
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content changelog-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📜 Changelog</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="changelog-list">
+          {changelog.map((entry, i) => (
+            <div key={i} className="changelog-entry">
+              <div className="changelog-header">
+                <span className="changelog-version">v{entry.version}</span>
+                <span className="changelog-date">{entry.date}</span>
+              </div>
+              <ul className="changelog-changes">
+                {entry.changes.map((change, j) => (
+                  <li key={j}>{change}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Article Templates Library
+function ArticleTemplates({ isOpen, onClose, onSelect }) {
+  const templates = [
+    { 
+      id: 'myth-bust', 
+      name: 'Myth Buster', 
+      emoji: '🚫',
+      desc: 'Debunk common fitness misconceptions',
+      structure: ['Hook (contrarian claim)', 'The myth', 'The science', 'The truth', 'Actionable CTA']
+    },
+    { 
+      id: 'vs-compare', 
+      name: 'Vs. Comparison', 
+      emoji: '⚔️',
+      desc: 'Compare two approaches side by side',
+      structure: ['Hook (tension)', 'Option A analysis', 'Option B analysis', 'Winner (with data)', 'Recommendation']
+    },
+    { 
+      id: 'deep-dive', 
+      name: 'Deep Dive', 
+      emoji: '🔬',
+      desc: 'ComprehensiveExploration of a topic',
+      structure: ['Hook (intrigue)', 'Problem statement', 'Mechanism (science)', 'Applications', 'Summary + CTA']
+    },
+    { 
+      id: 'how-to', 
+      name: 'How-To Guide', 
+      emoji: '🛠️',
+      desc: 'Actionable step-by-step content',
+      structure: ['Hook (pain point)', 'Why it matters', 'Step 1', 'Step 2', 'Step 3', 'Common mistakes', 'CTA']
+    },
+    { 
+      id: 'hot-take', 
+      name: 'Hot Take', 
+      emoji: '🔥',
+      desc: 'Controversial opinion with backing',
+      structure: ['Bold claim', 'Evidence 1', 'Evidence 2', 'Counter-arguments', 'Final stance']
+    },
+    { 
+      id: 'listicle', 
+      name: 'Listicle', 
+      emoji: '📋',
+      desc: 'Numbered list of insights',
+      structure: ['Hook (numbered promise)', 'Item 1 (hook)', 'Item 2', 'Item 3', 'Summary', 'CTA']
+    }
+  ]
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content templates-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📝 Article Templates</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="templates-grid">
+          {templates.map((t) => (
+            <div 
+              key={t.id} 
+              className="template-card"
+              onClick={() => { onSelect?.(t); onClose(); }}
+            >
+              <span className="template-emoji">{t.emoji}</span>
+              <div className="template-name">{t.name}</div>
+              <div className="template-desc">{t.desc}</div>
+              <div className="template-structure">
+                {t.structure.slice(0, 3).map((s, i) => (
+                  <span key={i} className="structure-tag">{s}</span>
+                ))}
+                {t.structure.length > 3 && <span className="structure-more">+{t.structure.length - 3}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Productivity Score Component
+function ProductivityScore({ articles, words, streak }) {
+  const [score, setScore] = useState(0)
+  const [breakdown, setBreakdown] = useState({ consistency: 0, output: 0, quality: 0 })
+  
+  useEffect(() => {
+    // Calculate productivity score
+    const consistencyScore = Math.min((streak / 30) * 100, 100) // 30-day streak = max
+    const outputScore = Math.min((words / 10000) * 100, 100) // 10k words = max
+    const qualityScore = articles.length > 0 
+      ? articles.reduce((sum, a) => sum + (a.engagement || 0), 0) / articles.length * 10 
+      : 0
+    
+    const totalScore = Math.round((consistencyScore * 0.3 + outputScore * 0.35 + qualityScore * 0.35))
+    
+    setBreakdown({ consistency: consistencyScore, output: outputScore, quality: qualityScore })
+    
+    // Animate score
+    let current = 0
+    const timer = setInterval(() => {
+      current += 2
+      if (current >= totalScore) {
+        setScore(totalScore)
+        clearInterval(timer)
+      } else {
+        setScore(current)
+      }
+    }, 20)
+    
+    return () => clearInterval(timer)
+  }, [articles, words, streak])
+  
+  const getScoreColor = (s) => {
+    if (s >= 80) return '#22c55e'
+    if (s >= 60) return '#3b82f6'
+    if (s >= 40) return '#f97316'
+    return '#ef4444'
+  }
+  
+  const getScoreLabel = (s) => {
+    if (s >= 80) return 'Elite'
+    if (s >= 60) return 'Strong'
+    if (s >= 40) return 'Average'
+    return 'Building'
+  }
+  
+  return (
+    <div className="productivity-score">
+      <div className="score-header">
+        <span className="score-icon">📈</span>
+        <span className="score-label">Productivity Score</span>
+      </div>
+      <div className="score-main">
+        <div className="score-circle" style={{ '--score-color': getScoreColor(score) }}>
+          <svg viewBox="0 0 100 100">
+            <circle className="score-bg-circle" cx="50" cy="50" r="45" />
+            <circle 
+              className="score-fill-circle" 
+              cx="50" 
+              cy="50" 
+              r="45" 
+              style={{ strokeDashoffset: 283 - (283 * score / 100) }}
+            />
+          </svg>
+          <div className="score-value">
+            <span className="score-number">{score}</span>
+            <span className="score-level">{getScoreLabel(score)}</span>
+          </div>
+        </div>
+      </div>
+      <div className="score-breakdown">
+        <div className="breakdown-item">
+          <span className="breakdown-label">Consistency</span>
+          <div className="breakdown-bar">
+            <div className="breakdown-fill" style={{ width: `${breakdown.consistency}%`, background: '#a855f7' }} />
+          </div>
+          <span className="breakdown-value">{Math.round(breakdown.consistency)}%</span>
+        </div>
+        <div className="breakdown-item">
+          <span className="breakdown-label">Output</span>
+          <div className="breakdown-bar">
+            <div className="breakdown-fill" style={{ width: `${breakdown.output}%`, background: '#3b82f6' }} />
+          </div>
+          <span className="breakdown-value">{Math.round(breakdown.output)}%</span>
+        </div>
+        <div className="breakdown-item">
+          <span className="breakdown-label">Quality</span>
+          <div className="breakdown-bar">
+            <div className="breakdown-fill" style={{ width: `${breakdown.quality}%`, background: '#22c55e' }} />
+          </div>
+          <span className="breakdown-value">{Math.round(breakdown.quality)}%</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Daily Quote Component
 function DailyQuote() {
   const quotes = [
@@ -1391,12 +1628,117 @@ const tips = [
 
 const quickActions = [
   { label: "New Draft", icon: "📝", action: "new", shortcut: "D" },
-  { label: "Hot Take", icon: "🔥", action: "hottake", shortcut: "T" },
+  { label: "Templates", icon: "📋", action: "templates", shortcut: "T" },
+  { label: "Hot Take", icon: "🔥", action: "hottake", shortcut: "Y" },
   { label: "Writing Prompt", icon: "💡", action: "prompt", shortcut: "P" },
   { label: "Virality Score", icon: "🎯", action: "virality", shortcut: "V" },
   { label: "Check Trends", icon: "📈", action: "trends", shortcut: "R" },
-  { label: "Shortcuts", icon: "⌨️", action: "shortcuts", shortcut: "H" }
+  { label: "Shortcuts", icon: "⌨️", action: "shortcuts", shortcut: "H" },
+  { label: "Changelog", icon: "📜", action: "changelog", shortcut: "L" },
+  { label: "Export Drafts", icon: "📦", action: "exportDrafts", shortcut: "E" }
 ]
+
+// Reading Time Estimator Component
+function ReadingTimeEstimator({ wordCount }) {
+  const minutes = Math.ceil(wordCount / 200) // Average reading speed
+  
+  const getColor = () => {
+    if (minutes <= 3) return 'short'
+    if (minutes <= 7) return 'medium'
+    return 'long'
+  }
+  
+  return (
+    <div className={`reading-time ${getColor()}`}>
+      <span className="reading-icon">⏱️</span>
+      <span className="reading-minutes">{minutes} min read</span>
+    </div>
+  )
+}
+
+// Word Count Goal Progress
+function WordCountGoal({ current, goal }) {
+  const percentage = Math.min((current / goal) * 100, 100)
+  
+  return (
+    <div className="word-goal-widget">
+      <div className="word-goal-header">
+        <span className="word-goal-icon">📝</span>
+        <span className="word-goal-title">Daily Goal</span>
+        <span className="word-goal-pct">{Math.round(percentage)}%</span>
+      </div>
+      <div className="word-goal-bar">
+        <div 
+          className="word-goal-fill" 
+          style={{ 
+            width: `${percentage}%`,
+            background: percentage >= 100 ? 'var(--accent-green)' : 'var(--accent)'
+          }} 
+        />
+      </div>
+      <div className="word-goal-counts">
+        <span>{current.toLocaleString()}</span>
+        <span>/ {goal.toLocaleString()} words</span>
+      </div>
+    </div>
+  )
+}
+
+// Export Drafts Modal
+function ExportDraftsModal({ drafts, onClose }) {
+  const [exportFormat, setExportFormat] = useState('markdown')
+  
+  const exportContent = () => {
+    let content = ''
+    
+    if (exportFormat === 'markdown') {
+      drafts.forEach((draft, i) => {
+        content += `# ${draft.title || `Draft ${i + 1}`}\n\n`
+        content += `**Category:** ${draft.category || 'Uncategorized'}\n`
+        content += `**Date:** ${new Date(draft.date).toLocaleDateString()}\n\n`
+        content += `---\n\n`
+        content += `${draft.hook || ''}\n\n`
+        content += `---\n\n`
+      })
+    } else if (exportFormat === 'json') {
+      content = JSON.stringify(drafts, null, 2)
+    }
+    
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `renzo-drafts-${new Date().toISOString().split('T')[0]}.${exportFormat === 'markdown' ? 'md' : 'json'}`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content export-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📦 Export Drafts</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="export-info">
+          <p>Export <strong>{drafts.length}</strong> drafts</p>
+        </div>
+        <div className="export-format">
+          <label>Format:</label>
+          <select value={exportFormat} onChange={e => setExportFormat(e.target.value)}>
+            <option value="markdown">Markdown (.md)</option>
+            <option value="json">JSON</option>
+          </select>
+        </div>
+        <div className="export-actions">
+          <button className="export-btn" onClick={exportContent}>
+            📥 Download
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -1429,6 +1771,9 @@ function App() {
   const [showTopicGenerator, setShowTopicGenerator] = useState(false)
   const [showClipboard, setShowClipboard] = useState(false)
   const [showBrainstorm, setShowBrainstorm] = useState(false)
+  const [showExportDrafts, setShowExportDrafts] = useState(false)
+  const [showChangelog, setShowChangelog] = useState(false)
+  const [showTemplates, setShowTemplates] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -1537,7 +1882,8 @@ function App() {
       const key = e.key.toUpperCase()
       if (key === 'N') setShowPrompt(true)
       if (key === 'P') setShowPrompt(true)
-      if (key === 'T') setShowHotTake(true)
+      if (key === 'T') setShowTemplates(true)
+      if (key === 'Y') setShowHotTake(true)
       if (key === 'D') setShowQuickDraft(true)
       if (key === 'H') setShowShortcuts(true)
       if (key === 'V') setShowVirality(true)
@@ -1546,6 +1892,8 @@ function App() {
       if (key === 'G') setShowTopicGenerator(true)
       if (key === 'C' && !e.metaKey && !e.ctrlKey) setShowClipboard(true)
       if (key === 'B') setShowBrainstorm(true)
+      if (key === 'E') setShowExportDrafts(true)
+      if (key === 'L') setShowChangelog(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -1559,6 +1907,8 @@ function App() {
         setShowTopicGenerator(false)
         setShowClipboard(false)
         setShowBrainstorm(false)
+        setShowChangelog(false)
+        setShowTemplates(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -1591,6 +1941,16 @@ function App() {
         break
       case 'voice':
         setShowPrompt(true)
+        break
+      case 'exportDrafts':
+        setShowExportDrafts(true)
+        break
+      case 'templates':
+        setShowTemplates(true)
+        addActivity('prompt', 'Opened article templates')
+        break
+      case 'changelog':
+        setShowChangelog(true)
         break
       case 'sync':
         addToast('Syncing with Notion...', 'info')
@@ -1700,6 +2060,27 @@ function App() {
           onSave={saveQuickWrite}
         />
       )}
+      {showExportDrafts && (
+        <ExportDraftsModal 
+          drafts={drafts} 
+          onClose={() => setShowExportDrafts(false)} 
+        />
+      )}
+      {showChangelog && (
+        <ChangelogModal 
+          isOpen={showChangelog} 
+          onClose={() => setShowChangelog(false)} 
+        />
+      )}
+      {showTemplates && (
+        <ArticleTemplates 
+          isOpen={showTemplates} 
+          onClose={() => setShowTemplates(false)}
+          onSelect={(template) => {
+            addToast(`Selected template: ${template.name}`, 'success')
+          }}
+        />
+      )}
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
@@ -1796,20 +2177,25 @@ function App() {
             <span>Formula</span>
             <span className="feature-hint">F</span>
           </button>
+          <button className="feature-btn" onClick={() => setShowTemplates(true)}>
+            <span>📋</span>
+            <span>Templates</span>
+            <span className="feature-hint">T</span>
+          </button>
           <button className="feature-btn" onClick={() => setShowTopicGenerator(true)}>
             <span>💡</span>
             <span>Topic</span>
             <span className="feature-hint">G</span>
           </button>
-          <button className="feature-btn" onClick={() => setShowClipboard(true)}>
-            <span>📋</span>
-            <span>Clips</span>
-            <span className="feature-hint">C</span>
-          </button>
           <button className="feature-btn" onClick={() => setShowBrainstorm(true)}>
             <span>🧠</span>
             <span>Brainstorm</span>
             <span className="feature-hint">B</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowChangelog(true)}>
+            <span>📜</span>
+            <span>Changelog</span>
+            <span className="feature-hint">L</span>
           </button>
         </section>
 
@@ -1826,10 +2212,13 @@ function App() {
                 className="action-btn"
                 onClick={() => {
                   if (action.action === 'new') setShowQuickDraft(true)
+                  else if (action.action === 'templates') setShowTemplates(true)
                   else if (action.action === 'prompt') setShowPrompt(true)
                   else if (action.action === 'hottake') setShowHotTake(true)
                   else if (action.action === 'trends') document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth' })
                   else if (action.action === 'shortcuts') setShowShortcuts(true)
+                  else if (action.action === 'changelog') setShowChangelog(true)
+                  else if (action.action === 'exportDrafts') setShowExportDrafts(true)
                   else if (action.action === 'sync') addToast('Syncing with Notion...', 'info')
                 }}
               >
@@ -1894,6 +2283,21 @@ function App() {
             <div className="metric-label">Total Reads</div>
             <div className="metric-trend">📈 {metrics.avgEngagement}/10 avg</div>
           </div>
+        </section>
+
+        {/* Productivity Score */}
+        <section className="productivity-section">
+          <div className="section-header">
+            <h2 className="section-title">
+              <span className="section-icon">📈</span>
+              Productivity Score
+            </h2>
+          </div>
+          <ProductivityScore 
+            articles={recentArticles} 
+            words={metrics.totalWords} 
+            streak={metrics.currentStreak} 
+          />
         </section>
 
         {/* Trending Topics */}
