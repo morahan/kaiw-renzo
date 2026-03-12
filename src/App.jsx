@@ -1065,7 +1065,43 @@ const quickActions = [
   { label: "Writing Prompt", icon: "💡", action: "prompt", shortcut: "P" },
   { label: "Virality Score", icon: "🎯", action: "virality", shortcut: "V" },
   { label: "Check Trends", icon: "📈", action: "trends", shortcut: "R" },
-  { label: "Shortcuts", icon: "⌨️", action: "shortcuts", shortcut: "H" }
+  { label: "Copy Thread Template", icon: "📋", action: "copyThread", shortcut: "C" },
+  { label: "Random Idea", icon: "🎲", action: "randomIdea", shortcut: "I" },
+  { label: "Shortcuts", icon: "⌨️", action: "shortcuts", shortcut: "?" }
+]
+
+// Thread template for X posts
+const threadTemplate = `🧵 THREAD: [TITLE]
+
+[Hook - 1-2 sentences that stop the scroll]
+
+[Context - why this matters now]
+
+[Point 1 - the main insight]
+📌 [evidence or example]
+
+[Point 2 - actionable takeaway]
+📌 [specific steps or tips]
+
+[Point 3 - the contrarian view or surprise]
+📌 [back it up with data]
+
+[Conclusion - synthesize and CTA]
+
+👇 What'd I miss? Drop your takes below ↓`
+
+// Random article ideas
+const articleIdeas = [
+  { topic: "Zone 2 vs Polarized Training", angle: "Why zone 2 is overrated for most people" },
+  { topic: "Creatine Timing", angle: "Does when you take it actually matter?" },
+  { topic: "Sleep as a PED", angle: "The data on sleep deprivation and strength gains" },
+  { topic: "Training Frequency", angle: "3 days vs 6 days - what the meta-analysis says" },
+  { topic: "Protein Timing", angle: "The anabolic window is a myth - here's why" },
+  { topic: "Cardio for Fat Loss", angle: "Why steady state beats HIIT for most" },
+  { topic: "Progressive Overload", angle: "The 3 types nobody talks about" },
+  { topic: "Recovery Metrics", angle: "HRV vs RHR vs readiness scores" },
+  { topic: "Supplements That Work", angle: "Only 3 supplements have solid evidence" },
+  { topic: "Training to Failure", angle: "When it helps and when it hurts" },
 ]
 
 function App() {
@@ -1107,6 +1143,17 @@ function App() {
       { type: 'prompt', text: 'Used writing prompt', time: '5h ago' },
     ]
   })
+  const [focusMode, setFocusMode] = useState(false)
+  const [dailyWordGoal, setDailyWordGoal] = useState(() => {
+    const saved = localStorage.getItem('renzo-daily-words')
+    const today = new Date().toDateString()
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      return parsed.date === today ? parsed : { goal: 1500, current: 0, date: today }
+    }
+    return { goal: 1500, current: 0, date: today }
+  })
+  const [showRandomIdea, setShowRandomIdea] = useState(false)
   const inputRef = useRef(null)
 
   // Toast helpers
@@ -1162,6 +1209,31 @@ function App() {
     addToast('Focus updated!', 'success')
   }
 
+  // Save daily word goal
+  const updateDailyWords = (words) => {
+    const updated = { ...dailyWordGoal, current: words }
+    setDailyWordGoal(updated)
+    localStorage.setItem('renzo-daily-words', JSON.stringify(updated))
+  }
+
+  // Handle random idea
+  const handleRandomIdea = () => {
+    const idea = articleIdeas[Math.floor(Math.random() * articleIdeas.length)]
+    setShowRandomIdea(true)
+    setTimeout(() => setShowRandomIdea(false), 5000)
+    addToast(`💡 ${idea.topic}: ${idea.angle}`, 'info')
+  }
+
+  // Copy thread template
+  const handleCopyThread = async () => {
+    try {
+      await navigator.clipboard.writeText(threadTemplate)
+      addToast('Thread template copied! 📋', 'success')
+    } catch {
+      addToast('Failed to copy', 'error')
+    }
+  }
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
@@ -1210,6 +1282,8 @@ function App() {
       if (key === 'V') setShowVirality(true)
       if (key === 'W') setShowQuickWrite(true)
       if (key === 'F') setShowFormula(true)
+      if (key === 'C') handleCopyThread()
+      if (key === 'I') handleRandomIdea()
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -1401,14 +1475,26 @@ function App() {
           >
             {soundEnabled ? '🔊' : '🔇'}
           </button>
+          <button 
+            className={`focus-mode-btn ${focusMode ? 'active' : ''}`} 
+            onClick={() => {
+              setFocusMode(!focusMode)
+              addToast(focusMode ? 'Focus mode OFF' : 'Focus mode ON - distractions hidden', 'info')
+            }}
+            title="Focus Mode (F)"
+          >
+            <span className="focus-icon">{focusMode ? '🎯' : '⚡'}</span>
+          </button>
           <button className="cmd-hint" onClick={() => setShowCommandPalette(true)}>
             <span className="cmd-icon">⌘</span>
             <span>K</span>
           </button>
-          <div className="tip-banner">
-            <span className="tip-icon">💡</span>
-            <span className="tip-text">{tips[activeTip]}</span>
-          </div>
+          {!focusMode && (
+            <div className="tip-banner">
+              <span className="tip-icon">💡</span>
+              <span className="tip-text">{tips[activeTip]}</span>
+            </div>
+          )}
           <LiveClock />
         </div>
       </header>
@@ -1489,6 +1575,73 @@ function App() {
           </div>
           <WeeklyGoals />
         </section>
+
+        {/* Daily Word Goal */}
+        {!focusMode && (
+          <section className="daily-word-section">
+            <div className="daily-word-card">
+              <div className="daily-word-header">
+                <span className="daily-word-icon">✍️</span>
+                <span className="daily-word-title">Today's Word Goal</span>
+                <button 
+                  className="daily-word-edit"
+                  onClick={() => {
+                    const newGoal = prompt('Set daily word goal:', dailyWordGoal.goal)
+                    if (newGoal && !isNaN(newGoal)) {
+                      setDailyWordGoal(prev => ({ ...prev, goal: parseInt(newGoal) }))
+                      localStorage.setItem('renzo-daily-words', JSON.stringify({ ...dailyWordGoal, goal: parseInt(newGoal) }))
+                      addToast(`Daily goal set to ${newGoal} words!`, 'success')
+                    }
+                  }}
+                >
+                  ⚙️
+                </button>
+              </div>
+              <div className="daily-word-progress">
+                <div className="daily-word-numbers">
+                  <span className="daily-word-current">{dailyWordGoal.current}</span>
+                  <span className="daily-word-separator">/</span>
+                  <span className="daily-word-target">{dailyWordGoal.goal}</span>
+                  <span className="daily-word-words">words</span>
+                </div>
+                <div className="daily-word-bar">
+                  <div 
+                    className="daily-word-fill"
+                    style={{ 
+                      width: `${Math.min((dailyWordGoal.current / dailyWordGoal.goal) * 100, 100)}%`,
+                      background: dailyWordGoal.current >= dailyWordGoal.goal 
+                        ? 'var(--accent-green)' 
+                        : 'linear-gradient(90deg, var(--accent), var(--accent-purple))'
+                    }}
+                  />
+                </div>
+                <div className="daily-word-actions">
+                  <button 
+                    className="daily-word-btn"
+                    onClick={() => {
+                      const words = prompt('Add words written:', dailyWordGoal.current)
+                      if (words && !isNaN(words)) {
+                        updateDailyWords(parseInt(words))
+                        addToast(`+${parseInt(words) - dailyWordGoal.current} words added!`, 'success')
+                      }
+                    }}
+                  >
+                    + Add Words
+                  </button>
+                  <button 
+                    className="daily-word-btn reset"
+                    onClick={() => {
+                      updateDailyWords(0)
+                      addToast('Daily word count reset!', 'info')
+                    }}
+                  >
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="metrics-grid">
           <div 
