@@ -1,6 +1,102 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
 
+// Writing prompt component
+function WritingPrompt({ onClose }) {
+  const prompts = [
+    "Myth-bust: Most people think ___ but the science says ___",
+    "What if everything you knew about ___ was wrong?",
+    "The one metric most people ignore that matters most: ___",
+    "Why your ___ is actually working (but not how you think)",
+    "The hidden mechanism behind ___ that nobody talks about",
+    "3 counter-intuitive findings from the latest research on ___",
+    "The uncomfortable truth about ___ that the fitness industry hides",
+  ]
+  const [prompt] = useState(prompts[Math.floor(Math.random() * prompts.length)])
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content prompt-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>💡 Writing Prompt</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="prompt-text">
+          <p>{prompt}</p>
+        </div>
+        <button className="prompt-copy-btn" onClick={() => navigator.clipboard.writeText(prompt)}>
+          📋 Copy Prompt
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// Live Clock Component
+function LiveClock() {
+  const [time, setTime] = useState(new Date())
+  
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+  
+  const hours = time.getHours()
+  const mins = time.getMinutes()
+  const secs = time.getSeconds()
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  const displayHour = hours % 12 || 12
+  
+  return (
+    <div className="live-clock">
+      <div className="clock-dots">
+        <span className="clock-dot"></span>
+        <span className="clock-dot"></span>
+        <span className="clock-dot"></span>
+      </div>
+      <span className="clock-time">
+        {displayHour}:{mins.toString().padStart(2, '0')}:{secs.toString().padStart(2, '0')} {ampm}
+      </span>
+    </div>
+  )
+}
+
+// Animated Counter Component
+function AnimatedCounter({ end, duration = 1500, suffix = '' }) {
+  const [count, setCount] = useState(0)
+  const ref = useRef(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true)
+      },
+      { threshold: 0.5 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isVisible) return
+    let start = 0
+    const increment = end / (duration / 16)
+    const timer = setInterval(() => {
+      start += increment
+      if (start >= end) {
+        setCount(end)
+        clearInterval(timer)
+      } else {
+        setCount(Math.floor(start))
+      }
+    }, 16)
+    return () => clearInterval(timer)
+  }, [end, duration, isVisible])
+
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>
+}
+
 // Recent articles data
 const recentArticles = [
   {
@@ -103,50 +199,17 @@ const quickActions = [
   { label: "Voice Brief", icon: "🎙️", action: "voice", shortcut: "V" }
 ]
 
-// Animated Counter Component
-function AnimatedCounter({ end, duration = 1500, suffix = '' }) {
-  const [count, setCount] = useState(0)
-  const ref = useRef(null)
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsVisible(true)
-      },
-      { threshold: 0.5 }
-    )
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!isVisible) return
-    let start = 0
-    const increment = end / (duration / 16)
-    const timer = setInterval(() => {
-      start += increment
-      if (start >= end) {
-        setCount(end)
-        clearInterval(timer)
-      } else {
-        setCount(Math.floor(start))
-      }
-    }, 16)
-    return () => clearInterval(timer)
-  }, [end, duration, isVisible])
-
-  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>
-}
-
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [activeTip, setActiveTip] = useState(0)
   const [writingPulse, setWritingPulse] = useState(false)
+  const [viewMode, setViewMode] = useState('dashboard')
+  const [showPrompt, setShowPrompt] = useState(false)
+  const [likedArticles, setLikedArticles] = useState({})
   const [expandedArticle, setExpandedArticle] = useState(null)
-  const [showActions, setShowActions] = useState(false)
   const [hoveredMetric, setHoveredMetric] = useState(null)
+  const inputRef = useRef(null)
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -180,8 +243,8 @@ function App() {
     const handleKeyPress = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
       const key = e.key.toUpperCase()
-      if (key === 'N') setShowActions(true)
-      if (key === 'ESCAPE') setShowActions(false)
+      if (key === 'N') setShowPrompt(true)
+      if (key === 'ESCAPE') setShowPrompt(false)
     }
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
@@ -199,6 +262,13 @@ function App() {
       month: 'short',
       day: 'numeric'
     })
+  }
+
+  const handleLike = (article) => {
+    setLikedArticles(prev => ({
+      ...prev,
+      [article.title]: !prev[article.title]
+    }))
   }
 
   const getEngagementColor = (engagement) => {
@@ -221,6 +291,8 @@ function App() {
 
   return (
     <div className="app">
+      {showPrompt && <WritingPrompt onClose={() => setShowPrompt(false)} />}
+      
       <div 
         className="gradient-orb"
         style={{
@@ -246,13 +318,7 @@ function App() {
             <span className="tip-icon">💡</span>
             <span className="tip-text">{tips[activeTip]}</span>
           </div>
-          <div className="timestamp">
-            {currentTime.toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: true 
-            })}
-          </div>
+          <LiveClock />
         </div>
       </header>
 
@@ -286,7 +352,7 @@ function App() {
               <button 
                 key={i} 
                 className="action-btn"
-                onClick={() => setShowActions(!showActions)}
+                onClick={() => setShowPrompt(true)}
               >
                 <span className="action-icon">{action.icon}</span>
                 <span className="action-label">{action.label}</span>
