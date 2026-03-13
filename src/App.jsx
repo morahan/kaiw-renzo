@@ -3,6 +3,174 @@ import './App.css'
 
 // ========== NEW FEATURES ==========
 
+// Quick Capture - Floating button to quickly jot ideas
+function QuickCapture({ isOpen, onClose, onSave }) {
+  const [note, setNote] = useState('')
+  const [category, setCategory] = useState('Idea')
+  const textareaRef = useRef(null)
+
+  useEffect(() => {
+    if (isOpen && textareaRef.current) {
+      textareaRef.current.focus()
+    }
+  }, [isOpen])
+
+  const handleSave = () => {
+    if (note.trim()) {
+      onSave?.({ note: note.trim(), category, date: new Date().toISOString() })
+      setNote('')
+      onClose()
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content capture-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>⚡ Quick Capture</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="capture-form">
+          <div className="capture-field">
+            <label>Category</label>
+            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="Idea">💡 Idea</option>
+              <option value="Hook">🪝 Hook</option>
+              <option value="Headline">📰 Headline</option>
+              <option value="Research">🔬 Research</option>
+              <option value="Note">📝 Note</option>
+            </select>
+          </div>
+          <div className="capture-field">
+            <label>Quick Note</label>
+            <textarea
+              ref={textareaRef}
+              placeholder="Jot down your idea quickly..."
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={4}
+            />
+          </div>
+        </div>
+        <div className="capture-actions">
+          <button className="capture-cancel" onClick={onClose}>Cancel</button>
+          <button className="capture-save" onClick={handleSave} disabled={!note.trim()}>
+            Save Note
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Streak Fire - Animated streak display with fire effect
+function StreakFire({ streak }) {
+  const [isAnimating, setIsAnimating] = useState(false)
+
+  useEffect(() => {
+    setIsAnimating(true)
+    const timer = setTimeout(() => setIsAnimating(false), 2000)
+    return () => clearTimeout(timer)
+  }, [streak])
+
+  const getStreakLevel = (s) => {
+    if (s >= 30) return { level: 'legendary', flames: 5, color: '#fbbf24' }
+    if (s >= 14) return { level: 'hot', flames: 4, color: '#f97316' }
+    if (s >= 7) return { level: 'warming', flames: 3, color: '#fb923c' }
+    if (s >= 3) return { level: 'building', flames: 2, color: '#fb7185' }
+    return { level: 'starting', flames: 1, color: '#94a3b8' }
+  }
+
+  const { level, flames, color } = getStreakLevel(streak)
+
+  return (
+    <div className={`streak-fire ${level} ${isAnimating ? 'pulse' : ''}`}>
+      <div className="streak-flames">
+        {[...Array(flames)].map((_, i) => (
+          <span 
+            key={i} 
+            className="flame"
+            style={{ 
+              '--flame-delay': `${i * 0.15}s`,
+              '--flame-color': color 
+            }}
+          >
+            🔥
+          </span>
+        ))}
+      </div>
+      <div className="streak-info">
+        <span className="streak-number">{streak}</span>
+        <span className="streak-label">day streak</span>
+      </div>
+      <div className="streak-badge">{level}</div>
+    </div>
+  )
+}
+
+// Session Stats - Today's writing session summary
+function SessionStats() {
+  const [stats, setStats] = useState(() => ({
+    sessions: parseInt(localStorage.getItem('renzo-timer-sessions') || '0'),
+    words: parseInt(localStorage.getItem('renzo-today-words') || '0'),
+    startTime: localStorage.getItem('renzo-session-start') || new Date().toISOString()
+  }))
+
+  const [elapsed, setElapsed] = useState(0)
+
+  useEffect(() => {
+    const start = new Date(stats.startTime)
+    const now = new Date()
+    setElapsed(Math.floor((now - start) / 60000))
+
+    const timer = setInterval(() => {
+      const start = new Date(stats.startTime)
+      const now = new Date()
+      setElapsed(Math.floor((now - start) / 60000))
+    }, 60000)
+
+    return () => clearInterval(timer)
+  }, [stats.startTime])
+
+  const formatTime = (mins) => {
+    const hours = Math.floor(mins / 60)
+    const m = mins % 60
+    if (hours > 0) return `${hours}h ${m}m`
+    return `${m}m`
+  }
+
+  return (
+    <div className="session-stats">
+      <div className="session-header">
+        <span className="session-icon">📈</span>
+        <span className="session-title">Today's Session</span>
+      </div>
+      <div className="session-grid">
+        <div className="session-stat">
+          <span className="session-stat-value">{stats.sessions}</span>
+          <span className="session-stat-label">🍅 Pomodoros</span>
+        </div>
+        <div className="session-stat">
+          <span className="session-stat-value">{stats.words.toLocaleString()}</span>
+          <span className="session-stat-label">📝 Words</span>
+        </div>
+        <div className="session-stat">
+          <span className="session-stat-value">{formatTime(elapsed)}</span>
+          <span className="session-stat-label">⏱️ Active Time</span>
+        </div>
+        <div className="session-stat">
+          <span className="session-stat-value">
+            {stats.sessions > 0 ? Math.round(stats.words / stats.sessions) : 0}
+          </span>
+          <span className="session-stat-label">📊 Avg/Session</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Daily Quote Component
 function DailyQuote() {
   const quotes = [
@@ -1429,6 +1597,11 @@ function App() {
   const [showTopicGenerator, setShowTopicGenerator] = useState(false)
   const [showClipboard, setShowClipboard] = useState(false)
   const [showBrainstorm, setShowBrainstorm] = useState(false)
+  const [showQuickCapture, setShowQuickCapture] = useState(false)
+  const [quickNotes, setQuickNotes] = useState(() => {
+    const saved = localStorage.getItem('renzo-quick-notes')
+    return saved ? JSON.parse(saved) : []
+  })
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -1495,6 +1668,15 @@ function App() {
     addToast('Focus updated!', 'success')
   }
 
+  // Save quick note
+  const saveQuickNote = (note) => {
+    const newNotes = [note, ...quickNotes].slice(0, 20)
+    setQuickNotes(newNotes)
+    localStorage.setItem('renzo-quick-notes', JSON.stringify(newNotes))
+    addActivity('prompt', `Captured: ${note.category} - "${note.note.slice(0, 30)}..."`)
+    addToast('Note captured!', 'success')
+  }
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
@@ -1546,6 +1728,7 @@ function App() {
       if (key === 'G') setShowTopicGenerator(true)
       if (key === 'C' && !e.metaKey && !e.ctrlKey) setShowClipboard(true)
       if (key === 'B') setShowBrainstorm(true)
+      if (key === 'Q') setShowQuickCapture(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -1559,6 +1742,7 @@ function App() {
         setShowTopicGenerator(false)
         setShowClipboard(false)
         setShowBrainstorm(false)
+        setShowQuickCapture(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -1694,6 +1878,13 @@ function App() {
       )}
       {showShortcuts && <ShortcutsPanel onClose={() => setShowShortcuts(false)} />}
       {showVirality && <ViralityCalculator onClose={() => setShowVirality(false)} />}
+      {showQuickCapture && (
+        <QuickCapture 
+          isOpen={showQuickCapture} 
+          onClose={() => setShowQuickCapture(false)}
+          onSave={saveQuickNote}
+        />
+      )}
       {showQuickWrite && (
         <QuickWriteMode 
           onClose={() => setShowQuickWrite(false)} 
@@ -1728,7 +1919,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v2.7</span>
+          <span className="logo-badge">v2.8</span>
         </div>
         <div className="header-right">
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
@@ -1788,9 +1979,15 @@ function App() {
           <StudySpotlight />
           <QuickStatGenerator />
           <WritingTimer onComplete={() => addToast('Session complete! Take a break ☕', 'success')} />
+          <SessionStats />
         </section>
         
         <section className="feature-buttons-row">
+          <button className="feature-btn" onClick={() => setShowQuickCapture(true)}>
+            <span>⚡</span>
+            <span>Capture</span>
+            <span className="feature-hint">Q</span>
+          </button>
           <button className="feature-btn" onClick={() => setShowFormula(true)}>
             <span>📝</span>
             <span>Formula</span>
@@ -1805,11 +2002,6 @@ function App() {
             <span>📋</span>
             <span>Clips</span>
             <span className="feature-hint">C</span>
-          </button>
-          <button className="feature-btn" onClick={() => setShowBrainstorm(true)}>
-            <span>🧠</span>
-            <span>Brainstorm</span>
-            <span className="feature-hint">B</span>
           </button>
         </section>
 
@@ -2159,7 +2351,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.7 • Press ⌘K for commands, H for shortcuts</p>
+        <p className="footer-version">v2.8 • Press ⌘K for commands, Q for quick capture</p>
       </footer>
     </div>
   )
