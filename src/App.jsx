@@ -1,7 +1,311 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import './App.css'
 
-// ========== NEW FEATURES v3.0 ==========
+// ========== v3.1 FEATURES ==========
+
+// Readability Analyzer - Flesch-Kincaid scoring
+function ReadabilityAnalyzer({ isOpen, onClose }) {
+  const [text, setText] = useState('')
+  
+  const metrics = useMemo(() => {
+    if (!text.trim()) return null
+    const words = text.trim().split(/\s+/).length
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length || 1
+    const syllables = text.split(/\s+/).reduce((acc, word) => {
+      return acc + countSyllables(word)
+    }, 0)
+    
+    const fleschReading = 206.835 - 1.015 * (words / sentences) - 84.6 * (syllables / words)
+    const fleschKincaid = 0.39 * (words / sentences) + 11.8 * (syllables / words) - 15.59
+    
+    return {
+      words,
+      sentences,
+      syllables,
+      fleschReading: Math.max(0, Math.min(100, fleschReading)),
+      fleschKincaid: Math.max(0, fleschKincaid),
+      gradeLevel: getGradeLevel(fleschKincaid),
+      readingTime: Math.ceil(words / 200)
+    }
+  }, [text])
+  
+  function countSyllables(word) {
+    word = word.toLowerCase().replace(/[^a-z]/g, '')
+    if (word.length <= 3) return 1
+    word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '')
+    word = word.replace(/^y/, '')
+    return word.match(/[aeiouy]{1,2}/g)?.length || 1
+  }
+  
+  function getGradeLevel(score) {
+    if (score <= 5) return 'Graduate'
+    if (score <= 8) return '8th Grade'
+    if (score <= 10) return '10th Grade'
+    if (score <= 12) return '12th Grade'
+    return 'College'
+  }
+  
+  const getScoreColor = (score) => {
+    if (score >= 80) return '#22c55e'
+    if (score >= 60) return '#84cc16'
+    if (score >= 40) return '#f97316'
+    return '#ef4444'
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content readability-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📊 Readability Analyzer</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <textarea
+          className="readability-input"
+          placeholder="Paste your text here to analyze..."
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+        
+        {metrics && (
+          <div className="readability-results">
+            <div className="readability-score" style={{ borderColor: getScoreColor(metrics.fleschReading) }}>
+              <div className="score-value" style={{ color: getScoreColor(metrics.fleschReading) }}>
+                {Math.round(metrics.fleschReading)}
+              </div>
+              <div className="score-label">Flesch Reading Ease</div>
+            </div>
+            
+            <div className="readability-grid">
+              <div className="readability-stat">
+                <span className="stat-num">{metrics.words}</span>
+                <span className="stat-name">Words</span>
+              </div>
+              <div className="readability-stat">
+                <span className="stat-num">{metrics.sentences}</span>
+                <span className="stat-name">Sentences</span>
+              </div>
+              <div className="readability-stat">
+                <span className="stat-num">{metrics.syllables}</span>
+                <span className="stat-name">Syllables</span>
+              </div>
+              <div className="readability-stat">
+                <span className="stat-num">{metrics.readingTime}</span>
+                <span className="stat-name">Min Read</span>
+              </div>
+            </div>
+            
+            <div className="readability-grade">
+              <span className="grade-label">Grade Level:</span>
+              <span className="grade-value">{metrics.gradeLevel}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Content Calendar Mini-View
+function ContentCalendarView({ isOpen, onClose, articles }) {
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  
+  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate()
+  const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay()
+  
+  const scheduledArticles = useMemo(() => {
+    const map = {}
+    articles.forEach(a => {
+      const dateKey = a.date?.slice(0, 10)
+      if (dateKey) {
+        if (!map[dateKey]) map[dateKey] = []
+        map[dateKey].push(a)
+      }
+    })
+    return map
+  }, [articles])
+  
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content calendar-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📅 Content Calendar</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="calendar-nav">
+          <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}>←</button>
+          <span className="calendar-month">{monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}</span>
+          <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}>→</button>
+        </div>
+        
+        <div className="calendar-grid">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+            <div key={d} className="calendar-day-header">{d}</div>
+          ))}
+          
+          {Array(firstDay).fill(null).map((_, i) => (
+            <div key={`empty-${i}`} className="calendar-day empty" />
+          ))}
+          
+          {Array(daysInMonth).fill(null).map((_, i) => {
+            const day = i + 1
+            const dateKey = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+            const dayArticles = scheduledArticles[dateKey] || []
+            const isToday = new Date().toISOString().slice(0, 10) === dateKey
+            
+            return (
+              <div key={day} className={`calendar-day ${isToday ? 'today' : ''} ${dayArticles.length ? 'has-content' : ''}`}>
+                <span className="day-number">{day}</span>
+                {dayArticles.length > 0 && (
+                  <div className="day-dots">
+                    {dayArticles.slice(0, 3).map((a, j) => (
+                      <span key={j} className="day-dot" title={a.title} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Weekly Goals Tracker
+function WeeklyGoalsTracker({ isOpen, onClose }) {
+  const [goals, setGoals] = useState(() => {
+    const saved = localStorage.getItem('renzo-weekly-goals')
+    return saved ? JSON.parse(saved) : [
+      { id: 1, text: 'Write 3 articles', completed: false, target: 3, current: 0 },
+      { id: 2, text: 'Publish to Notion', completed: false, target: 3, current: 0 },
+      { id: 3, text: 'Research new topics', completed: false, target: 5, current: 0 },
+    ]
+  })
+  
+  const updateGoal = (id, field, value) => {
+    const updated = goals.map(g => g.id === id ? { ...g, [field]: value } : g)
+    setGoals(updated)
+    localStorage.setItem('renzo-weekly-goals', JSON.stringify(updated))
+  }
+  
+  const addGoal = () => {
+    const newGoal = { id: Date.now(), text: 'New goal', completed: false, target: 1, current: 0 }
+    setGoals([...goals, newGoal])
+    localStorage.setItem('renzo-weekly-goals', JSON.stringify([...goals, newGoal]))
+  }
+  
+  const deleteGoal = (id) => {
+    const updated = goals.filter(g => g.id !== id)
+    setGoals(updated)
+    localStorage.setItem('renzo-weekly-goals', JSON.stringify(updated))
+  }
+  
+  const progress = Math.round((goals.filter(g => g.completed).length / goals.length) * 100) || 0
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content goals-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🎯 Weekly Goals</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="goals-progress">
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${progress}%` }} />
+          </div>
+          <span className="progress-text">{progress}% Complete</span>
+        </div>
+        
+        <div className="goals-list">
+          {goals.map(goal => (
+            <div key={goal.id} className={`goal-item ${goal.completed ? 'completed' : ''}`}>
+              <input
+                type="checkbox"
+                checked={goal.completed}
+                onChange={(e) => updateGoal(goal.id, 'completed', e.target.checked)}
+              />
+              <input
+                type="text"
+                className="goal-text"
+                value={goal.text}
+                onChange={(e) => updateGoal(goal.id, 'text', e.target.value)}
+              />
+              <div className="goal-counter">
+                <button onClick={() => updateGoal(goal.id, 'current', Math.max(0, goal.current - 1))}>-</button>
+                <span>{goal.current}/{goal.target}</span>
+                <button onClick={() => updateGoal(goal.id, 'current', Math.min(goal.target, goal.current + 1))}>+</button>
+              </div>
+              <button className="goal-delete" onClick={() => deleteGoal(goal.id)}>×</button>
+            </div>
+          ))}
+        </div>
+        
+        <button className="goals-add" onClick={addGoal}>+ Add Goal</button>
+      </div>
+    </div>
+  )
+}
+
+// Trending Topics Quick Panel
+function TrendingTopics({ isOpen, onClose, onSelect }) {
+  const topics = [
+    { topic: 'Zone 2 Training', category: 'Cardio', heat: 95 },
+    { topic: 'Protein Timing Myths', category: 'Nutrition', heat: 88 },
+    { topic: 'Sleep Quality & Hypertrophy', category: 'Recovery', heat: 92 },
+    { topic: 'Creatine + Caffeine Stack', category: 'Supplements', heat: 78 },
+    { topic: 'Metabolic Damage Debate', category: 'Myths', heat: 85 },
+    { topic: 'HIIT vs Steady State', category: 'Cardio', heat: 72 },
+    { topic: 'Omega-3 & Inflammation', category: 'Nutrition', heat: 81 },
+    { topic: 'Muscle Memory Science', category: 'Science', heat: 90 },
+    { topic: 'Cortisol & Fat Loss', category: 'Recovery', heat: 76 },
+    { topic: 'Strength Standards by Age', category: 'Training', heat: 83 },
+  ]
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content trending-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🔥 Trending Topics</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="trending-list">
+          {topics.map((t, i) => (
+            <div key={i} className="trending-item" onClick={() => { onSelect?.(t.topic); onClose(); }}>
+              <div className="trending-rank">#{i + 1}</div>
+              <div className="trending-content">
+                <span className="trending-topic">{t.topic}</span>
+                <span className="trending-category">{t.category}</span>
+              </div>
+              <div className="trending-heat" style={{ 
+                background: `linear-gradient(90deg, #ef4444 ${t.heat}%, transparent ${t.heat}%)` 
+              }}>
+                {t.heat}° 
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== EXISTING FEATURES ==========
+
+// Research Queue - topics waiting to be written
 
 // Research Queue - topics waiting to be written
 function ResearchQueue({ isOpen, onClose, onSelect }) {
@@ -1228,15 +1532,32 @@ function ContentFormulaRef({ isOpen, onClose }) {
 // Keyboard Shortcuts Reference
 function KeyboardShortcuts({ isOpen, onClose }) {
   const shortcuts = [
-    { key: 'F', action: 'Open Content Formula' },
-    { key: 'G', action: 'Generate Topic' },
-    { key: 'C', action: 'Open Clipboard History' },
-    { key: 'K', action: 'Open Command Palette' },
-    { key: 'Q', action: 'Quick Write Mode' },
-    { key: 'S', action: 'Save Draft' },
-    { key: 'N', action: 'New Article' },
+    { key: '⌘K', action: 'Open Command Palette' },
+    { key: 'N/P', action: 'New Writing Prompt' },
+    { key: 'D', action: 'Quick Draft' },
+    { key: 'W', action: 'Quick Write' },
+    { key: 'S', action: 'Word Sprint' },
+    { key: 'M', action: 'Focus Mode' },
+    { key: 'F', action: 'Content Formula' },
+    { key: 'Y', action: 'Hot Take Generator' },
+    { key: 'V', action: 'Virality Calculator' },
+    { key: 'G', action: 'Topic Generator' },
+    { key: 'T', action: 'Templates' },
+    { key: 'X', action: 'Trending Topics' },
+    { key: 'A', action: 'Readability Analyzer' },
+    { key: 'K', action: 'Content Calendar' },
+    { key: 'J', action: 'Weekly Goals' },
+    { key: 'O', action: 'Research Queue' },
+    { key: 'U', action: 'Saved Hooks' },
+    { key: 'Z', action: 'Article Series' },
+    { key: 'I', action: 'Citation Manager' },
+    { key: 'C', action: 'Clipboard History' },
+    { key: 'B', action: 'Brainstorm Mode' },
+    { key: 'R', action: 'Reference Panel' },
+    { key: 'L', action: 'Changelog' },
+    { key: 'H', action: 'This Shortcuts List' },
+    { key: '/', action: 'Search Articles' },
     { key: 'Esc', action: 'Close Modal' },
-    { key: '⏱️', action: 'Start/Stop Timer (in modal)' },
   ]
   
   if (!isOpen) return null
@@ -1994,8 +2315,10 @@ function CommandPalette({ isOpen, onClose, onAction }) {
     { id: 'new', label: 'New Draft', icon: '📝', shortcut: 'D', category: 'Create' },
     { id: 'prompt', label: 'Random Prompt', icon: '💡', shortcut: 'P', category: 'Create' },
     { id: 'hottake', label: 'Hot Take Generator', icon: '🔥', shortcut: 'H', category: 'Create' },
-    { id: 'trends', label: 'View Trends', icon: '🔥', shortcut: 'T', category: 'Research' },
-    { id: 'analytics', label: 'Analytics', icon: '📊', shortcut: 'A', category: 'View' },
+    { id: 'trends', label: 'View Trends', icon: '🔥', shortcut: 'X', category: 'Research' },
+    { id: 'readability', label: 'Readability Analyzer', icon: '📊', shortcut: 'A', category: 'Tools' },
+    { id: 'calendar', label: 'Content Calendar', icon: '📅', shortcut: 'K', category: 'View' },
+    { id: 'goals', label: 'Weekly Goals', icon: '🎯', shortcut: 'J', category: 'Track' },
     { id: 'voice', label: 'Voice Brief', icon: '🎙️', shortcut: 'V', category: 'Tools' },
     { id: 'search', label: 'Search Articles', icon: '🔍', shortcut: '/', category: 'Search' },
     { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: '⌨️', shortcut: '?', category: 'Help' },
@@ -2718,6 +3041,10 @@ function App() {
   const [showWordSprint, setShowWordSprint] = useState(false)
   const [showArticleSeries, setShowArticleSeries] = useState(false)
   const [showCitationManager, setShowCitationManager] = useState(false)
+  const [showReadability, setShowReadability] = useState(false)
+  const [showCalendar, setShowCalendar] = useState(false)
+  const [showGoals, setShowGoals] = useState(false)
+  const [showTrending, setShowTrending] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -2859,6 +3186,10 @@ function App() {
       if (key === 'S' && !e.metaKey && !e.ctrlKey) setShowWordSprint(true)
       if (key === 'Z') setShowArticleSeries(true)
       if (key === 'I') setShowCitationManager(true)
+      if (key === 'A') setShowReadability(true)
+      if (key === 'K') setShowCalendar(true)
+      if (key === 'J') setShowGoals(true)
+      if (key === 'X') setShowTrending(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -2881,6 +3212,10 @@ function App() {
         setShowWordSprint(false)
         setShowArticleSeries(false)
         setShowCitationManager(false)
+        setShowReadability(false)
+        setShowCalendar(false)
+        setShowGoals(false)
+        setShowTrending(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -2903,7 +3238,16 @@ function App() {
         setShowHotTake(true)
         break
       case 'trends':
-        document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth' })
+        setShowTrending(true)
+        break
+      case 'readability':
+        setShowReadability(true)
+        break
+      case 'calendar':
+        setShowCalendar(true)
+        break
+      case 'goals':
+        setShowGoals(true)
         break
       case 'analytics':
         document.querySelector('.feed-section')?.scrollIntoView({ behavior: 'smooth' })
@@ -3089,6 +3433,26 @@ function App() {
       <CitationManager
         isOpen={showCitationManager}
         onClose={() => setShowCitationManager(false)}
+      />
+      <ReadabilityAnalyzer
+        isOpen={showReadability}
+        onClose={() => setShowReadability(false)}
+      />
+      <ContentCalendarView
+        isOpen={showCalendar}
+        onClose={() => setShowCalendar(false)}
+        articles={recentArticles}
+      />
+      <WeeklyGoalsTracker
+        isOpen={showGoals}
+        onClose={() => setShowGoals(false)}
+      />
+      <TrendingTopics
+        isOpen={showTrending}
+        onClose={() => setShowTrending(false)}
+        onSelect={(topic) => {
+          setShowQuickDraft(true)
+        }}
       />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
@@ -3610,7 +3974,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.9 • Press ⌘K for commands, H for shortcuts</p>
+        <p className="footer-version">v3.1 • Press ⌘K for commands, H for shortcuts</p>
       </footer>
     </div>
   )

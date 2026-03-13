@@ -37,27 +37,31 @@ A powerful writing dashboard for AI-powered fitness content creation. Built with
 
 | Key | Action |
 |-----|--------|
+| ⌘K | Command Palette |
 | N / P | New Prompt |
-| M | Focus Mode |
-| S | Word Sprint |
-| W | Quick Write |
 | D | Quick Draft |
+| W | Quick Write |
+| S | Word Sprint |
+| M | Focus Mode |
+| F | Content Formula |
 | Y | Hot Take |
 | V | Virality |
-| F | Formula |
 | G | Topic Generator |
-| C | Clipboard |
-| B | Brainstorm |
 | T | Templates |
-| E | Export |
-| L | Changelog |
-| R | Reference Panel |
+| X | Trending Topics |
+| A | Readability Analyzer |
+| K | Content Calendar |
+| J | Weekly Goals |
 | O | Research Queue |
 | U | Saved Hooks |
 | Z | Article Series |
+| I | Citation Manager |
+| C | Clipboard |
+| B | Brainstorm |
+| R | Reference Panel |
+| L | Changelog |
 | H | Shortcuts |
 | / | Search |
-| Cmd+K | Command Palette |
 | Esc | Close Modal |
 
 ## Tech Stack
@@ -95,6 +99,7 @@ src/
 
 ## Version History
 
+- **v3.1** (2026-03-13) - Readability Analyzer, Content Calendar, Weekly Goals, Trending Topics
 - **v3.0** (2026-03-12) - Word Sprint, Research Queue, Saved Hooks, Article Series
 - **v2.9** (2026-03-12) - Focus Mode, Writing Streak, Reference Panel
 - **v2.8** (2026-03-12) - Export, Reading Time, Word Goals
