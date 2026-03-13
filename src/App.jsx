@@ -1241,6 +1241,209 @@ function InspirationBoard({ isOpen, onClose }) {
   )
 }
 
+// ========== READING LIST (NEW v4.7) ==========
+function ReadingList({ isOpen, onClose }) {
+  const [items, setItems] = useState(() => {
+    const saved = localStorage.getItem('renzo-reading-list')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [newUrl, setNewUrl] = useState('')
+  const [newTitle, setNewTitle] = useState('')
+  const [filter, setFilter] = useState('all')
+  const [showAddForm, setShowAddForm] = useState(false)
+
+  const addItem = () => {
+    if (newUrl.trim()) {
+      const item = {
+        id: Date.now(),
+        url: newUrl,
+        title: newTitle || newUrl.slice(0, 50) + '...',
+        added: new Date().toISOString(),
+        read: false,
+        category: 'Research'
+      }
+      const updated = [item, ...items]
+      setItems(updated)
+      localStorage.setItem('renzo-reading-list', JSON.stringify(updated))
+      setNewUrl('')
+      setNewTitle('')
+      setShowAddForm(false)
+    }
+  }
+
+  const toggleRead = (id) => {
+    const updated = items.map(item => 
+      item.id === id ? { ...item, read: !item.read } : item
+    )
+    setItems(updated)
+    localStorage.setItem('renzo-reading-list', JSON.stringify(updated))
+  }
+
+  const deleteItem = (id) => {
+    const updated = items.filter(item => item.id !== id)
+    setItems(updated)
+    localStorage.setItem('renzo-reading-list', JSON.stringify(updated))
+  }
+
+  const openUrl = (url) => {
+    window.open(url, '_blank')
+  }
+
+  const filteredItems = filter === 'all' ? items : items.filter(item => item.read === (filter === 'read'))
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content reading-list-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📚 Reading List</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="reading-list-toolbar">
+          <div className="filter-tabs">
+            <button className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>All ({items.length})</button>
+            <button className={filter === 'unread' ? 'active' : ''} onClick={() => setFilter('unread')}>Unread ({items.filter(i => !i.read).length})</button>
+            <button className={filter === 'read' ? 'active' : ''} onClick={() => setFilter('read')}>Read ({items.filter(i => i.read).length})</button>
+          </div>
+          <button className="add-btn" onClick={() => setShowAddForm(!showAddForm)}>
+            {showAddForm ? '−' : '+'} Add URL
+          </button>
+        </div>
+
+        {showAddForm && (
+          <div className="add-url-form">
+            <input
+              type="text"
+              placeholder="URL (required)"
+              value={newUrl}
+              onChange={(e) => setNewUrl(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Title (optional)"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+            />
+            <button onClick={addItem}>Add to List</button>
+          </div>
+        )}
+
+        <div className="reading-list-items">
+          {filteredItems.length === 0 ? (
+            <div className="empty-state">
+              {items.length === 0 ? 'No URLs saved yet. Add some for research!' : 'All caught up!'}
+            </div>
+          ) : (
+            filteredItems.map(item => (
+              <div key={item.id} className={`reading-item ${item.read ? 'read' : ''}`}>
+                <div className="reading-item-content" onClick={() => openUrl(item.url)}>
+                  <span className="reading-item-title">{item.title}</span>
+                  <span className="reading-item-url">{item.url}</span>
+                </div>
+                <div className="reading-item-actions">
+                  <button onClick={() => toggleRead(item.id)} title={item.read ? 'Mark unread' : 'Mark read'}>
+                    {item.read ? '📖' : '○'}
+                  </button>
+                  <button onClick={() => openUrl(item.url)}>🔗</button>
+                  <button onClick={() => deleteItem(item.id)}>🗑️</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== QUICK AI PROMPT (NEW v4.7) ==========
+function QuickAIPrompt({ isOpen, onClose, onGenerate }) {
+  const [prompt, setPrompt] = useState('')
+  const [result, setResult] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem('renzo-ai-prompt-history')
+    return saved ? JSON.parse(saved) : []
+  })
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) return
+    setLoading(true)
+    setResult('')
+    
+    // Simulate AI generation (in real usage, this would call renzo CLI)
+    await new Promise(r => setTimeout(r, 1500))
+    
+    const generated = `[AI Response to: "${prompt.slice(0, 30)}..."]
+
+Here's a draft response based on your prompt:
+
+${prompt}
+
+This is a placeholder response. In production, this would connect to the renzo CLI or Notion API to generate actual content.
+
+Try using the Headline Generator (H) or Brief Generator (I) for specific content types.`
+    
+    setResult(generated)
+    const newHistory = [{ prompt, result: generated, time: new Date().toISOString() }, ...history].slice(0, 10)
+    setHistory(newHistory)
+    localStorage.setItem('renzo-ai-prompt-history', JSON.stringify(newHistory))
+    setLoading(false)
+  }
+
+  const copyResult = () => {
+    navigator.clipboard.writeText(result)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content ai-prompt-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🤖 Quick AI Prompt</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="ai-prompt-input">
+          <textarea
+            placeholder="Enter your prompt... (e.g., 'Write a hook about protein timing')"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            rows={3}
+          />
+          <button onClick={handleGenerate} disabled={loading || !prompt.trim()}>
+            {loading ? 'Generating...' : 'Generate'}
+          </button>
+        </div>
+
+        {result && (
+          <div className="ai-prompt-result">
+            <div className="result-header">
+              <span>Result</span>
+              <button onClick={copyResult}>📋 Copy</button>
+            </div>
+            <pre>{result}</pre>
+          </div>
+        )}
+
+        {history.length > 0 && (
+          <div className="ai-prompt-history">
+            <h4>Recent Prompts</h4>
+            {history.slice(0, 5).map((item, i) => (
+              <div key={i} className="history-item" onClick={() => setPrompt(item.prompt)}>
+                <span className="history-prompt">{item.prompt.slice(0, 50)}...</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Word Sprint - Quick 15-min timed writing
 function WordSprint({ isOpen, onClose, onSave }) {
   const [content, setContent] = useState('')
@@ -5989,6 +6192,10 @@ function App() {
   // NEW v4.5 features
   const [showInspirationBoard, setShowInspirationBoard] = useState(false)
   
+  // NEW v4.7 features
+  const [showReadingList, setShowReadingList] = useState(false)
+  const [showQuickAIPrompt, setShowQuickAIPrompt] = useState(false)
+  
   const [appSettings, setAppSettings] = useState(() => {
     const saved = localStorage.getItem('renzo-app-settings')
     return saved ? JSON.parse(saved) : {
@@ -6228,6 +6435,8 @@ function App() {
       if (key === '7') setShowPerformanceTracker(true)  // 7 for Performance Tracker
       if (key === '8') setShowDraftCollections(true)  // 8 for Draft Collections
       if (key === '9') setShowInspirationBoard(true)  // 9 for Inspiration Board
+      if (key === '0') setShowReadingList(true)  // 0 for Reading List
+      if (key === '`') setShowQuickAIPrompt(true)  // ` for Quick AI Prompt
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -6261,6 +6470,8 @@ function App() {
         setShowSEOScore(false)
         setShowCitationFormatter(false)
         setShowInspirationBoard(false)
+        setShowReadingList(false)
+        setShowQuickAIPrompt(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -6566,6 +6777,14 @@ function App() {
       <InspirationBoard
         isOpen={showInspirationBoard}
         onClose={() => setShowInspirationBoard(false)}
+      />
+      <ReadingList
+        isOpen={showReadingList}
+        onClose={() => setShowReadingList(false)}
+      />
+      <QuickAIPrompt
+        isOpen={showQuickAIPrompt}
+        onClose={() => setShowQuickAIPrompt(false)}
       />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
@@ -6886,6 +7105,16 @@ function App() {
             <span>🎨</span>
             <span>Inspire</span>
             <span className="feature-hint">9</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowReadingList(true)}>
+            <span>📚</span>
+            <span>Reading</span>
+            <span className="feature-hint">0</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowQuickAIPrompt(true)}>
+            <span>🤖</span>
+            <span>AI Prompt</span>
+            <span className="feature-hint">`</span>
           </button>
         </section>
 

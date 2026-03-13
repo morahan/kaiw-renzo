@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.7.0] — March 13, 2026
+
+### Added
+
+#### Reading List (Key 0)
+- Save URLs for research with optional titles
+- Filter by read/unread status
+- Mark items as read/unread
+- One-click open in new tab
+- Persistent storage with localStorage
+
+#### Quick AI Prompt (Key `)
+- Text input for custom prompts
+- Simulated AI response generation
+- Prompt history (last 10)
+- Copy result to clipboard
+- Quick access to recent prompts
+
+### Improvements
+- Updated version badge to v4.7
+- Added new feature buttons in the feature row
+
 ## [4.6.0] — March 13, 2026
 
 ### Added
