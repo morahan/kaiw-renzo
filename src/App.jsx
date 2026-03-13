@@ -777,6 +777,14 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '3.7', date: '2026-03-13', changes: [
+      'Added Quick Mood Indicator in header - see your current mood at a glance',
+      'Added smooth fade-in and slide animations throughout the UI',
+      'Enhanced header with gradient glow effects and better visual hierarchy',
+      'Added responsive design improvements for mobile',
+      'Added animation utility classes for consistent motion design',
+      'Updated version badge to v3.7'
+    ]},
     { version: '3.6', date: '2026-03-13', changes: [
       'Fixed keyboard shortcut conflict (H was assigned to both Shortcuts and Headline Gen)',
       'Added Daily Word Goal widget in header - track progress toward daily target',
@@ -4022,6 +4030,16 @@ function App() {
   const [drafts, setDrafts] = useState([])
   const [showHotTake, setShowHotTake] = useState(false)
   const [energyLevel, setEnergyLevel] = useState(80)
+  
+  // Mood state for quick indicator
+  const [mood, setMood] = useState(() => localStorage.getItem('renzo-mood') || 'neutral')
+  const moods = [
+    { id: 'fired', emoji: '🔥', label: 'Fired Up' },
+    { id: 'focused', emoji: '🎯', label: 'Focused' },
+    { id: 'neutral', emoji: '😐', label: 'Neutral' },
+    { id: 'tired', emoji: '😴', label: 'Tired' },
+    { id: 'blocked', emoji: '🚧', label: 'Blocked' },
+  ]
   const [wordsWritten, setWordsWritten] = useState(0)
   const [showQuickWrite, setShowQuickWrite] = useState(false)
   const [todayWordCount, setTodayWordCount] = useState(() => {
@@ -4613,7 +4631,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v3.6</span>
+          <span className="logo-badge">v3.7</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -4627,6 +4645,21 @@ function App() {
             </div>
             <span className="goal-count">{wordsWritten}/{dailyWordGoal}</span>
           </div>
+          
+          {/* Quick Mood Indicator */}
+          <div 
+            className="mood-indicator" 
+            onClick={() => setShowMoodTracker(true)}
+            title="Click to change mood"
+          >
+            <span className="mood-emoji">
+              {moods.find(m => m.id === mood)?.emoji || '😐'}
+            </span>
+            <span className="mood-text">
+              {moods.find(m => m.id === mood)?.label || 'Neutral'}
+            </span>
+          </div>
+          
           <ThemeToggle isDark={isDarkMode} onToggle={toggleTheme} />
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
           <button 
