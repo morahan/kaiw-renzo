@@ -113,6 +113,194 @@
   font-size: 0.9rem;
 }
 
+/* ========== CONTENT IDEAS BANK ========== */
+.ideas-modal {
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.ideas-form {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ideas-input-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.ideas-title-input {
+  flex: 1;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.ideas-title-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ideas-category-select {
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  min-width: 140px;
+}
+
+.ideas-angle-input {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  resize: none;
+  margin-bottom: 0.75rem;
+}
+
+.ideas-angle-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ideas-save-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.ideas-save-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.ideas-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ideas-filter {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ideas-filter .filter-btn {
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ideas-filter .filter-btn:hover {
+  border-color: var(--accent);
+}
+
+.ideas-filter .filter-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.ideas-list {
+  padding: 1rem;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.ideas-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+}
+
+.idea-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: all var(--transition-fast);
+}
+
+.idea-card:hover {
+  border-color: var(--border-hover);
+}
+
+.idea-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.idea-category {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.idea-date {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.idea-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.idea-angle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 0.75rem;
+}
+
+.idea-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.idea-actions button {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.idea-actions button:hover {
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+}
+
 /* ========== SEO SCORE CALCULATOR ========== */
 .seo-modal {
   width: 90%;

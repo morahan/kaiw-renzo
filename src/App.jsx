@@ -65,6 +65,109 @@ function QuickCapture({ isOpen, onClose, onSave }) {
   )
 }
 
+// Content Ideas Bank - Save and organize content ideas for future articles
+function ContentIdeasBank({ isOpen, onClose, ideas, onSave, onDelete, onMoveToDraft }) {
+  const [title, setTitle] = useState('')
+  const [category, setCategory] = useState('Trending')
+  const [angle, setAngle] = useState('')
+  const [filter, setFilter] = useState('all')
+  const inputRef = useRef(null)
+
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isOpen])
+
+  const handleSave = () => {
+    if (title.trim()) {
+      onSave?.({ title: title.trim(), category, angle: angle.trim() })
+      setTitle('')
+      setAngle('')
+    }
+  }
+
+  const filteredIdeas = filter === 'all' ? ideas : ideas.filter(i => i.category === filter)
+
+  const getCategoryColor = (cat) => {
+    const colors = { 'Trending': '#f97316', 'Myth-bust': '#dc2626', 'How-to': '#22c55e', 'Science': '#3b82f6', 'Listicle': '#a855f7' }
+    return colors[cat] || '#a1a1aa'
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content ideas-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>💡 Content Ideas Bank</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="ideas-form">
+          <div className="ideas-input-row">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="New content idea..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="ideas-title-input"
+            />
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="ideas-category-select">
+              <option value="Trending">🔥 Trending</option>
+              <option value="Myth-bust">💥 Myth-bust</option>
+              <option value="How-to">⚙️ How-to</option>
+              <option value="Science">🔬 Science</option>
+              <option value="Listicle">📋 Listicle</option>
+            </select>
+          </div>
+          <textarea
+            placeholder="Angle or hook idea..."
+            value={angle}
+            onChange={(e) => setAngle(e.target.value)}
+            rows={2}
+            className="ideas-angle-input"
+          />
+          <button className="ideas-save-btn" onClick={handleSave} disabled={!title.trim()}>
+            Add to Bank
+          </button>
+        </div>
+
+        <div className="ideas-filter">
+          <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All ({ideas.length})</button>
+          {['Trending', 'Myth-bust', 'How-to', 'Science', 'Listicle'].map(cat => (
+            <button key={cat} className={`filter-btn ${filter === cat ? 'active' : ''}`} onClick={() => setFilter(cat)}>
+              {cat} ({ideas.filter(i => i.category === cat).length})
+            </button>
+          ))}
+        </div>
+
+        <div className="ideas-list">
+          {filteredIdeas.length === 0 ? (
+            <div className="ideas-empty">No ideas yet. Add your first one above!</div>
+          ) : (
+            filteredIdeas.map(idea => (
+              <div key={idea.id} className="idea-card">
+                <div className="idea-header">
+                  <span className="idea-category" style={{ color: getCategoryColor(idea.category) }}>{idea.category}</span>
+                  <span className="idea-date">{new Date(idea.date).toLocaleDateString()}</span>
+                </div>
+                <div className="idea-title">{idea.title}</div>
+                {idea.angle && <div className="idea-angle">"{idea.angle}"</div>}
+                <div className="idea-actions">
+                  <button onClick={() => onMoveToDraft?.(idea.id)}>📝 Draft</button>
+                  <button onClick={() => onDelete?.(idea.id)}>🗑️</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Session Stats - Today's writing session summary
 function SessionStats() {
   const [stats, setStats] = useState(() => ({
@@ -675,6 +778,7 @@ const tips = [
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
     { version: '3.4', date: '2026-03-13', changes: [
+      'Added Content Ideas Bank - Save and organize content ideas for future articles (A key)',
       'Added Writing Mood Tracker - Track your creative energy states',
       'Added Category Performance chart - Visual breakdown by content category',
       'Added SEO Score Calculator - Check article SEO potential',
@@ -2697,6 +2801,7 @@ function CommandPalette({ isOpen, onClose, onAction }) {
 
   const commands = [
     { id: 'new', label: 'New Draft', icon: '📝', shortcut: 'D', category: 'Create' },
+    { id: 'ideas', label: 'Content Ideas Bank', icon: '💡', shortcut: 'A', category: 'Create' },
     { id: 'prompt', label: 'Random Prompt', icon: '💡', shortcut: 'P', category: 'Create' },
     { id: 'hottake', label: 'Hot Take Generator', icon: '🔥', shortcut: 'H', category: 'Create' },
     { id: 'trends', label: 'View Trends', icon: '🔥', shortcut: 'T', category: 'Research' },
@@ -3930,6 +4035,12 @@ function App() {
   const [showReferencePanel, setShowReferencePanel] = useState(false)
   const [showResearchQueue, setShowResearchQueue] = useState(false)
   const [showQuickCapture, setShowQuickCapture] = useState(false)
+  const [contentIdeas, setContentIdeas] = useState(() => {
+    const saved = localStorage.getItem('renzo-content-ideas')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [newIdea, setNewIdea] = useState({ title: '', category: 'Trending', angle: '' })
+  const [showIdeasBank, setShowIdeasBank] = useState(false)
   const [quickNotes, setQuickNotes] = useState(() => {
     const saved = localStorage.getItem('renzo-quick-notes')
     return saved ? JSON.parse(saved) : []
@@ -4018,6 +4129,41 @@ function App() {
     addToast('Note captured!', 'success')
   }
 
+  // Content Ideas Bank functions
+  const saveContentIdea = (idea) => {
+    const newIdeas = [{ ...idea, id: Date.now(), date: new Date().toISOString(), status: 'pending' }, ...contentIdeas]
+    setContentIdeas(newIdeas)
+    localStorage.setItem('renzo-content-ideas', JSON.stringify(newIdeas))
+    addActivity('prompt', `New idea: ${idea.title.slice(0, 30)}`)
+    addToast('Idea saved to bank!', 'success')
+  }
+
+  const deleteIdea = (id) => {
+    const updated = contentIdeas.filter(i => i.id !== id)
+    setContentIdeas(updated)
+    localStorage.setItem('renzo-content-ideas', JSON.stringify(updated))
+  }
+
+  const moveIdeaToDraft = (id) => {
+    const idea = contentIdeas.find(i => i.id === id)
+    if (idea) {
+      const draft = {
+        title: idea.title,
+        hook: idea.angle,
+        category: idea.category,
+        date: new Date().toISOString()
+      }
+      saveDraft(draft)
+      deleteIdea(id)
+      addToast('Moved to drafts!', 'success')
+    }
+  }
+
+  const getIdeaCategoryColor = (cat) => {
+    const colors = { 'Trending': '#f97316', 'Myth-bust': '#dc2626', 'How-to': '#22c55e', 'Science': '#3b82f6', 'Listicle': '#a855f7' }
+    return colors[cat] || '#a1a1aa'
+  }
+
   // Toggle theme
   const toggleTheme = () => {
     const newTheme = !isDarkMode
@@ -4091,6 +4237,7 @@ function App() {
       if (key === 'L') setShowChangelog(true)
       if (key === 'M') setShowFocusMode(true)
       if (key === 'I') setShowBriefGen(true)
+      if (key === 'A') setShowIdeasBank(true)
       if (key === 'R') setShowReferencePanel(true)
       if (key === 'O') setShowResearchQueue(true)
       if (key === 'U') setShowSavedHooks(true)
@@ -4139,6 +4286,10 @@ function App() {
     switch(actionId) {
       case 'new':
         setShowQuickWrite(true)
+        break
+      case 'ideas':
+        setShowIdeasBank(true)
+        addActivity('prompt', 'Opened Content Ideas Bank')
         break
       case 'prompt':
         setShowPrompt(true)
@@ -4412,6 +4563,14 @@ function App() {
         isOpen={showQuickCapture} 
         onClose={() => setShowQuickCapture(false)}
         onSave={saveQuickNote}
+      />
+      <ContentIdeasBank
+        isOpen={showIdeasBank}
+        onClose={() => setShowIdeasBank(false)}
+        ideas={contentIdeas}
+        onSave={saveContentIdea}
+        onDelete={deleteIdea}
+        onMoveToDraft={moveIdeaToDraft}
       />
       <CommandPalette 
         isOpen={showCommandPalette} 
@@ -4965,7 +5124,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.9 • Press ⌘K for commands, H for shortcuts</p>
+        <p className="footer-version">v3.4 • Press ⌘K for commands, H for shortcuts</p>
       </footer>
     </div>
   )
