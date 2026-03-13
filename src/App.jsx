@@ -1,11 +1,376 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import './App.css'
 
-// ========== NEW FEATURES ==========
+// ========== NEW FEATURES v3.0 ==========
+
+// Research Queue - topics waiting to be written
+function ResearchQueue({ isOpen, onClose, onSelect }) {
+  const [queue, setQueue] = useState(() => {
+    const saved = localStorage.getItem('renzo-research-queue')
+    return saved ? JSON.parse(saved) : [
+      { id: 1, topic: "Photobiomodulation therapy", priority: "high", notes: "Red light therapy research", date: "2026-03-10" },
+      { id: 2, topic: "Epigenetic age reversal protocols", priority: "medium", notes: "Look into TruAge data", date: "2026-03-08" },
+      { id: 3, topic: "Myostatin inhibition research", priority: "low", notes: "Future of muscle growth", date: "2026-03-05" },
+    ]
+  })
+  const [newTopic, setNewTopic] = useState({ topic: '', priority: 'medium', notes: '' })
+  
+  const addToQueue = () => {
+    if (newTopic.topic) {
+      const updated = [{ ...newTopic, id: Date.now(), date: new Date().toISOString() }, ...queue]
+      setQueue(updated)
+      localStorage.setItem('renzo-research-queue', JSON.stringify(updated))
+      setNewTopic({ topic: '', priority: 'medium', notes: '' })
+    }
+  }
+  
+  const removeFromQueue = (id) => {
+    const updated = queue.filter(q => q.id !== id)
+    setQueue(updated)
+    localStorage.setItem('renzo-research-queue', JSON.stringify(updated))
+  }
+  
+  const getPriorityColor = (p) => {
+    if (p === 'high') return '#ef4444'
+    if (p === 'medium') return '#f97316'
+    return '#22c55e'
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content research-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🔬 Research Queue</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="research-add">
+          <input
+            type="text"
+            placeholder="Topic to research..."
+            value={newTopic.topic}
+            onChange={(e) => setNewTopic({...newTopic, topic: e.target.value})}
+          />
+          <select 
+            value={newTopic.priority}
+            onChange={(e) => setNewTopic({...newTopic, priority: e.target.value})}
+          >
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+          <button onClick={addToQueue}>Add</button>
+        </div>
+        
+        <div className="research-list">
+          {queue.length === 0 ? (
+            <div className="research-empty">Queue is empty! Add topics to research.</div>
+          ) : (
+            queue.map(item => (
+              <div key={item.id} className="research-item">
+                <div className="research-priority" style={{ background: getPriorityColor(item.priority) }}>
+                  {item.priority.charAt(0).toUpperCase()}
+                </div>
+                <div className="research-content" onClick={() => { onSelect?.(item); onClose(); }}>
+                  <div className="research-topic">{item.topic}</div>
+                  {item.notes && <div className="research-notes">{item.notes}</div>}
+                </div>
+                <button className="research-remove" onClick={() => removeFromQueue(item.id)}>×</button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Saved Hooks Collection
+function SavedHooks({ isOpen, onClose }) {
+  const [hooks, setHooks] = useState(() => {
+    const saved = localStorage.getItem('renzo-saved-hooks')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [newHook, setNewHook] = useState('')
+  
+  const addHook = () => {
+    if (newHook.trim()) {
+      const updated = [{ text: newHook.trim(), date: new Date().toISOString(), used: false }, ...hooks]
+      setHooks(updated)
+      localStorage.setItem('renzo-saved-hooks', JSON.stringify(updated))
+      setNewHook('')
+    }
+  }
+  
+  const markAsUsed = (index) => {
+    const updated = [...hooks]
+    updated[index].used = !updated[index].used
+    setHooks(updated)
+    localStorage.setItem('renzo-saved-hooks', JSON.stringify(updated))
+  }
+  
+  const deleteHook = (index) => {
+    const updated = hooks.filter((_, i) => i !== index)
+    setHooks(updated)
+    localStorage.setItem('renzo-saved-hooks', JSON.stringify(updated))
+  }
+  
+  const copyHook = (text) => {
+    navigator.clipboard.writeText(text)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content hooks-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>⚡ Saved Hooks</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="hooks-add">
+          <input
+            type="text"
+            placeholder="Write a killer hook..."
+            value={newHook}
+            onChange={(e) => setNewHook(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addHook()}
+          />
+          <button onClick={addHook} disabled={!newHook.trim()}>Save</button>
+        </div>
+        
+        <div className="hooks-list">
+          {hooks.length === 0 ? (
+            <div className="hooks-empty">
+              <span>⚡</span>
+              <p>No saved hooks yet. Start collecting your best opening lines!</p>
+            </div>
+          ) : (
+            hooks.map((hook, i) => (
+              <div key={i} className={`hook-item ${hook.used ? 'used' : ''}`}>
+                <p className="hook-text" onClick={() => copyHook(hook.text)}>"{hook.text}"</p>
+                <div className="hook-actions">
+                  <button 
+                    className={`hook-use-btn ${hook.used ? 'active' : ''}`}
+                    onClick={() => markAsUsed(i)}
+                  >
+                    {hook.used ? '✓ Used' : 'Mark Used'}
+                  </button>
+                  <button className="hook-copy" onClick={() => copyHook(hook.text)}>📋</button>
+                  <button className="hook-delete" onClick={() => deleteHook(i)}>🗑️</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Word Sprint - Quick 15-min timed writing
+function WordSprint({ isOpen, onClose, onSave }) {
+  const [content, setContent] = useState('')
+  const [timeLeft, setTimeLeft] = useState(15 * 60) // 15 minutes
+  const [isRunning, setIsRunning] = useState(false)
+  const [sprintWords, setSprintWords] = useState(0)
+  
+  useEffect(() => {
+    let interval
+    if (isRunning && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft(t => t - 1)
+      }, 1000)
+    } else if (timeLeft === 0 && isRunning) {
+      setIsRunning(false)
+    }
+    return () => clearInterval(interval)
+  }, [isRunning, timeLeft])
+  
+  useEffect(() => {
+    const words = content.trim().split(/\s+/).filter(w => w).length
+    setSprintWords(words)
+  }, [content])
+  
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
+  }
+  
+  const handleSave = () => {
+    if (content.trim()) {
+      onSave?.({ title: `Sprint - ${new Date().toLocaleTimeString()}`, content, words: sprintWords, date: new Date().toISOString() })
+      setContent('')
+      setTimeLeft(15 * 60)
+      onClose()
+    }
+  }
+  
+  const resetSprint = () => {
+    setIsRunning(false)
+    setTimeLeft(15 * 60)
+    setContent('')
+  }
+  
+  if (!isOpen) return null
+  
+  const progress = ((15 * 60) - timeLeft) / (15 * 60) * 100
+  
+  return (
+    <div className="sprint-overlay">
+      <div className="sprint-container">
+        <div className="sprint-header">
+          <div className="sprint-timer">
+            <span className={`sprint-time ${timeLeft < 60 ? 'warning' : ''}`}>{formatTime(timeLeft)}</span>
+            <div className="sprint-progress-bar">
+              <div className="sprint-progress-fill" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+          <div className="sprint-controls">
+            <button className="sprint-btn primary" onClick={() => setIsRunning(!isRunning)}>
+              {isRunning ? 'Pause' : timeLeft === 15 * 60 ? 'Start Sprint' : 'Resume'}
+            </button>
+            <button className="sprint-btn" onClick={resetSprint}>Reset</button>
+            <button className="sprint-btn" onClick={onClose}>Exit</button>
+          </div>
+        </div>
+        
+        <div className="sprint-stats">
+          <div className="sprint-stat">
+            <span className="sprint-stat-value">{sprintWords}</span>
+            <span className="sprint-stat-label">words</span>
+          </div>
+          <div className="sprint-stat">
+            <span className="sprint-stat-value">{Math.max(0, Math.round((sprintWords / ((15 * 60 - timeLeft) || 1)) * 60))}</span>
+            <span className="sprint-stat-label">WPM</span>
+          </div>
+          <div className="sprint-stat">
+            <span className="sprint-stat-value">{timeLeft < 60 ? '🔴' : timeLeft < 180 ? '🟡' : '🟢'}</span>
+            <span className="sprint-stat-label">energy</span>
+          </div>
+        </div>
+        
+        <textarea
+          className="sprint-textarea"
+          placeholder="Go! Write your heart out..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          disabled={!isRunning && timeLeft === 15 * 60}
+        />
+        
+        <div className="sprint-footer">
+          <button className="sprint-save" onClick={handleSave} disabled={!content.trim()}>
+            Save Sprint ({sprintWords} words)
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Article Series Tracker
+function ArticleSeriesTracker({ isOpen, onClose }) {
+  const [series, setSeries] = useState(() => {
+    const saved = localStorage.getItem('renzo-article-series')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [newSeries, setNewSeries] = useState({ title: '', articles: [], expanded: false })
+  
+  const addSeries = () => {
+    if (newSeries.title) {
+      const updated = [...series, { ...newSeries, id: Date.now(), created: new Date().toISOString() }]
+      setSeries(updated)
+      localStorage.setItem('renzo-article-series', JSON.stringify(updated))
+      setNewSeries({ title: '', articles: [], expanded: false })
+    }
+  }
+  
+  const deleteSeries = (id) => {
+    const updated = series.filter(s => s.id !== id)
+    setSeries(updated)
+    localStorage.setItem('renzo-article-series', JSON.stringify(updated))
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content series-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📚 Article Series</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="series-add">
+          <input
+            type="text"
+            placeholder="New series title..."
+            value={newSeries.title}
+            onChange={(e) => setNewSeries({...newSeries, title: e.target.value})}
+          />
+          <button onClick={addSeries}>Create Series</button>
+        </div>
+        
+        <div className="series-list">
+          {series.length === 0 ? (
+            <div className="series-empty">
+              <span>📚</span>
+              <p>No article series yet. Group related articles together!</p>
+            </div>
+          ) : (
+            series.map(s => (
+              <div key={s.id} className="series-item">
+                <div className="series-header">
+                  <span className="series-title">{s.title}</span>
+                  <span className="series-count">{s.articles.length} articles</span>
+                  <button className="series-delete" onClick={() => deleteSeries(s.id)}>×</button>
+                </div>
+                <div className="series-progress">
+                  <div 
+                    className="series-progress-fill"
+                    style={{ width: `${(s.articles.filter(a => a.status === 'published').length / Math.max(s.articles.length, 1)) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Extended tips for v3.0
+const tips = [
+  "Paradox Open hooks convert 3x better than questions",
+  "Myth-busting articles hit 10/10 virality",
+  "First sentence must work as a standalone tweet",
+  "Specific mechanisms beat generic advice",
+  "Lead with the controversial take, then back it up",
+  "The Stats Punch formula: Lead with the number",
+  "Expansion Bridge: add detail after impact",
+  "Cut adjectives. Cut adverbs. Cut weak words.",
+  "Your CTA should tie directly back to your hook",
+  "If bores you, it bores them. Cut it.",
+  "The best headlines answer a question the reader didn't know they had",
+  "Always challenge assumptions — that's where the clicks live",
+]
 
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '3.0', date: '2026-03-12', changes: [
+      'Added Word Sprint - Quick 15-min timed writing sessions',
+      'Added Research Queue - Track topics needing research',
+      'Added Saved Hooks - Collect your best opening lines',
+      'Added Article Series Tracker - Group related articles',
+      'Added 7 new writing tips',
+      'Performance improvements and bug fixes'
+    ]},
     { version: '2.9', date: '2026-03-12', changes: [
       'Added Focus Mode (M) - Full-screen distraction-free writing',
       'Added Writing Streak Calendar - Visual 28-day activity tracker',
@@ -1827,14 +2192,6 @@ const categoryColors = {
   "Recovery": "#ec4899"
 }
 
-const tips = [
-  "Paradox Open hooks convert 3x better than questions",
-  "Myth-busting articles hit 10/10 virality",
-  "First sentence must work as a standalone tweet",
-  "Specific mechanisms beat generic advice",
-  "Lead with the controversial take, then back it up"
-]
-
 const quickActions = [
   { label: "New Draft", icon: "📝", action: "new", shortcut: "D" },
   { label: "Templates", icon: "📋", action: "templates", shortcut: "T" },
@@ -1985,6 +2342,10 @@ function App() {
   const [showTemplates, setShowTemplates] = useState(false)
   const [showFocusMode, setShowFocusMode] = useState(false)
   const [showReferencePanel, setShowReferencePanel] = useState(false)
+  const [showResearchQueue, setShowResearchQueue] = useState(false)
+  const [showSavedHooks, setShowSavedHooks] = useState(false)
+  const [showWordSprint, setShowWordSprint] = useState(false)
+  const [showArticleSeries, setShowArticleSeries] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -2107,6 +2468,10 @@ function App() {
       if (key === 'L') setShowChangelog(true)
       if (key === 'M') setShowFocusMode(true)
       if (key === 'R') setShowReferencePanel(true)
+      if (key === 'O') setShowResearchQueue(true)
+      if (key === 'U') setShowSavedHooks(true)
+      if (key === 'S' && !e.metaKey && !e.ctrlKey) setShowWordSprint(true)
+      if (key === 'Z') setShowArticleSeries(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -2124,6 +2489,10 @@ function App() {
         setShowTemplates(false)
         setShowFocusMode(false)
         setShowReferencePanel(false)
+        setShowResearchQueue(false)
+        setShowSavedHooks(false)
+        setShowWordSprint(false)
+        setShowArticleSeries(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -2309,6 +2678,26 @@ function App() {
           onClose={() => setShowReferencePanel(false)}
         />
       )}
+      {showResearchQueue && (
+        <ResearchQueue 
+          isOpen={showResearchQueue} 
+          onClose={() => setShowResearchQueue(false)}
+          onSelect={(item) => addToast(`Selected: ${item.topic}`, 'info')}
+        />
+      )}
+      <SavedHooks 
+        isOpen={showSavedHooks} 
+        onClose={() => setShowSavedHooks(false)}
+      />
+      <WordSprint 
+        isOpen={showWordSprint} 
+        onClose={() => setShowWordSprint(false)}
+        onSave={saveQuickWrite}
+      />
+      <ArticleSeriesTracker 
+        isOpen={showArticleSeries} 
+        onClose={() => setShowArticleSeries(false)}
+      />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
@@ -2397,7 +2786,7 @@ function App() {
           <StudySpotlight />
           <QuickStatGenerator />
           <WritingTimer onComplete={() => addToast('Session complete! Take a break ☕', 'success')} />
-          <WritingStreakCalendar streak={metrics.currentStreak} articles={articles} />
+          <WritingStreakCalendar streak={metrics.currentStreak} articles={recentArticles} />
         </section>
         
         <section className="feature-buttons-row">
@@ -2435,6 +2824,26 @@ function App() {
             <span>📜</span>
             <span>Changelog</span>
             <span className="feature-hint">L</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowWordSprint(true)}>
+            <span>⚡</span>
+            <span>Sprint</span>
+            <span className="feature-hint">S</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowResearchQueue(true)}>
+            <span>🔬</span>
+            <span>Research</span>
+            <span className="feature-hint">O</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowSavedHooks(true)}>
+            <span>⚡</span>
+            <span>Hooks</span>
+            <span className="feature-hint">U</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowArticleSeries(true)}>
+            <span>📚</span>
+            <span>Series</span>
+            <span className="feature-hint">Z</span>
           </button>
         </section>
 
