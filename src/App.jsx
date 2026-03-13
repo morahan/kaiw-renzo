@@ -673,6 +673,13 @@ const tips = [
   "Vary sentence length. 1-sentence paragraphs = punch. 3-line paragraphs = nuance.",
   "Your reader's time is more valuable than your prose",
   "If you can cut it and still make the point — cut it",
+  "The 'You' factor: use second person to make it personal",
+  "Numbers in headlines boost click-through by 36%",
+  "Questions in headlines increase engagement by 25%",
+  "Write 80% of your first draft in half the time, then polish",
+  "Start writing from the middle — the hook writes itself last",
+  "Save your best stat for the last paragraph before CTA",
+  "The 'But wait — there's more' structure creates anticipation",
 ]
 
 // Changelog Modal - Version history
@@ -2868,6 +2875,265 @@ const categoryColors = {
   "Recovery": "#ec4899"
 }
 
+// ========== NEW: Title Generator ==========
+function TitleGenerator({ isOpen, onClose }) {
+  const [generated, setGenerated] = useState([])
+  const [generating, setGenerating] = useState(false)
+  
+  const generateTitles = () => {
+    setGenerating(true)
+    setTimeout(() => {
+      const templates = [
+        "The {topic} Secret Nobody Tells You",
+        "Why {topic} Is Killing Your Progress (And What Works)",
+        "{topic}: The Science Behind the Hype",
+        "Why Your {topic} Routine Isn't Working",
+        "The Ultimate {topic} Guide for 2026",
+        "{topic} vs {topic2}: What the Research Says",
+        "How to Optimize {topic} for Maximum Results",
+        "The {topic} Mistake Everyone Makes",
+        "5 {topic} Myths That Need to Die",
+        "Why I Changed My {topic} Approach (And Why You Should Too)",
+      ]
+      const topics = ["Zone 2 Training", "Protein Timing", "Sleep Quality", "Creatine", "Muscle Growth", "Fat Loss", "Recovery", "Strength", "Hypertrophy", "Metabolism"]
+      const newTitles = []
+      for (let i = 0; i < 5; i++) {
+        let t = templates[Math.floor(Math.random() * templates.length)]
+        const topic1 = topics[Math.floor(Math.random() * topics.length)]
+        const topic2 = topics[Math.floor(Math.random() * topics.length)]
+        t = t.replace('{topic}', topic1).replace('{topic2}', topic2)
+        newTitles.push({ title: t, category: topic1 })
+      }
+      setGenerated(newTitles)
+      setGenerating(false)
+    }, 800)
+  }
+  
+  const copyTitle = (title) => {
+    navigator.clipboard.writeText(title)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content title-gen-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>✏️ Title Generator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="title-gen-content">
+          {generated.length === 0 ? (
+            <div className="title-gen-placeholder">
+              <span>✏️</span>
+              <p>Generate catchy article titles instantly</p>
+            </div>
+          ) : (
+            <div className="title-gen-list">
+              {generated.map((item, i) => (
+                <div key={i} className="title-gen-item">
+                  <span className="title-gen-category" style={{ color: categoryColors[item.category] || '#a855f7' }}>
+                    {item.category}
+                  </span>
+                  <div className="title-gen-text" onClick={() => copyTitle(item.title)}>
+                    {item.title}
+                  </div>
+                  <button className="title-gen-copy" onClick={() => copyTitle(item.title)}>📋</button>
+                </div>
+              ))}
+            </div>
+          )}
+          <button 
+            className={`generate-btn ${generating ? 'loading' : ''}`}
+            onClick={generateTitles}
+            disabled={generating}
+          >
+            {generating ? 'Generating...' : '✏️ Generate Titles'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== NEW: Quick Snippets Manager ==========
+function QuickSnippets({ isOpen, onClose, onInsert }) {
+  const [snippets, setSnippets] = useState(() => {
+    const saved = localStorage.getItem('renzo-snippets')
+    return saved ? JSON.parse(saved) : [
+      { id: 1, name: "CTA Template", text: "Start implementing this tonight. Your body will thank you in 30 days.", category: "CTA" },
+      { id: 2, name: "Hook - Stat", text: "73% of people quit their fitness routine within 6 months. Here's why — and how to beat the odds.", category: "Hook" },
+      { id: 3, name: "Science Lead", text: "A 2024 meta-analysis published in the Journal of Sports Sciences found that...", category: "Science" },
+    ]
+  })
+  const [newSnippet, setNewSnippet] = useState({ name: '', text: '', category: 'General' })
+  const [filter, setFilter] = useState('all')
+  
+  const categories = ['all', 'Hook', 'CTA', 'Science', 'Transition', 'General']
+  
+  const addSnippet = () => {
+    if (newSnippet.name && newSnippet.text) {
+      const updated = [{ ...newSnippet, id: Date.now() }, ...snippets]
+      setSnippets(updated)
+      localStorage.setItem('renzo-snippets', JSON.stringify(updated))
+      setNewSnippet({ name: '', text: '', category: 'General' })
+    }
+  }
+  
+  const deleteSnippet = (id) => {
+    const updated = snippets.filter(s => s.id !== id)
+    setSnippets(updated)
+    localStorage.setItem('renzo-snippets', JSON.stringify(updated))
+  }
+  
+  const copySnippet = (text) => {
+    navigator.clipboard.writeText(text)
+  }
+  
+  const filteredSnippets = filter === 'all' ? snippets : snippets.filter(s => s.category === filter)
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content snippets-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📋 Quick Snippets</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="snippets-filters">
+          {categories.map(cat => (
+            <button 
+              key={cat}
+              className={`filter-btn ${filter === cat ? 'active' : ''}`}
+              onClick={() => setFilter(cat)}
+            >
+              {cat === 'all' ? 'All' : cat}
+            </button>
+          ))}
+        </div>
+        
+        <div className="snippets-add">
+          <input
+            type="text"
+            placeholder="Snippet name..."
+            value={newSnippet.name}
+            onChange={(e) => setNewSnippet({...newSnippet, name: e.target.value})}
+          />
+          <select 
+            value={newSnippet.category}
+            onChange={(e) => setNewSnippet({...newSnippet, category: e.target.value})}
+          >
+            {categories.filter(c => c !== 'all').map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+        <textarea
+          className="snippets-textarea"
+          placeholder="Snippet text..."
+          value={newSnippet.text}
+          onChange={(e) => setNewSnippet({...newSnippet, text: e.target.value})}
+        />
+        <button className="snippets-add-btn" onClick={addSnippet}>+ Add Snippet</button>
+        
+        <div className="snippets-list">
+          {filteredSnippets.map(snippet => (
+            <div key={snippet.id} className="snippet-item">
+              <div className="snippet-header">
+                <span className="snippet-name">{snippet.name}</span>
+                <span className="snippet-category">{snippet.category}</span>
+              </div>
+              <div className="snippet-text" onClick={() => copySnippet(snippet.text)}>
+                {snippet.text}
+              </div>
+              <div className="snippet-actions">
+                <button onClick={() => copySnippet(snippet.text)}>📋 Copy</button>
+                <button className="snippet-delete" onClick={() => deleteSnippet(snippet.id)}>🗑️</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== NEW: Writing Stats Dashboard ==========
+function WritingStatsDashboard({ isOpen, onClose, articles, drafts }) {
+  const stats = useMemo(() => {
+    const thisWeek = articles.filter(a => {
+      const artDate = new Date(a.date)
+      const weekAgo = new Date()
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      return artDate >= weekAgo
+    })
+    const thisMonth = articles.filter(a => {
+      const artDate = new Date(a.date)
+      const monthAgo = new Date()
+      monthAgo.setDate(monthAgo.getDate() - 30)
+      return artDate >= monthAgo
+    })
+    
+    const avgWords = articles.length ? articles.reduce((sum, a) => sum + a.words, 0) / articles.length : 0
+    const totalReads = articles.reduce((sum, a) => sum + (a.reads || 0), 0)
+    const avgEngagement = articles.length ? articles.reduce((sum, a) => sum + (a.engagement || 0), 0) / articles.length : 0
+    
+    return {
+      thisWeek: thisWeek.length,
+      thisMonth: thisMonth.length,
+      avgWords: Math.round(avgWords),
+      totalReads,
+      avgEngagement: avgEngagement.toFixed(1),
+      draftsInProgress: drafts.length,
+    }
+  }, [articles, drafts])
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content stats-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📊 Writing Statistics</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="stats-dashboard">
+          <div className="stats-row">
+            <div className="stat-box">
+              <span className="stat-value">{stats.thisWeek}</span>
+              <span className="stat-label">This Week</span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-value">{stats.thisMonth}</span>
+              <span className="stat-label">This Month</span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-value">{stats.draftsInProgress}</span>
+              <span className="stat-label">Drafts</span>
+            </div>
+          </div>
+          <div className="stats-row">
+            <div className="stat-box highlight">
+              <span className="stat-value">{stats.avgWords}</span>
+              <span className="stat-label">Avg Words</span>
+            </div>
+            <div className="stat-box highlight">
+              <span className="stat-value">{(stats.totalReads / 1000).toFixed(1)}k</span>
+              <span className="stat-label">Total Reads</span>
+            </div>
+            <div className="stat-box highlight">
+              <span className="stat-value">{stats.avgEngagement}</span>
+              <span className="stat-label">Avg Engagement</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const quickActions = [
   { label: "New Draft", icon: "📝", action: "new", shortcut: "D" },
   { label: "Templates", icon: "📋", action: "templates", shortcut: "T" },
@@ -3118,6 +3384,9 @@ function App() {
   const [showArticleSeries, setShowArticleSeries] = useState(false)
   const [showCitationManager, setShowCitationManager] = useState(false)
   const [showReadability, setShowReadability] = useState(false)
+  const [showTitleGenerator, setShowTitleGenerator] = useState(false)
+  const [showSnippets, setShowSnippets] = useState(false)
+  const [showStats, setShowStats] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
   const [showGoals, setShowGoals] = useState(false)
   const [showTrending, setShowTrending] = useState(false)
@@ -3267,6 +3536,9 @@ function App() {
       if (key === 'K') setShowCalendar(true)
       if (key === 'J') setShowGoals(true)
       if (key === 'X') setShowTrending(true)
+      if (key === 'K' && !e.metaKey && !e.ctrlKey) setShowTitleGenerator(true)
+      if (key === 'Q') setShowSnippets(true)
+      if (key === 'P' && !e.metaKey && !e.ctrlKey) setShowStats(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -3537,6 +3809,20 @@ function App() {
           setShowQuickDraft(true)
         }}
       />
+      <TitleGenerator 
+        isOpen={showTitleGenerator} 
+        onClose={() => setShowTitleGenerator(false)} 
+      />
+      <QuickSnippets 
+        isOpen={showSnippets} 
+        onClose={() => setShowSnippets(false)} 
+      />
+      <WritingStatsDashboard 
+        isOpen={showStats} 
+        onClose={() => setShowStats(false)}
+        articles={recentArticles}
+        drafts={drafts}
+      />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
@@ -3656,6 +3942,16 @@ function App() {
             <span>Focus</span>
             <span className="feature-hint">M</span>
           </button>
+          <button className="feature-btn" onClick={() => setShowTitleGenerator(true)}>
+            <span>✏️</span>
+            <span>Title</span>
+            <span className="feature-hint">K</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowSnippets(true)}>
+            <span>📋</span>
+            <span>Snippets</span>
+            <span className="feature-hint">Q</span>
+          </button>
           <button className="feature-btn" onClick={() => setShowReferencePanel(true)}>
             <span>📚</span>
             <span>Refs</span>
@@ -3663,7 +3959,7 @@ function App() {
           </button>
           <button className="feature-btn" onClick={() => setShowChangelog(true)}>
             <span>📜</span>
-            <span>Changelog</span>
+            <span>History</span>
             <span className="feature-hint">L</span>
           </button>
           <button className="feature-btn" onClick={() => setShowWordSprint(true)}>
@@ -3671,24 +3967,14 @@ function App() {
             <span>Sprint</span>
             <span className="feature-hint">S</span>
           </button>
-          <button className="feature-btn" onClick={() => setShowResearchQueue(true)}>
-            <span>🔬</span>
-            <span>Research</span>
-            <span className="feature-hint">O</span>
-          </button>
-          <button className="feature-btn" onClick={() => setShowSavedHooks(true)}>
-            <span>⚡</span>
-            <span>Hooks</span>
-            <span className="feature-hint">U</span>
-          </button>
-          <button className="feature-btn" onClick={() => setShowArticleSeries(true)}>
-            <span>📚</span>
-            <span>Series</span>
-            <span className="feature-hint">Z</span>
+          <button className="feature-btn" onClick={() => setShowStats(true)}>
+            <span>📊</span>
+            <span>Stats</span>
+            <span className="feature-hint">P</span>
           </button>
           <button className="feature-btn" onClick={() => setShowCitationManager(true)}>
             <span>📖</span>
-            <span>Citations</span>
+            <span>Cite</span>
             <span className="feature-hint">I</span>
           </button>
         </section>

@@ -1359,11 +1359,11 @@ button, .feature-btn, .brainstorm-item, .shortcut-item {
   text-align: right;
 }
 
-/* Feature buttons row - updated for 7 buttons */
+/* Feature buttons row - updated for 12 buttons */
 .feature-buttons-row {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.6rem;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
 
@@ -2867,4 +2867,282 @@ button, .feature-btn, .brainstorm-item, .shortcut-item {
 .shortcut-action {
   font-size: 0.85rem;
   color: var(--text-primary);
+}
+
+/* ========== NEW COMPONENT STYLES ========== */
+
+/* Title Generator Modal */
+.title-gen-modal .modal-content {
+  max-width: 520px;
+}
+
+.title-gen-content {
+  padding: 1rem;
+}
+
+.title-gen-placeholder {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.title-gen-placeholder span {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.title-gen-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.title-gen-item {
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title-gen-category {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  min-width: 60px;
+}
+
+.title-gen-text {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.title-gen-text:hover {
+  color: var(--accent);
+}
+
+.title-gen-copy {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.title-gen-copy:hover {
+  opacity: 1;
+}
+
+/* Quick Snippets Modal */
+.snippets-modal .modal-content {
+  max-width: 550px;
+}
+
+.snippets-filters {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.snippets-add {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.snippets-add input {
+  flex: 1;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.snippets-add select {
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.75rem;
+}
+
+.snippets-textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  resize: vertical;
+  margin-bottom: 0.75rem;
+}
+
+.snippets-add-btn {
+  width: 100%;
+  padding: 0.5rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.snippets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.snippet-item {
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.snippet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.snippet-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.snippet-category {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.snippet-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.snippet-text:hover {
+  background: var(--bg-card);
+  color: var(--accent);
+}
+
+.snippet-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.snippet-actions button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.snippet-actions button:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.snippet-delete {
+  background: #7f1d1d !important;
+  border-color: #ef4444 !important;
+}
+
+/* Writing Stats Dashboard Modal */
+.stats-modal .modal-content {
+  max-width: 480px;
+}
+
+.stats-dashboard {
+  padding: 1rem;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.stat-box {
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.stat-box.highlight {
+  background: linear-gradient(135deg, var(--accent), #b91c1c);
+}
+
+.stat-box.highlight .stat-value {
+  color: white;
+}
+
+.stat-box.highlight .stat-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .feature-buttons-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .feature-buttons-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

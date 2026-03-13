@@ -25,6 +25,9 @@ A powerful writing dashboard for AI-powered fitness content creation. Built with
 - **Virality Calculator** - Score your content (V)
 - **Topic Generator** - Get fresh content ideas (G)
 - **Formula Reference** - Headline & hook formulas (F)
+- **Title Generator** - Generate catchy headlines (K)
+- **Quick Snippets** - Reusable text snippets (Q)
+- **Writing Stats** - Dashboard with writing metrics (P)
 
 ### Utilities
 - **Templates** - Pre-built article structures (T)
@@ -51,7 +54,7 @@ A powerful writing dashboard for AI-powered fitness content creation. Built with
 | T | Templates |
 | X | Trending Topics |
 | A | Readability Analyzer |
-| K | Content Calendar |
+| K | Title Generator |
 | J | Weekly Goals |
 | O | Research Queue |
 | U | Saved Hooks |
@@ -62,6 +65,8 @@ A powerful writing dashboard for AI-powered fitness content creation. Built with
 | R | Reference Panel |
 | L | Changelog |
 | H | Shortcuts |
+| Q | Quick Snippets |
+| P | Writing Stats |
 | / | Search |
 | Esc | Close Modal |
 
@@ -100,7 +105,7 @@ src/
 
 ## Version History
 
-- **v3.2** (2026-03-13) - Daily Writing Prompt, Dark mode CSS variables fix
+- **v3.2** (2026-03-13) - Title Generator, Quick Snippets, Writing Stats Dashboard, 12-column feature buttons grid, Daily Writing Prompt
 - **v3.1** (2026-03-13) - Readability Analyzer, Content Calendar, Weekly Goals, Trending Topics
 - **v3.0** (2026-03-12) - Word Sprint, Research Queue, Saved Hooks, Article Series
 - **v2.9** (2026-03-12) - Focus Mode, Writing Streak, Reference Panel
