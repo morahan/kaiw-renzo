@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.6.0] — March 13, 2026
+
+### Added
+
+#### Writing Velocity Tracker
+- Real-time words-per-minute tracking during writing sessions
+- Session history with average velocity calculations
+- Quick-add buttons for tracking words written
+- Persistent storage of velocity history
+- Compare current velocity vs. historical average
+
+#### Keyboard Shortcuts Footer
+- Persistent footer showing common keyboard shortcuts
+- Quick access to essential features
+- Press ? for full shortcuts list
+
+### Improvements
+- Updated version badge to v4.6
+- Enhanced daily goal widget in header
+
 ## [4.5.0] — March 13, 2026
 
 ### Added

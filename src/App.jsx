@@ -2770,6 +2770,170 @@ function DailyQuote() {
   )
 }
 
+// ========== WRITING VELOCITY TRACKER (NEW v4.6) ==========
+function WritingVelocityTracker() {
+  const [velocity, setVelocity] = useState(0)
+  const [sessionWords, setSessionWords] = useState(0)
+  const [sessionTime, setSessionTime] = useState(0)
+  const [isActive, setIsActive] = useState(false)
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem('renzo-velocity-history')
+    return saved ? JSON.parse(saved) : []
+  })
+  
+  useEffect(() => {
+    let interval
+    if (isActive) {
+      interval = setInterval(() => {
+        setSessionTime(t => t + 1)
+        // Calculate velocity every 30 seconds
+        if (sessionTime > 0 && sessionTime % 30 === 0) {
+          const wpm = Math.round((sessionWords / sessionTime) * 60)
+          setVelocity(wpm)
+        }
+      }, 1000)
+    }
+    return () => clearInterval(interval)
+  }, [isActive, sessionWords, sessionTime])
+  
+  const startSession = () => {
+    setIsActive(true)
+    setSessionWords(0)
+    setSessionTime(0)
+    setVelocity(0)
+  }
+  
+  const endSession = () => {
+    if (sessionWords > 0 && sessionTime > 60) {
+      const wpm = Math.round((sessionWords / sessionTime) * 60)
+      const newEntry = {
+        words: sessionWords,
+        time: sessionTime,
+        wpm: wpm,
+        date: new Date().toISOString()
+      }
+      const updated = [newEntry, ...history].slice(0, 20)
+      setHistory(updated)
+      localStorage.setItem('renzo-velocity-history', JSON.stringify(updated))
+    }
+    setIsActive(false)
+  }
+  
+  const addWords = (count) => {
+    setSessionWords(w => w + count)
+  }
+  
+  const formatTime = (secs) => {
+    const m = Math.floor(secs / 60)
+    const s = secs % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
+  }
+  
+  const avgVelocity = history.length > 0 
+    ? Math.round(history.reduce((s, h) => s + h.wpm, 0) / history.length)
+    : 0
+  
+  return (
+    <div className="velocity-tracker">
+      <div className="velocity-header">
+        <span className="velocity-icon">⚡</span>
+        <span className="velocity-title">Writing Velocity</span>
+        {isActive && <span className="velocity-badge">LIVE</span>}
+      </div>
+      
+      <div className="velocity-display">
+        <div className="velocity-main">
+          <span className="velocity-value">{isActive ? velocity : avgVelocity}</span>
+          <span className="velocity-unit">WPM</span>
+        </div>
+        <div className="velocity-stats">
+          <div className="velocity-stat">
+            <span className="stat-num">{sessionWords}</span>
+            <span className="stat-lbl">words</span>
+          </div>
+          <div className="velocity-stat">
+            <span className="stat-num">{formatTime(sessionTime)}</span>
+            <span className="stat-lbl">time</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="velocity-actions">
+        {!isActive ? (
+          <>
+            <button className="velocity-start" onClick={startSession}>Start Session</button>
+            {sessionWords > 0 && (
+              <button className="velocity-save" onClick={() => {
+                const wpm = Math.round((sessionWords / sessionTime) * 60)
+                const newEntry = { words: sessionWords, time: sessionTime, wpm, date: new Date().toISOString() }
+                const updated = [newEntry, ...history].slice(0, 20)
+                setHistory(updated)
+                localStorage.setItem('renzo-velocity-history', JSON.stringify(updated))
+                setSessionWords(0)
+                setSessionTime(0)
+              }}>Save & Reset</button>
+            )}
+          </>
+        ) : (
+          <>
+            <button className="velocity-add" onClick={() => addWords(50)}>+50 words</button>
+            <button className="velocity-end" onClick={endSession}>End Session</button>
+          </>
+        )}
+      </div>
+      
+      {history.length > 0 && (
+        <div className="velocity-history">
+          <span className="history-label">Recent Sessions</span>
+          <div className="history-list">
+            {history.slice(0, 3).map((h, i) => (
+              <div key={i} className="history-item">
+                <span className="history-wpm">{h.wpm} WPM</span>
+                <span className="history-words">{h.words} words</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ========== KEYBOARD SHORTCUTS FOOTER (NEW v4.6) ==========
+function KeyboardShortcutsFooter({ onShowShortcuts }) {
+  const shortcuts = [
+    { key: '?', help: 'Shortcuts' },
+    { key: 'M', help: 'Focus Mode' },
+    { key: 'H', help: 'Headlines' },
+    { key: 'D', help: 'New Draft' },
+    { key: 'S', help: 'Sprint' },
+    { key: 'A', help: 'Ideas' },
+    { key: 'Q', help: 'Capture' },
+  ]
+  
+  return (
+    <div className="shortcuts-footer">
+      <div className="footer-shortcuts">
+        {shortcuts.map((s, i) => (
+          <button 
+            key={i} 
+            className="footer-shortcut"
+            onClick={() => {
+              if (s.key === '?') onShowShortcuts?.()
+            }}
+          >
+            <kbd>{s.key}</kbd>
+            <span>{s.help}</span>
+          </button>
+        ))}
+      </div>
+      <div className="footer-tip">
+        Press <kbd>?</kbd> for all shortcuts
+      </div>
+    </div>
+  )
+}
+
 // Daily Writing Challenge Component
 function DailyChallenge({ onComplete }) {
   const [challenge, setChallenge] = useState(() => {
@@ -6500,7 +6664,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v4.5</span>
+          <span className="logo-badge">v4.6</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -6590,6 +6754,7 @@ function App() {
           <TrendingHashtags />
           <ContentCalendar />
           <WritingTimer onComplete={() => addToast('Session complete! Take a break ☕', 'success')} />
+          <WritingVelocityTracker />
           <WritingStreakCalendar streak={metrics.currentStreak} articles={recentArticles} />
           <WritingHeatmap />
           <WeeklyStatsDashboard articles={recentArticles} />
@@ -7158,9 +7323,10 @@ function App() {
         </div>
       </main>
 
+      <KeyboardShortcutsFooter onShowShortcuts={() => setShowShortcuts(true)} />
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v4.4 • Press ⌘K for commands, 3 for search, , for settings, 4 for data</p>
+        <p className="footer-version">v4.6 • Press ⌘K for commands, ? for all shortcuts</p>
       </footer>
     </div>
   )

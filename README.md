@@ -1,4 +1,4 @@
-# RENZO — Content Writing Interface (v4.5)
+# RENZO — Content Writing Interface (v4.6)
 
 A comprehensive web-based writing and content management interface for fitness article creation, built with React + Vite.
 
@@ -123,6 +123,19 @@ npm run preview
 - Smooth transitions and animations
 - Mobile-responsive design
 - Accessibility-first approach
+
+## What's New in v4.6
+
+✅ **Writing Velocity Tracker** — Real-time WPM tracking during writing sessions
+  - Track words per minute while writing
+  - Session history with averages
+  - Compare current velocity vs. historical performance
+  - Quick-add buttons for tracking words
+
+✅ **Keyboard Shortcuts Footer** — Always-visible shortcut reference
+  - Common shortcuts always visible at bottom
+  - Quick access to Focus Mode, Headlines, Draft, Sprint, Ideas, Capture
+  - Press ? for full shortcuts list
 
 ## What's New in v4.4
 
