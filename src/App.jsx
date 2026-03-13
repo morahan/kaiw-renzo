@@ -674,6 +674,13 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '3.2', date: '2026-03-13', changes: [
+      'Added CTA Templates - 6 pre-built call-to-action templates',
+      'Added Hook Tester - Analyze hooks for effectiveness (curiosity, emotion, specificity, urgency)',
+      'Added keyboard shortcuts K (CTA) and J (Hook Tester)',
+      'Updated Keyboard Shortcuts modal with all current shortcuts',
+      'Added toolbar buttons for CTA and Hook Tester'
+    ]},
     { version: '3.1', date: '2026-03-12', changes: [
       'Added Headline Generator - 13 proven headline formulas',
       'Added Tier ranking for headlines (Tier 1 = best performers)',
@@ -1037,6 +1044,286 @@ function ArticleTemplates({ isOpen, onClose, onSelect }) {
   )
 }
 
+// CTA Templates Library
+function CTATemplates({ isOpen, onClose, onSelect }) {
+  const ctaTemplates = [
+    { 
+      id: 'direct-action',
+      name: 'Direct Action',
+      emoji: '🎯',
+      desc: 'Clear, immediate action step',
+      examples: [
+        'Start tonight. Your muscles will thank you tomorrow.',
+        'Try this for 2 weeks. Track your results.',
+        'Drop the guesswork. Start here.',
+        'Commit to one change today.'
+      ]
+    },
+    { 
+      id: 'question-cta',
+      name: 'Question CTA',
+      emoji: '❓',
+      desc: 'Engage reader with a question',
+      examples: [
+        'Ready to stop guessing? Let\'s go.',
+        'What\'s holding you back?',
+        'Who\'s ready to try this?',
+        'Which of these will you implement first?'
+      ]
+    },
+    { 
+      id: 'transformation',
+      name: 'Transformation',
+      emoji: '✨',
+      desc: 'Promise a result or change',
+      examples: [
+        'Your future self starts today.',
+        'Transform your training in 30 days.',
+        'Build the body you actually want.',
+        'This is the shortcut nobody talks about.'
+      ]
+    },
+    { 
+      id: 'community',
+      name: 'Community CTA',
+      emoji: '🤝',
+      desc: 'Social proof or community angle',
+      examples: [
+        'Join 10,000+ athletes doing this right now.',
+        'Tag someone who needs to hear this.',
+        'Drop a 🔥 if you\'re in.',
+        'Be the first to try it and report back.'
+      ]
+    },
+    { 
+      id: 'challenge',
+      name: 'Challenge CTA',
+      emoji: '🏆',
+      desc: 'Push reader to compete',
+      examples: [
+        'I dare you to try this for 30 days.',
+        'Prove the doubters wrong.',
+        'Take the 2-week challenge.',
+        'Who can hit this first?'
+      ]
+    },
+    { 
+      id: 'soft-cta',
+      name: 'Soft CTA',
+      emoji: '💬',
+      desc: 'Low-pressure invitation',
+      examples: [
+        'Save this for later.',
+        'Bookmark and come back when you\'re ready.',
+        'Share with a training partner.',
+        'Keep this in your back pocket.'
+      ]
+    }
+  ]
+
+  const [copiedId, setCopiedId] = useState(null)
+
+  const copyToClipboard = (text, id) => {
+    navigator.clipboard.writeText(text)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 1500)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content cta-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📣 CTA Templates</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+          Click any example to copy it
+        </p>
+        <div className="cta-templates-grid">
+          {ctaTemplates.map((cta) => (
+            <div key={cta.id} className="cta-template-card">
+              <div className="cta-template-header">
+                <span className="cta-emoji">{cta.emoji}</span>
+                <span className="cta-name">{cta.name}</span>
+              </div>
+              <div className="cta-desc">{cta.desc}</div>
+              <div className="cta-examples">
+                {cta.examples.map((ex, i) => (
+                  <div 
+                    key={i} 
+                    className="cta-example"
+                    onClick={() => copyToClipboard(ex, `${cta.id}-${i}`)}
+                  >
+                    {copiedId === `${cta.id}-${i}` ? '✓ Copied!' : ex}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Hook Effectiveness Tester
+function HookTester({ isOpen, onClose }) {
+  const [hook, setHook] = useState('')
+  const [analysis, setAnalysis] = useState(null)
+
+  const analyzeHook = (text) => {
+    const score = { total: 0, curiosity: 0, emotion: 0, specificity: 0, urgency: 0, clarity: 0 }
+    const feedback = []
+
+    // Curiosity check (question, gap, "secret", "truth", "myth", "what happens")
+    if (text.includes('?') || /\b(secret|truth|myth|what happens|why|how come)\b/i.test(text)) {
+      score.curiosity = 25
+      feedback.push('✅ Good curiosity gap')
+    } else {
+      score.curiosity = 10
+      feedback.push('💡 Add a question or curiosity gap')
+    }
+
+    // Emotion check (strong words)
+    const emotionWords = /\b(shocking|surprising|devastating|amazing|life-changing|insane|killer|deadly|real|honest|brutal|game-changer)\b/i
+    if (emotionWords.test(text)) {
+      score.emotion = 25
+      feedback.push('✅ Strong emotional language')
+    } else {
+      score.emotion = 10
+      feedback.push('💡 Add emotion with stronger words')
+    }
+
+    // Specificity check (numbers, конкрет)
+    if (/\d+/.test(text) || /\b(once|twice|exactly|specifically)\b/i.test(text)) {
+      score.specificity = 25
+      feedback.push('✅ Good specificity')
+    } else {
+      score.specificity = 10
+      feedback.push('💡 Add numbers or specific details')
+    }
+
+    // Urgency check (now, today, tonight, stop, start, don't)
+    if (/\b(now|today|tonight|stop|start|don\'t|never|finally)\b/i.test(text)) {
+      score.urgency = 15
+      feedback.push('✅ Creates urgency')
+    } else {
+      score.urgency = 5
+      feedback.push('💡 Add urgency words')
+    }
+
+    // Clarity check (short, readable)
+    if (text.length < 80) {
+      score.clarity = 10
+      feedback.push('✅ Good length for scroll')
+    } else if (text.length < 120) {
+      score.clarity = 5
+      feedback.push('⚠️ Getting long - consider trimming')
+    } else {
+      score.clarity = 0
+      feedback.push('❌ Too long - will get cut off')
+    }
+
+    score.total = score.curiosity + score.emotion + score.specificity + score.urgency + score.clarity
+
+    return { score, feedback }
+  }
+
+  const handleAnalyze = () => {
+    if (hook.trim()) {
+      setAnalysis(analyzeHook(hook))
+    }
+  }
+
+  const getScoreColor = (score) => {
+    if (score >= 80) return 'var(--accent-green)'
+    if (score >= 60) return 'var(--accent-blue)'
+    if (score >= 40) return 'var(--accent-orange)'
+    return 'var(--text-muted)'
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content hook-tester-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🔍 Hook Tester</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="hook-input-area">
+          <textarea
+            className="hook-input"
+            placeholder="Paste your hook here..."
+            value={hook}
+            onChange={(e) => setHook(e.target.value)}
+            rows={3}
+          />
+          <button className="analyze-btn" onClick={handleAnalyze} disabled={!hook.trim()}>
+            Analyze Hook
+          </button>
+        </div>
+        {analysis && (
+          <div className="hook-analysis">
+            <div className="hook-score-display">
+              <div className="score-circle" style={{ borderColor: getScoreColor(analysis.score.total) }}>
+                <span className="score-number" style={{ color: getScoreColor(analysis.score.total) }}>
+                  {analysis.score.total}
+                </span>
+                <span className="score-label">/100</span>
+              </div>
+            </div>
+            <div className="hook-feedback">
+              {analysis.feedback.map((f, i) => (
+                <div key={i} className="feedback-item">{f}</div>
+              ))}
+            </div>
+            <div className="score-breakdown">
+              <div className="breakdown-row">
+                <span>Curiosity</span>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: `${analysis.score.curiosity}%` }} />
+                </div>
+                <span>{analysis.score.curiosity}/25</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Emotion</span>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: `${analysis.score.emotion}%` }} />
+                </div>
+                <span>{analysis.score.emotion}/25</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Specificity</span>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: `${analysis.score.specificity}%` }} />
+                </div>
+                <span>{analysis.score.specificity}/25</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Urgency</span>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: `${analysis.score.urgency}%` }} />
+                </div>
+                <span>{analysis.score.urgency}/15</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Clarity</span>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: `${analysis.score.clarity}%` }} />
+                </div>
+                <span>{analysis.score.clarity}/10</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Productivity Score Component
 function ProductivityScore({ articles, words, streak }) {
   const [score, setScore] = useState(0)
@@ -1373,15 +1660,33 @@ function ContentFormulaRef({ isOpen, onClose }) {
 // Keyboard Shortcuts Reference
 function KeyboardShortcuts({ isOpen, onClose }) {
   const shortcuts = [
-    { key: 'F', action: 'Open Content Formula' },
-    { key: 'G', action: 'Generate Topic' },
-    { key: 'C', action: 'Open Clipboard History' },
-    { key: 'K', action: 'Open Command Palette' },
-    { key: 'Q', action: 'Quick Write Mode' },
-    { key: 'S', action: 'Save Draft' },
     { key: 'N', action: 'New Article' },
+    { key: 'D', action: 'Quick Draft' },
+    { key: 'T', action: 'Article Templates' },
+    { key: 'K', action: 'CTA Templates' },
+    { key: 'J', action: 'Hook Tester' },
+    { key: 'Y', action: 'Hot Take Generator' },
+    { key: 'P', action: 'Writing Prompt' },
+    { key: 'V', action: 'Virality Calculator' },
+    { key: 'H', action: 'Headline Generator' },
+    { key: 'F', action: 'Content Formula' },
+    { key: 'G', action: 'Topic Generator' },
+    { key: 'B', action: 'Brainstorm Mode' },
+    { key: 'C', action: 'Clipboard History' },
+    { key: 'Q', action: 'Quick Capture' },
+    { key: 'W', action: 'Quick Write' },
+    { key: 'M', action: 'Focus Mode' },
+    { key: 'R', action: 'Reference Panel' },
+    { key: 'O', action: 'Research Queue' },
+    { key: 'U', action: 'Saved Hooks' },
+    { key: 'S', action: 'Word Sprint' },
+    { key: 'Z', action: 'Article Series' },
+    { key: 'P', action: 'Pipeline Tracker' },
+    { key: 'X', action: 'Thread Generator' },
+    { key: 'E', action: 'Export Drafts' },
+    { key: 'L', action: 'Changelog' },
+    { key: '/', action: 'Search Articles' },
     { key: 'Esc', action: 'Close Modal' },
-    { key: '⏱️', action: 'Start/Stop Timer (in modal)' },
   ]
   
   if (!isOpen) return null
@@ -2618,6 +2923,8 @@ const categoryColors = {
 const quickActions = [
   { label: "New Draft", icon: "📝", action: "new", shortcut: "D" },
   { label: "Templates", icon: "📋", action: "templates", shortcut: "T" },
+  { label: "CTA Templates", icon: "📣", action: "ctaTemplates", shortcut: "K" },
+  { label: "Hook Tester", icon: "🔍", action: "hookTester", shortcut: "J" },
   { label: "Hot Take", icon: "🔥", action: "hottake", shortcut: "Y" },
   { label: "Writing Prompt", icon: "💡", action: "prompt", shortcut: "P" },
   { label: "Virality Score", icon: "🎯", action: "virality", shortcut: "V" },
@@ -3084,6 +3391,8 @@ function App() {
   const [showExportDrafts, setShowExportDrafts] = useState(false)
   const [showChangelog, setShowChangelog] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
+  const [showCTATemplates, setShowCTATemplates] = useState(false)
+  const [showHookTester, setShowHookTester] = useState(false)
   const [showFocusMode, setShowFocusMode] = useState(false)
   const [showReferencePanel, setShowReferencePanel] = useState(false)
   const [showResearchQueue, setShowResearchQueue] = useState(false)
@@ -3230,6 +3539,8 @@ function App() {
       if (key === 'N') setShowPrompt(true)
       if (key === 'P') setShowPrompt(true)
       if (key === 'T') setShowTemplates(true)
+      if (key === 'K') setShowCTATemplates(true)
+      if (key === 'J') setShowHookTester(true)
       if (key === 'Y') setShowHotTake(true)
       if (key === 'D') setShowQuickDraft(true)
       if (key === 'H') setShowShortcuts(true)
@@ -3314,6 +3625,14 @@ function App() {
       case 'templates':
         setShowTemplates(true)
         addActivity('prompt', 'Opened article templates')
+        break
+      case 'ctaTemplates':
+        setShowCTATemplates(true)
+        addActivity('prompt', 'Opened CTA templates')
+        break
+      case 'hookTester':
+        setShowHookTester(true)
+        addActivity('prompt', 'Opened hook tester')
         break
       case 'changelog':
         setShowChangelog(true)
@@ -3445,6 +3764,21 @@ function App() {
           onSelect={(template) => {
             addToast(`Selected template: ${template.name}`, 'success')
           }}
+        />
+      )}
+      {showCTATemplates && (
+        <CTATemplates 
+          isOpen={showCTATemplates} 
+          onClose={() => setShowCTATemplates(false)}
+          onSelect={(cta) => {
+            addToast(`Copied CTA: ${cta.name}`, 'success')
+          }}
+        />
+      )}
+      {showHookTester && (
+        <HookTester 
+          isOpen={showHookTester} 
+          onClose={() => setShowHookTester(false)}
         />
       )}
       {showFocusMode && (
@@ -3600,6 +3934,16 @@ function App() {
             <span>📋</span>
             <span>Templates</span>
             <span className="feature-hint">T</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowCTATemplates(true)}>
+            <span>📣</span>
+            <span>CTA</span>
+            <span className="feature-hint">K</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowHookTester(true)}>
+            <span>🔍</span>
+            <span>Hook Test</span>
+            <span className="feature-hint">J</span>
           </button>
           <button className="feature-btn" onClick={() => setShowTopicGenerator(true)}>
             <span>💡</span>
