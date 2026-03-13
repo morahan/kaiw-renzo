@@ -812,3 +812,234 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ========== TRENDING HASHTAGS ========== */
+.trending-hashtags {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+}
+
+.hashtags-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.hashtags-icon {
+  font-size: 1rem;
+}
+
+.hashtags-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.hashtags-refresh {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.2rem;
+  transition: transform 0.2s;
+}
+
+.hashtags-refresh:hover {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+.hashtags-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.hashtag-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.hashtag-item:hover {
+  background: var(--bg-hover);
+  transform: translateX(2px);
+}
+
+.hashtag-tag {
+  font-size: 0.8rem;
+  color: var(--accent-blue);
+  font-weight: 500;
+}
+
+.hashtag-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hashtag-posts {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.hashtag-trend {
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.hashtag-copied {
+  position: absolute;
+  right: 0.5rem;
+  font-size: 0.65rem;
+  color: var(--accent-green);
+  background: var(--bg-card);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+
+/* ========== ARTICLE BRIEF GENERATOR ========== */
+.brief-modal {
+  width: 90%;
+  max-width: 650px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.brief-input {
+  padding: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.brief-input input {
+  flex: 1;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.brief-input input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.brief-generate-btn {
+  padding: 0.75rem 1.25rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.brief-generate-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.brief-generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.brief-output {
+  padding: 0 1rem 1rem;
+}
+
+.brief-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.brief-category {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.brief-target {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.brief-section {
+  margin-bottom: 1rem;
+}
+
+.brief-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.brief-section p {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.brief-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.brief-copy-btn,
+.brief-save-btn {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.brief-copy-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.brief-copy-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+.brief-save-btn {
+  background: var(--accent);
+  border: none;
+  color: white;
+}
+
+.brief-save-btn:hover {
+  background: var(--accent-hover);
+}
