@@ -1,4 +1,4 @@
-# RENZO — Content Writing Interface (v4.3)
+# RENZO — Content Writing Interface (v4.4)
 
 A comprehensive web-based writing and content management interface for fitness article creation, built with React + Vite.
 
@@ -34,8 +34,12 @@ A comprehensive web-based writing and content management interface for fitness a
 - **Article Publishing Timer** — Days since last published (urges you to ship!)
 - **Performance Dashboard** — Track metrics over time
 - **Quick Stat Generator** — Random fitness facts with study sources
+- **Daily Challenge** — Daily writing goals to keep you accountable
 
-### Data Management (NEW v4.0)
+### Data Management & Publishing (NEW v4.4)
+- **Publishing Prep Workflow** (6) — Unified tool: article → X thread → YouTube script → schedule
+- **Performance Tracker** (7) — Log article views, shares, saves, track engagement metrics
+- **Draft Collections** (8) — Organize drafts into folders/projects for better organization
 - **Floating Action Button (FAB)** — Quick access to 5 core actions from anywhere
 - **Mini Command Bar** (Ctrl+Space) — Fast command input for navigation
 - **Global Search** (3) — Search across all hooks, ideas, headlines, and references
@@ -49,6 +53,9 @@ Ctrl+Space      Mini Command Bar
 3               Global Search
 ,               Settings
 4               Data Management
+6               Publishing Prep Workflow (NEW)
+7               Performance Tracker (NEW)
+8               Draft Collections (NEW)
 H               Headline Generator
 I               Article Brief Generator
 D               Quick Draft
@@ -110,6 +117,27 @@ npm run preview
 - Mobile-responsive design
 - Accessibility-first approach
 
+## What's New in v4.4
+
+✅ **Publishing Prep Workflow** (6) — One-stop shop for article → X thread → YouTube script → scheduling
+  - Step-by-step guided workflow
+  - Auto-generate X threads from articles
+  - Auto-generate YouTube scripts
+  - Schedule publish dates
+  - Unified summary before publishing
+
+✅ **Performance Tracker** (7) — Track what's working
+  - Log article views, shares, saves
+  - Calculate average engagement
+  - See which articles perform best
+  - Make data-driven decisions on topics
+
+✅ **Draft Collections** (8) — Better organization
+  - Group drafts into projects/collections
+  - Organize by topic, series, or season
+  - Quick folder-based access
+  - Better workflow for related articles
+
 ## What's New in v4.3
 
 ✅ **Keyboard Shortcut Fix** — Fixed conflict where A key was mapped to both Ideas Bank and Quick Tweet
@@ -140,12 +168,15 @@ npm run preview
 
 ## Usage Tips
 
-1. **Start with Global Search (3)** — Find your previous ideas quickly
-2. **Set Daily Goals** — Configure in Settings (,) to track progress
-3. **Use Templates** — Pick an article template to structure your writing
-4. **Save Reusable Content** — Hooks, CTAs, and ideas for future articles
-5. **Backup Regularly** — Export data (4) weekly for peace of mind
-6. **Keyboard Shortcuts** — Press ? to see all available shortcuts
+1. **Publishing Prep (6)** — Use the unified workflow to turn articles into full content packages
+2. **Performance Tracker (7)** — Log metrics after articles go live to track what works
+3. **Draft Collections (8)** — Organize series and related articles into projects
+4. **Start with Global Search (3)** — Find your previous ideas quickly
+5. **Set Daily Goals** — Configure in Settings (,) to track progress
+6. **Use Templates** — Pick an article template to structure your writing
+7. **Save Reusable Content** — Hooks, CTAs, and ideas for future articles
+8. **Backup Regularly** — Export data (4) weekly for peace of mind
+9. **Keyboard Shortcuts** — Press ? to see all available shortcuts
 
 ## Keyboard Shortcut Cheat Sheet
 

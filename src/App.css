@@ -966,3 +966,44 @@
 .category-item { display: flex; justify-content: space-between; font-size: 0.8rem; }
 .category-name { color: var(--text-secondary); }
 .category-count { color: var(--text-primary); font-weight: 600; }
+
+/* ========== DAILY CHALLENGE (v4.4) ========== */
+.daily-challenge { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem; flex: 1; min-width: 240px; transition: all var(--transition-normal); }
+.daily-challenge.completed { border-color: var(--accent-green); background: linear-gradient(135deg, var(--bg-card), rgba(34, 197, 94, 0.1)); }
+.challenge-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.challenge-icon { font-size: 1.2rem; }
+.challenge-label { font-weight: 600; font-size: 0.9rem; flex: 1; }
+.challenge-badge { background: var(--accent-green); color: white; font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-weight: 600; }
+.challenge-desc { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
+.challenge-progress { height: 6px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden; margin-bottom: 0.5rem; }
+.challenge-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-purple)); border-radius: 3px; transition: width var(--transition-normal); }
+.daily-challenge.completed .challenge-bar { background: var(--accent-green); }
+.challenge-numbers { display: flex; align-items: baseline; gap: 0.25rem; margin-bottom: 0.75rem; }
+.challenge-current { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+.daily-challenge.completed .challenge-current { color: var(--accent-green); }
+.challenge-sep { color: var(--text-muted); }
+.challenge-target { font-size: 0.9rem; color: var(--text-muted); }
+.challenge-actions { display: flex; gap: 0.5rem; }
+.challenge-btn { flex: 1; padding: 0.5rem; font-size: 0.8rem; background: var(--accent); color: white; border: none; }
+.challenge-btn:hover { background: var(--accent-hover); }
+.challenge-btn:disabled { background: var(--accent-green); cursor: default; }
+
+/* ========== UI POLISH (v4.4) ========== */
+.hero-content { animation: fadeInUp 0.6s ease-out; }
+.hero-status { animation: fadeInUp 0.6s ease-out 0.1s both; }
+.new-features-row { animation: fadeInUp 0.6s ease-out 0.2s both; }
+.feature-buttons-row { animation: fadeInUp 0.6s ease-out 0.3s both; }
+.quick-actions { animation: fadeInUp 0.6s ease-out 0.4s both; }
+.metrics-grid { animation: fadeInUp 0.6s ease-out 0.5s both; }
+
+/* Card hover effects */
+.article-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.metric-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+/* Button ripple effect */
+button { position: relative; overflow: hidden; }
+button::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); opacity: 0; transition: opacity 0.3s; }
+button:hover::after { opacity: 1; }
+
+/* Gradient text for headers */
+.hero-title { background: linear-gradient(135deg, var(--text-primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }

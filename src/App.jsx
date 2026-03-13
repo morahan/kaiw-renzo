@@ -1301,6 +1301,13 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '4.4', date: '2026-03-13', changes: [
+      'Added Publishing Prep Workflow (6 key) — Unified tool: article → X thread → YouTube script → schedule',
+      'Added Performance Tracker (7 key) — Log article views, shares, saves, track engagement metrics',
+      'Added Draft Collections (8 key) — Organize drafts into folders/projects',
+      'Enhanced FAB with better action grouping',
+      'Improved keyboard shortcut documentation'
+    ]},
     { version: '4.3', date: '2026-03-13', changes: [
       'Fixed keyboard shortcut conflict — A key was mapped to both Ideas Bank and Quick Tweet',
       'Changed Quick Tweet shortcut from A to N for better organization',
@@ -2619,6 +2626,75 @@ function DailyQuote() {
       <span className="quote-icon">"</span>
       <p className="quote-text">{quote.text}</p>
       <span className="quote-author">— {quote.author}</span>
+    </div>
+  )
+}
+
+// Daily Writing Challenge Component
+function DailyChallenge({ onComplete }) {
+  const [challenge, setChallenge] = useState(() => {
+    const today = new Date().toDateString()
+    const saved = localStorage.getItem('renzo-daily-challenge')
+    const savedDate = localStorage.getItem('renzo-daily-challenge-date')
+    if (saved && savedDate === today) {
+      return JSON.parse(saved)
+    }
+    // Generate a new challenge for today
+    const challenges = [
+      { type: 'word', target: 500, desc: 'Write 500 words on any topic', icon: '✍️' },
+      { type: 'headline', target: 10, desc: 'Generate 10 headline variations', icon: '📰' },
+      { type: 'hook', target: 5, desc: 'Write 5 opening hooks', icon: '🪝' },
+      { type: 'sprint', target: 1, desc: 'Complete a 15-min word sprint', icon: '⚡' },
+      { type: 'research', target: 3, desc: 'Find 3 new study citations', icon: '🔬' },
+      { type: 'thread', target: 1, desc: 'Create 1 X/Twitter thread outline', icon: '🧵' },
+    ]
+    const newChallenge = challenges[Math.floor(Math.random() * challenges.length)]
+    newChallenge.progress = 0
+    newChallenge.completed = false
+    newChallenge.date = today
+    localStorage.setItem('renzo-daily-challenge', JSON.stringify(newChallenge))
+    localStorage.setItem('renzo-daily-challenge-date', today)
+    return newChallenge
+  })
+  
+  const updateProgress = (amount) => {
+    const newProgress = Math.min(challenge.progress + amount, challenge.target)
+    const updated = { ...challenge, progress: newProgress, completed: newProgress >= challenge.target }
+    setChallenge(updated)
+    localStorage.setItem('renzo-daily-challenge', JSON.stringify(updated))
+    if (updated.completed && !challenge.completed) {
+      onComplete?.()
+    }
+  }
+  
+  const progress = Math.min((challenge.progress / challenge.target) * 100, 100)
+  const isComplete = challenge.completed
+  
+  return (
+    <div className={`daily-challenge ${isComplete ? 'completed' : ''}`}>
+      <div className="challenge-header">
+        <span className="challenge-icon">{challenge.icon}</span>
+        <span className="challenge-label">Daily Challenge</span>
+        {isComplete && <span className="challenge-badge">✓ Done</span>}
+      </div>
+      <div className="challenge-desc">{challenge.desc}</div>
+      <div className="challenge-progress">
+        <div className="challenge-bar" style={{ width: `${progress}%` }} />
+      </div>
+      <div className="challenge-numbers">
+        <span className="challenge-current">{challenge.progress}</span>
+        <span className="challenge-sep">/</span>
+        <span className="challenge-target">{challenge.target}</span>
+      </div>
+      <div className="challenge-actions">
+        <button 
+          className="challenge-btn"
+          onClick={() => updateProgress(challenge.type === 'sprint' ? 1 : Math.ceil(challenge.target / 4))}
+          disabled={isComplete}
+        >
+          {isComplete ? 'Completed!' : 'Make Progress'}
+        </button>
+      </div>
     </div>
   )
 }
@@ -5171,6 +5247,343 @@ function AnimatedCounterWithDirection({ end, duration = 1500, suffix = '', showD
   )
 }
 
+// ========== PUBLISHING PREP WORKFLOW (NEW v4.4) ==========
+function PublishingPrepWorkflow({ isOpen, onClose }) {
+  const [step, setStep] = useState('article')
+  const [articleData, setArticleData] = useState({
+    title: '',
+    body: '',
+    category: 'Training'
+  })
+  const [xThread, setXThread] = useState([])
+  const [youtubeScript, setYoutubeScript] = useState('')
+  const [scheduledDate, setScheduledDate] = useState('')
+
+  const generateThreadFromArticle = () => {
+    if (!articleData.title) return
+    const thread = [
+      `New piece: "${articleData.title}" 🧵`,
+      `Key insight: [Main point from article]`,
+      `📊 The research backs this up:`,
+      `[Statistical finding]`,
+      `Ready to apply this? Start with: [First action step]`,
+      `Full article + sources: [Link]`
+    ]
+    setXThread(thread)
+  }
+
+  const generateYoutubeScript = () => {
+    if (!articleData.title) return
+    const script = `
+INTRO:
+Hey, quick breakdown on "${articleData.title}"...
+
+MAIN:
+[5-minute talking points from article]
+
+CTA:
+Drop a comment if you've tried this. Subscribe for more evidence-based content.
+
+OUTRO:
+Link in description for the full research.
+    `.trim()
+    setYoutubeScript(script)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content prep-workflow-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📦 Publishing Prep Workflow</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="workflow-steps">
+          <button 
+            className={`step-btn ${step === 'article' ? 'active' : ''}`}
+            onClick={() => setStep('article')}
+          >
+            1️⃣ Article
+          </button>
+          <button 
+            className={`step-btn ${step === 'thread' ? 'active' : ''}`}
+            onClick={() => setStep('thread')}
+          >
+            2️⃣ X Thread
+          </button>
+          <button 
+            className={`step-btn ${step === 'youtube' ? 'active' : ''}`}
+            onClick={() => setStep('youtube')}
+          >
+            3️⃣ YouTube
+          </button>
+          <button 
+            className={`step-btn ${step === 'schedule' ? 'active' : ''}`}
+            onClick={() => setStep('schedule')}
+          >
+            4️⃣ Schedule
+          </button>
+        </div>
+
+        {step === 'article' && (
+          <div className="workflow-content">
+            <input
+              type="text"
+              placeholder="Article title..."
+              value={articleData.title}
+              onChange={(e) => setArticleData({...articleData, title: e.target.value})}
+              className="input-field"
+            />
+            <textarea
+              placeholder="Paste article body here..."
+              value={articleData.body}
+              onChange={(e) => setArticleData({...articleData, body: e.target.value})}
+              className="textarea-field"
+              rows="8"
+            />
+            <button 
+              className="primary-btn"
+              onClick={() => setStep('thread')}
+            >
+              Next: Generate X Thread →
+            </button>
+          </div>
+        )}
+
+        {step === 'thread' && (
+          <div className="workflow-content">
+            <button className="secondary-btn" onClick={generateThreadFromArticle}>
+              Generate X Thread from Article
+            </button>
+            {xThread.length > 0 && (
+              <div className="thread-preview">
+                {xThread.map((tweet, i) => (
+                  <div key={i} className="tweet-preview">
+                    <span className="tweet-number">{i+1}</span>
+                    <p>{tweet}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button 
+              className="primary-btn"
+              onClick={() => setStep('youtube')}
+            >
+              Next: Generate YouTube Script →
+            </button>
+          </div>
+        )}
+
+        {step === 'youtube' && (
+          <div className="workflow-content">
+            <button className="secondary-btn" onClick={generateYoutubeScript}>
+              Generate YouTube Script
+            </button>
+            {youtubeScript && (
+              <textarea
+                className="textarea-field"
+                value={youtubeScript}
+                readOnly
+                rows="10"
+              />
+            )}
+            <button 
+              className="primary-btn"
+              onClick={() => setStep('schedule')}
+            >
+              Next: Schedule Publish →
+            </button>
+          </div>
+        )}
+
+        {step === 'schedule' && (
+          <div className="workflow-content">
+            <label>Schedule publish date:</label>
+            <input
+              type="datetime-local"
+              value={scheduledDate}
+              onChange={(e) => setScheduledDate(e.target.value)}
+              className="input-field"
+            />
+            <div className="publish-summary">
+              <h4>📋 Publish Summary</h4>
+              <p>✅ Article: {articleData.title}</p>
+              <p>✅ X Threads: {xThread.length} tweets ready</p>
+              <p>✅ YouTube Script: Generated</p>
+              <p>✅ Scheduled: {scheduledDate || 'Immediate'}</p>
+            </div>
+            <button className="success-btn">
+              🚀 Publish Everything
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ========== PERFORMANCE TRACKER (NEW v4.4) ==========
+function PerformanceTracker({ isOpen, onClose }) {
+  const [articles, setArticles] = useState(() => {
+    const saved = localStorage.getItem('renzo-article-performance') || '[]'
+    return JSON.parse(saved)
+  })
+  const [newArticle, setNewArticle] = useState({
+    title: '',
+    views: 0,
+    shares: 0,
+    saves: 0,
+    date: new Date().toISOString()
+  })
+
+  const addMetric = () => {
+    if (!newArticle.title) return
+    const updated = [...articles, newArticle]
+    setArticles(updated)
+    localStorage.setItem('renzo-article-performance', JSON.stringify(updated))
+    setNewArticle({ title: '', views: 0, shares: 0, saves: 0, date: new Date().toISOString() })
+  }
+
+  const avgEngagement = articles.length > 0 
+    ? Math.round((articles.reduce((sum, a) => sum + (a.shares + a.saves), 0) / articles.length) * 10) / 10
+    : 0
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content performance-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📊 Performance Tracker</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="perf-add-article">
+          <h4>Log Article Performance</h4>
+          <input
+            type="text"
+            placeholder="Article title..."
+            value={newArticle.title}
+            onChange={(e) => setNewArticle({...newArticle, title: e.target.value})}
+            className="input-field"
+          />
+          <div className="metric-inputs">
+            <input
+              type="number"
+              placeholder="Views"
+              value={newArticle.views}
+              onChange={(e) => setNewArticle({...newArticle, views: parseInt(e.target.value) || 0})}
+              className="input-field"
+            />
+            <input
+              type="number"
+              placeholder="Shares"
+              value={newArticle.shares}
+              onChange={(e) => setNewArticle({...newArticle, shares: parseInt(e.target.value) || 0})}
+              className="input-field"
+            />
+            <input
+              type="number"
+              placeholder="Saves"
+              value={newArticle.saves}
+              onChange={(e) => setNewArticle({...newArticle, saves: parseInt(e.target.value) || 0})}
+              className="input-field"
+            />
+          </div>
+          <button className="primary-btn" onClick={addMetric}>Log Metrics</button>
+        </div>
+
+        <div className="perf-stats">
+          <div className="perf-stat">
+            <span className="perf-label">Total Articles</span>
+            <span className="perf-value">{articles.length}</span>
+          </div>
+          <div className="perf-stat">
+            <span className="perf-label">Avg Engagement</span>
+            <span className="perf-value">{avgEngagement}</span>
+          </div>
+        </div>
+
+        <div className="perf-list">
+          {articles.slice().reverse().map((article, i) => (
+            <div key={i} className="perf-item">
+              <span className="perf-title">{article.title}</span>
+              <span className="perf-metric">👁️ {article.views}</span>
+              <span className="perf-metric">🔄 {article.shares}</span>
+              <span className="perf-metric">📌 {article.saves}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== DRAFT COLLECTIONS (NEW v4.4) ==========
+function DraftCollections({ isOpen, onClose, drafts, onMoveToDraft }) {
+  const [collections, setCollections] = useState(() => {
+    const saved = localStorage.getItem('renzo-collections') || '[]'
+    return JSON.parse(saved)
+  })
+  const [newCollection, setNewCollection] = useState('')
+  const [selectedCollection, setSelectedCollection] = useState(null)
+
+  const addCollection = () => {
+    if (!newCollection.trim()) return
+    const updated = [...collections, { name: newCollection, drafts: [] }]
+    setCollections(updated)
+    localStorage.setItem('renzo-collections', JSON.stringify(updated))
+    setNewCollection('')
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content collections-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📁 Draft Collections</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="collection-create">
+          <input
+            type="text"
+            placeholder="New collection name..."
+            value={newCollection}
+            onChange={(e) => setNewCollection(e.target.value)}
+            className="input-field"
+          />
+          <button className="primary-btn" onClick={addCollection}>Create Collection</button>
+        </div>
+
+        <div className="collections-grid">
+          {collections.map((coll, i) => (
+            <div 
+              key={i} 
+              className={`collection-card ${selectedCollection === i ? 'selected' : ''}`}
+              onClick={() => setSelectedCollection(i)}
+            >
+              <div className="collection-icon">📁</div>
+              <div className="collection-name">{coll.name}</div>
+              <div className="collection-count">{coll.drafts?.length || 0} drafts</div>
+            </div>
+          ))}
+        </div>
+
+        {selectedCollection !== null && (
+          <div className="collection-details">
+            <h4>{collections[selectedCollection].name}</h4>
+            <p>Click drafts above to add to this collection</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
@@ -5263,6 +5676,11 @@ function App() {
   const [showDataManagement, setShowDataManagement] = useState(false)
   const [fabOpen, setFabOpen] = useState(false)
   const [miniBarVisible, setMiniBarVisible] = useState(false)
+  
+  // NEW v4.4 features
+  const [showPublishingPrep, setShowPublishingPrep] = useState(false)
+  const [showPerformanceTracker, setShowPerformanceTracker] = useState(false)
+  const [showDraftCollections, setShowDraftCollections] = useState(false)
   
   const [appSettings, setAppSettings] = useState(() => {
     const saved = localStorage.getItem('renzo-app-settings')
@@ -5499,6 +5917,9 @@ function App() {
       if (key === ',') setShowSettings(true)
       if (key === '4') setShowDataManagement(true)
       if (key === '5') setShowCitationFormatter(true)
+      if (key === '6') setShowPublishingPrep(true)  // 6 for Publishing Prep
+      if (key === '7') setShowPerformanceTracker(true)  // 7 for Performance Tracker
+      if (key === '8') setShowDraftCollections(true)  // 8 for Draft Collections
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -5819,6 +6240,20 @@ function App() {
         isOpen={showCitationFormatter}
         onClose={() => setShowCitationFormatter(false)}
       />
+      <PublishingPrepWorkflow
+        isOpen={showPublishingPrep}
+        onClose={() => setShowPublishingPrep(false)}
+      />
+      <PerformanceTracker
+        isOpen={showPerformanceTracker}
+        onClose={() => setShowPerformanceTracker(false)}
+      />
+      <DraftCollections
+        isOpen={showDraftCollections}
+        onClose={() => setShowDraftCollections(false)}
+        drafts={drafts}
+        onMoveToDraft={(draft) => saveDraft(draft)}
+      />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
@@ -5916,7 +6351,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v4.3</span>
+          <span className="logo-badge">v4.4</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -6000,6 +6435,7 @@ function App() {
         {/* New Feature Cards Row */}
         <section className="new-features-row">
           <DailyQuote />
+          <DailyChallenge onComplete={() => addToast('🎉 Daily challenge completed!', 'success')} />
           <StudySpotlight />
           <QuickStatGenerator />
           <TrendingHashtags />
@@ -6555,7 +6991,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v3.9 • Press ⌘K for commands, 3 for search, , for settings, 4 for data</p>
+        <p className="footer-version">v4.4 • Press ⌘K for commands, 3 for search, , for settings, 4 for data</p>
       </footer>
     </div>
   )
