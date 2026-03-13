@@ -1109,6 +1109,138 @@ Follow for evidence-based insights →`
   )
 }
 
+// ========== INSPIRATION BOARD (NEW v4.5) ==========
+function InspirationBoard({ isOpen, onClose }) {
+  const [items, setItems] = useState(() => {
+    const saved = localStorage.getItem('renzo-inspiration-board')
+    return saved ? JSON.parse(saved) : [
+      { id: 1, type: 'quote', content: "Write drunk, edit sober.", author: "Hemingway", tags: ['writing', 'process'] },
+      { id: 2, type: 'link', content: "The Science of Muscle Protein Synthesis", url: "https://pubmed.ncbi.nlm.nih.gov/", tags: ['science', 'research'] },
+      { id: 3, type: 'idea', content: "What if cold exposure activates brown adipose tissue in ways we haven't measured?", tags: ['longevity', 'hypothesis'] },
+    ]
+  })
+  const [newItem, setNewItem] = useState({ content: '', type: 'idea', tags: '' })
+  const [filter, setFilter] = useState('all')
+  const [copiedId, setCopiedId] = useState(null)
+  
+  const addItem = () => {
+    if (newItem.content.trim()) {
+      const tags = newItem.tags.split(',').map(t => t.trim()).filter(t => t)
+      const updated = [{ 
+        ...newItem, 
+        id: Date.now(), 
+        tags,
+        date: new Date().toISOString() 
+      }, ...items]
+      setItems(updated)
+      localStorage.setItem('renzo-inspiration-board', JSON.stringify(updated))
+      setNewItem({ content: '', type: 'idea', tags: '' })
+    }
+  }
+  
+  const deleteItem = (id) => {
+    const updated = items.filter(i => i.id !== id)
+    setItems(updated)
+    localStorage.setItem('renzo-inspiration-board', JSON.stringify(updated))
+  }
+  
+  const copyItem = (content, id) => {
+    navigator.clipboard.writeText(content)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 1500)
+  }
+  
+  const filteredItems = filter === 'all' ? items : items.filter(i => i.type === filter)
+  
+  const getTypeIcon = (type) => {
+    switch(type) {
+      case 'quote': return '💬'
+      case 'link': return '🔗'
+      case 'idea': return '💡'
+      default: return '📝'
+    }
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content inspiration-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🎨 Inspiration Board</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="inspiration-add">
+          <select 
+            value={newItem.type}
+            onChange={(e) => setNewItem({...newItem, type: e.target.value})}
+            className="inspiration-type-select"
+          >
+            <option value="idea">💡 Idea</option>
+            <option value="quote">💬 Quote</option>
+            <option value="link">🔗 Link</option>
+          </select>
+          <input
+            type="text"
+            placeholder="Capture inspiration..."
+            value={newItem.content}
+            onChange={(e) => setNewItem({...newItem, content: e.target.value})}
+            className="inspiration-input"
+          />
+          <input
+            type="text"
+            placeholder="Tags (comma separated)"
+            value={newItem.tags}
+            onChange={(e) => setNewItem({...newItem, tags: e.target.value})}
+            className="inspiration-tags"
+          />
+          <button onClick={addItem} className="inspiration-add-btn">Add</button>
+        </div>
+        
+        <div className="inspiration-filters">
+          <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All ({items.length})</button>
+          <button className={`filter-btn ${filter === 'idea' ? 'active' : ''}`} onClick={() => setFilter('idea')}>💡 Ideas</button>
+          <button className={`filter-btn ${filter === 'quote' ? 'active' : ''}`} onClick={() => setFilter('quote')}>💬 Quotes</button>
+          <button className={`filter-btn ${filter === 'link' ? 'active' : ''}`} onClick={() => setFilter('link')}>🔗 Links</button>
+        </div>
+        
+        <div className="inspiration-list">
+          {filteredItems.length === 0 ? (
+            <div className="inspiration-empty">
+              <span>🎨</span>
+              <p>Your inspiration board is empty. Capture ideas, quotes, and links!</p>
+            </div>
+          ) : (
+            filteredItems.map(item => (
+              <div key={item.id} className="inspiration-item">
+                <div className="inspiration-icon">{getTypeIcon(item.type)}</div>
+                <div className="inspiration-content">
+                  <p className="inspiration-text">{item.content}</p>
+                  {item.author && <span className="inspiration-author">— {item.author}</span>}
+                  {item.tags && item.tags.length > 0 && (
+                    <div className="inspiration-tags-list">
+                      {item.tags.map((tag, i) => (
+                        <span key={i} className="inspiration-tag">#{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="inspiration-actions">
+                  <button onClick={() => copyItem(item.content, item.id)}>
+                    {copiedId === item.id ? '✓' : '📋'}
+                  </button>
+                  <button onClick={() => deleteItem(item.id)}>🗑️</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Word Sprint - Quick 15-min timed writing
 function WordSprint({ isOpen, onClose, onSave }) {
   const [content, setContent] = useState('')
@@ -5682,6 +5814,9 @@ function App() {
   const [showPerformanceTracker, setShowPerformanceTracker] = useState(false)
   const [showDraftCollections, setShowDraftCollections] = useState(false)
   
+  // NEW v4.5 features
+  const [showInspirationBoard, setShowInspirationBoard] = useState(false)
+  
   const [appSettings, setAppSettings] = useState(() => {
     const saved = localStorage.getItem('renzo-app-settings')
     return saved ? JSON.parse(saved) : {
@@ -5920,6 +6055,7 @@ function App() {
       if (key === '6') setShowPublishingPrep(true)  // 6 for Publishing Prep
       if (key === '7') setShowPerformanceTracker(true)  // 7 for Performance Tracker
       if (key === '8') setShowDraftCollections(true)  // 8 for Draft Collections
+      if (key === '9') setShowInspirationBoard(true)  // 9 for Inspiration Board
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -5952,6 +6088,7 @@ function App() {
         setShowMoodTracker(false)
         setShowSEOScore(false)
         setShowCitationFormatter(false)
+        setShowInspirationBoard(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -6253,6 +6390,10 @@ function App() {
         onClose={() => setShowDraftCollections(false)}
         drafts={drafts}
         onMoveToDraft={(draft) => saveDraft(draft)}
+      />
+      <InspirationBoard
+        isOpen={showInspirationBoard}
+        onClose={() => setShowInspirationBoard(false)}
       />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
@@ -6567,6 +6708,11 @@ function App() {
             <span>📁</span>
             <span>Collect</span>
             <span className="feature-hint">8</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowInspirationBoard(true)}>
+            <span>🎨</span>
+            <span>Inspire</span>
+            <span className="feature-hint">9</span>
           </button>
         </section>
 

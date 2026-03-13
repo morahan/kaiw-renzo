@@ -1007,3 +1007,31 @@ button:hover::after { opacity: 1; }
 
 /* Gradient text for headers */
 .hero-title { background: linear-gradient(135deg, var(--text-primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+/* ========== INSPIRATION BOARD (v4.5) ========== */
+.inspiration-modal { width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
+.inspiration-add { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem; border-bottom: 1px solid var(--border); }
+.inspiration-type-select { padding: 0.6rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); font-size: 0.9rem; }
+.inspiration-input { padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); font-size: 0.95rem; }
+.inspiration-input:focus { outline: none; border-color: var(--accent); }
+.inspiration-tags { padding: 0.6rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 0.85rem; }
+.inspiration-add-btn { padding: 0.75rem; background: var(--accent-purple); border: none; border-radius: var(--radius-md); color: white; font-weight: 600; cursor: pointer; transition: all var(--transition-fast); }
+.inspiration-add-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.inspiration-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+.inspiration-filters .filter-btn { padding: 0.4rem 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 20px; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer; transition: all var(--transition-fast); }
+.inspiration-filters .filter-btn:hover { border-color: var(--accent); }
+.inspiration-filters .filter-btn.active { background: var(--accent-purple); border-color: var(--accent-purple); color: white; }
+.inspiration-list { padding: 1rem; max-height: 400px; overflow-y: auto; }
+.inspiration-empty { text-align: center; padding: 2rem; color: var(--text-muted); }
+.inspiration-empty span { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+.inspiration-item { display: flex; gap: 0.75rem; padding: 1rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 0.75rem; transition: all var(--transition-fast); }
+.inspiration-item:hover { border-color: var(--accent-purple); transform: translateX(4px); }
+.inspiration-icon { font-size: 1.25rem; }
+.inspiration-content { flex: 1; }
+.inspiration-text { font-size: 0.95rem; color: var(--text-primary); margin: 0 0 0.25rem 0; line-height: 1.4; }
+.inspiration-author { font-size: 0.8rem; color: var(--text-secondary); font-style: italic; }
+.inspiration-tags-list { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.inspiration-tag { font-size: 0.7rem; color: var(--accent-purple); background: rgba(168, 85, 247, 0.15); padding: 0.2rem 0.5rem; border-radius: 12px; }
+.inspiration-actions { display: flex; flex-direction: column; gap: 0.25rem; }
+.inspiration-actions button { padding: 0.4rem; background: transparent; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; transition: all var(--transition-fast); }
+.inspiration-actions button:hover { border-color: var(--accent-purple); background: var(--bg-hover); }

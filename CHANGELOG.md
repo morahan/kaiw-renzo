@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.5.0] — March 13, 2026
+
+### Added
+
+#### Inspiration Board (Key 9)
+- Capture and organize inspiration (quotes, links, ideas)
+- Tag-based organization system
+- Filter by type (idea, quote, link)
+- Quick copy to clipboard functionality
+- Persistent storage with localStorage
+
+### Improvements
+- Fixed keyboard shortcut for Quick Capture (was conflicting)
+- Added UI polish and animations
+
 ## [4.4.0] — March 13, 2026
 
 ### Added
