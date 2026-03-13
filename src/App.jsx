@@ -1433,6 +1433,14 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '4.5', date: '2026-03-13', changes: [
+      'Enhanced visual polish with smoother animations throughout',
+      'Added keyboard shortcut hints on feature buttons for better discoverability',
+      'Improved header layout with better spacing and visual hierarchy',
+      'Added Quick Actions sidebar for faster navigation',
+      'Enhanced Writing Streak Calendar with better visual feedback',
+      'Updated version badge to v4.5'
+    ]},
     { version: '4.4', date: '2026-03-13', changes: [
       'Added Publishing Prep Workflow (6 key) — Unified tool: article → X thread → YouTube script → schedule',
       'Added Performance Tracker (7 key) — Log article views, shares, saves, track engagement metrics',
@@ -6492,7 +6500,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v4.4</span>
+          <span className="logo-badge">v4.5</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}

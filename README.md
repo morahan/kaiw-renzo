@@ -1,4 +1,4 @@
-# RENZO — Content Writing Interface (v4.4)
+# RENZO — Content Writing Interface (v4.5)
 
 A comprehensive web-based writing and content management interface for fitness article creation, built with React + Vite.
 
@@ -36,7 +36,7 @@ A comprehensive web-based writing and content management interface for fitness a
 - **Quick Stat Generator** — Random fitness facts with study sources
 - **Daily Challenge** — Daily writing goals to keep you accountable
 
-### Data Management & Publishing (NEW v4.4)
+### Data Management & Publishing (v4.5)
 - **Publishing Prep Workflow** (6) — Unified tool: article → X thread → YouTube script → schedule
 - **Performance Tracker** (7) — Log article views, shares, saves, track engagement metrics
 - **Draft Collections** (8) — Organize drafts into folders/projects for better organization
@@ -45,6 +45,13 @@ A comprehensive web-based writing and content management interface for fitness a
 - **Global Search** (3) — Search across all hooks, ideas, headlines, and references
 - **Settings Modal** (,) — Customize daily goals, notifications, theme, auto-save
 - **Data Management** (4) — Export/import all data as JSON for backup
+
+### Visual Polish (v4.5)
+- Enhanced animations with smoother transitions throughout
+- Keyboard shortcut hints on feature buttons for better discoverability
+- Improved header layout with better spacing and visual hierarchy
+- Enhanced FAB with hover effects and keyboard shortcut display
+- Improved Writing Streak Calendar with better visual feedback
 
 ### Keyboard Shortcuts
 ```
