@@ -1636,6 +1636,12 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '4.8', date: '2026-03-13', changes: [
+      'Added SEO Checklist (= key) — Pre-publish checklist with weighted scoring',
+      'Added Tone Adjuster (- key) — Transform text between 6 different tones',
+      'Fixed version mismatch in index.html (was showing v3.8)',
+      'Updated version badge to v4.8'
+    ]},
     { version: '4.5', date: '2026-03-13', changes: [
       'Enhanced visual polish with smoother animations throughout',
       'Added keyboard shortcut hints on feature buttons for better discoverability',
@@ -2715,6 +2721,200 @@ function CitationFormatter({ isOpen, onClose }) {
               onClick={copyCitation}
             >
               {copied ? '✓ Copied!' : '📋 Copy Citation'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ========== SEO CHECKLIST (NEW v4.8) ==========
+function SEOChecklist({ isOpen, onClose }) {
+  const [checks, setChecks] = useState([
+    { id: 'title', label: 'Compelling headline with keyword', checked: false, weight: 15 },
+    { id: 'meta', label: 'Meta description (150-160 chars)', checked: false, weight: 10 },
+    { id: 'hook', label: 'Hook in first 50 words', checked: false, weight: 15 },
+    { id: 'h1', label: 'H1 contains main keyword', checked: false, weight: 10 },
+    { id: 'subheads', label: '2-3 H2 subheadings with keywords', checked: false, weight: 10 },
+    { id: 'images', label: 'Images have alt text', checked: false, weight: 5 },
+    { id: 'links', label: '2-3 outbound links to权威 sources', checked: false, weight: 10 },
+    { id: 'cta', label: 'Clear call-to-action', checked: false, weight: 10 },
+    { id: 'length', label: '750-1500 words', checked: false, weight: 10 },
+    { id: 'sources', label: 'At least 3 credible source citations', checked: false, weight: 5 },
+  ])
+  
+  const toggleCheck = (id) => {
+    setChecks(prev => prev.map(c => 
+      c.id === id ? { ...c, checked: !c.checked } : c
+    ))
+  }
+  
+  const score = checks.reduce((sum, c) => sum + (c.checked ? c.weight : 0), 0)
+  const maxScore = checks.reduce((sum, c) => sum + c.weight, 0)
+  const percentage = Math.round((score / maxScore) * 100)
+  
+  const getScoreColor = (p) => {
+    if (p >= 80) return '#22c55e'
+    if (p >= 60) return '#f97316'
+    return '#ef4444'
+  }
+  
+  const reset = () => {
+    setChecks(prev => prev.map(c => ({ ...c, checked: false })))
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content seo-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🔍 SEO Checklist</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="seo-score-display">
+          <div className="seo-score-circle" style={{ borderColor: getScoreColor(percentage) }}>
+            <span className="seo-score-number" style={{ color: getScoreColor(percentage) }}>
+              {percentage}%
+            </span>
+            <span className="seo-score-label">Score</span>
+          </div>
+          <div className="seo-score-details">
+            <span className="seo-score-points">{score}/{maxScore} points</span>
+            <button className="seo-reset-btn" onClick={reset}>Reset</button>
+          </div>
+        </div>
+        
+        <div className="seo-progress-bar">
+          <div 
+            className="seo-progress-fill" 
+            style={{ width: `${percentage}%`, background: getScoreColor(percentage) }}
+          />
+        </div>
+        
+        <div className="seo-checklist">
+          {checks.map(check => (
+            <label 
+              key={check.id} 
+              className={`seo-check-item ${check.checked ? 'checked' : ''}`}
+            >
+              <input
+                type="checkbox"
+                checked={check.checked}
+                onChange={() => toggleCheck(check.id)}
+              />
+              <span className="seo-check-label">{check.label}</span>
+              <span className="seo-check-weight">+{check.weight}</span>
+            </label>
+          ))}
+        </div>
+        
+        {percentage >= 80 && (
+          <div className="seo-success">
+            <span>🎉</span> Ready to publish!
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ========== TONE ADJUSTER (NEW v4.8) ==========
+function ToneAdjuster({ isOpen, onClose }) {
+  const [text, setText] = useState('')
+  const [selectedTone, setSelectedTone] = useState('professional')
+  const [output, setOutput] = useState('')
+  const [copied, setCopied] = useState(false)
+  
+  const tones = [
+    { id: 'professional', name: 'Professional', emoji: '💼', desc: 'Formal, authoritative' },
+    { id: 'conversational', name: 'Conversational', emoji: '💬', desc: 'Friendly, casual' },
+    { id: 'bold', name: 'Bold', emoji: '🔥', desc: 'Confident, edgy' },
+    { id: 'scientific', name: 'Scientific', emoji: '🔬', desc: 'Data-driven, precise' },
+    { id: 'storytelling', name: 'Storytelling', emoji: '📖', desc: 'Narrative, engaging' },
+    { id: 'direct', name: 'Direct', emoji: '🎯', desc: 'No fluff, action-oriented' },
+  ]
+  
+  // Simulated tone transformation (in production, this would call an AI API)
+  const transformText = () => {
+    if (!text.trim()) return
+    
+    const transformations = {
+      professional: text.replace(/you're/gi, 'you are').replace(/can't/gi, 'cannot').replace(/won't/gi, 'will not'),
+      conversational: text.replace(/\b(is|are|was|were)\b/gi, m => m.toLowerCase()).replace(/Furthermore/gi, 'Also').replace(/Additionally/gi, 'Plus'),
+      bold: text.replace(/\b(maybe|perhaps|possibly)\b/gi, 'definitely').replace(/could/gi, 'will').replace(/might/gi, 'can'),
+      scientific: text.replace(/\b(good|great|amazing)\b/gi, 'optimal').replace(/\b(bad|poor|badly)\b/gi, 'suboptimal').replace(/think/gi, 'hypothesize'),
+      storytelling: text.replace(/^/, 'Once upon a time, ').replace(/\. /g, '. '),
+      direct: text.replace(/However/gi, 'But').replace(/Furthermore/gi, 'And').replace(/It is important to note that/gi, ''),
+    }
+    
+    setOutput(transformations[selectedTone] || text)
+  }
+  
+  const copyOutput = () => {
+    navigator.clipboard.writeText(output)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content tone-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🎨 Tone Adjuster</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="tone-input-section">
+          <label>Paste your text:</label>
+          <textarea
+            placeholder="Paste article text, headline, or hook to adjust tone..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={4}
+          />
+        </div>
+        
+        <div className="tone-selection">
+          <label>Select tone:</label>
+          <div className="tone-grid">
+            {tones.map(tone => (
+              <button
+                key={tone.id}
+                className={`tone-option ${selectedTone === tone.id ? 'active' : ''}`}
+                onClick={() => setSelectedTone(tone.id)}
+              >
+                <span className="tone-emoji">{tone.emoji}</span>
+                <span className="tone-name">{tone.name}</span>
+                <span className="tone-desc">{tone.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <button 
+          className="tone-transform-btn"
+          onClick={transformText}
+          disabled={!text.trim()}
+        >
+          Transform Tone
+        </button>
+        
+        {output && (
+          <div className="tone-output-section">
+            <label>Transformed text:</label>
+            <div className="tone-output">
+              <p>{output}</p>
+            </div>
+            <button 
+              className={`tone-copy-btn ${copied ? 'copied' : ''}`}
+              onClick={copyOutput}
+            >
+              {copied ? '✓ Copied!' : '📋 Copy'}
             </button>
           </div>
         )}
@@ -6196,6 +6396,10 @@ function App() {
   const [showReadingList, setShowReadingList] = useState(false)
   const [showQuickAIPrompt, setShowQuickAIPrompt] = useState(false)
   
+  // NEW v4.8 features
+  const [showSEOChecklist, setShowSEOChecklist] = useState(false)
+  const [showToneAdjuster, setShowToneAdjuster] = useState(false)
+  
   const [appSettings, setAppSettings] = useState(() => {
     const saved = localStorage.getItem('renzo-app-settings')
     return saved ? JSON.parse(saved) : {
@@ -6437,6 +6641,8 @@ function App() {
       if (key === '9') setShowInspirationBoard(true)  // 9 for Inspiration Board
       if (key === '0') setShowReadingList(true)  // 0 for Reading List
       if (key === '`') setShowQuickAIPrompt(true)  // ` for Quick AI Prompt
+      if (key === '=') setShowSEOChecklist(true)  // = for SEO Checklist
+      if (key === '-') setShowToneAdjuster(true)  // - for Tone Adjuster
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -6760,6 +6966,14 @@ function App() {
         isOpen={showCitationFormatter}
         onClose={() => setShowCitationFormatter(false)}
       />
+      <SEOChecklist
+        isOpen={showSEOChecklist}
+        onClose={() => setShowSEOChecklist(false)}
+      />
+      <ToneAdjuster
+        isOpen={showToneAdjuster}
+        onClose={() => setShowToneAdjuster(false)}
+      />
       <PublishingPrepWorkflow
         isOpen={showPublishingPrep}
         onClose={() => setShowPublishingPrep(false)}
@@ -6883,7 +7097,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v4.6</span>
+          <span className="logo-badge">v4.8</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -7085,6 +7299,16 @@ function App() {
             <span>📚</span>
             <span>Cite</span>
             <span className="feature-hint">5</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowSEOChecklist(true)}>
+            <span>🔍</span>
+            <span>SEO</span>
+            <span className="feature-hint">6</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowToneAdjuster(true)}>
+            <span>🎨</span>
+            <span>Tone</span>
+            <span className="feature-hint">7</span>
           </button>
           <button className="feature-btn" onClick={() => setShowPublishingPrep(true)}>
             <span>🚀</span>
@@ -7555,7 +7779,7 @@ function App() {
       <KeyboardShortcutsFooter onShowShortcuts={() => setShowShortcuts(true)} />
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v4.6 • Press ⌘K for commands, ? for all shortcuts</p>
+        <p className="footer-version">v4.8 • Press ⌘K for commands, ? for all shortcuts</p>
       </footer>
     </div>
   )

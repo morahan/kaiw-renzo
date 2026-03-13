@@ -1036,6 +1036,53 @@ button:hover::after { opacity: 1; }
 .inspiration-actions button { padding: 0.4rem; background: transparent; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; transition: all var(--transition-fast); }
 .inspiration-actions button:hover { border-color: var(--accent-purple); background: var(--bg-hover); }
 
+/* ========== SEO CHECKLIST (v4.8) ========== */
+.seo-modal { width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; }
+.seo-score-display { display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem; border-bottom: 1px solid var(--border); }
+.seo-score-circle { width: 80px; height: 80px; border-radius: 50%; border: 4px solid var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.seo-score-number { font-size: 1.5rem; font-weight: 700; }
+.seo-score-label { font-size: 0.7rem; color: var(--text-muted); }
+.seo-score-details { flex: 1; }
+.seo-score-points { font-size: 0.9rem; color: var(--text-secondary); display: block; margin-bottom: 0.5rem; }
+.seo-reset-btn { padding: 0.4rem 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); font-size: 0.8rem; cursor: pointer; transition: all var(--transition-fast); }
+.seo-reset-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+.seo-progress-bar { height: 6px; background: var(--bg-hover); border-radius: 3px; overflow: hidden; margin: 0 1.5rem; }
+.seo-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s ease; }
+.seo-checklist { padding: 1rem; max-height: 350px; overflow-y: auto; }
+.seo-check-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: all var(--transition-fast); }
+.seo-check-item:hover { border-color: var(--accent); }
+.seo-check-item.checked { border-color: var(--accent-green); background: rgba(34, 197, 94, 0.1); }
+.seo-check-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent-green); cursor: pointer; }
+.seo-check-label { flex: 1; font-size: 0.9rem; color: var(--text-primary); }
+.seo-check-weight { font-size: 0.75rem; color: var(--accent-green); font-weight: 600; }
+.seo-success { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem; background: rgba(34, 197, 94, 0.15); border: 1px solid var(--accent-green); border-radius: 8px; margin: 1rem; color: var(--accent-green); font-weight: 600; }
+
+/* ========== TONE ADJUSTER (v4.8) ========== */
+.tone-modal { width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+.tone-input-section { padding: 1rem; border-bottom: 1px solid var(--border); }
+.tone-input-section label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.tone-input-section textarea { width: 100%; padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); font-size: 0.95rem; resize: vertical; min-height: 100px; }
+.tone-input-section textarea:focus { outline: none; border-color: var(--accent); }
+.tone-selection { padding: 1rem; border-bottom: 1px solid var(--border); }
+.tone-selection label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
+.tone-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.tone-option { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.75rem 0.5rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast); }
+.tone-option:hover { border-color: var(--accent); transform: translateY(-2px); }
+.tone-option.active { border-color: var(--accent-purple); background: rgba(168, 85, 247, 0.15); }
+.tone-emoji { font-size: 1.25rem; }
+.tone-name { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+.tone-desc { font-size: 0.65rem; color: var(--text-muted); text-align: center; }
+.tone-transform-btn { width: calc(100% - 2rem); margin: 1rem; padding: 0.875rem; background: linear-gradient(135deg, var(--accent-purple), var(--accent)); border: none; border-radius: var(--radius-md); color: white; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all var(--transition-fast); }
+.tone-transform-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4); }
+.tone-transform-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.tone-output-section { padding: 1rem; border-top: 1px solid var(--border); }
+.tone-output-section label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.tone-output { padding: 1rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 0.75rem; }
+.tone-output p { margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--text-primary); white-space: pre-wrap; }
+.tone-copy-btn { width: 100%; padding: 0.75rem; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); font-size: 0.9rem; cursor: pointer; transition: all var(--transition-fast); }
+.tone-copy-btn:hover { border-color: var(--accent-purple); }
+.tone-copy-btn.copied { background: var(--accent-green); border-color: var(--accent-green); color: white; }
+
 /* ========== v4.5 ENHANCEMENTS ========== */
 
 /* Enhanced animations */
