@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import './App.css'
 
-// ========== NEW FEATURES ==========
+// ========== NEW FEATURES v3.0 ==========
 
-// Quick Capture - Floating button to quickly jot ideas
+// Quick Capture - Quick idea capture (press Q)
 function QuickCapture({ isOpen, onClose, onSave }) {
   const [note, setNote] = useState('')
   const [category, setCategory] = useState('Idea')
@@ -65,47 +65,105 @@ function QuickCapture({ isOpen, onClose, onSave }) {
   )
 }
 
-// Streak Fire - Animated streak display with fire effect
-function StreakFire({ streak }) {
-  const [isAnimating, setIsAnimating] = useState(false)
+// Content Ideas Bank - Save and organize content ideas for future articles
+function ContentIdeasBank({ isOpen, onClose, ideas, onSave, onDelete, onMoveToDraft }) {
+  const [title, setTitle] = useState('')
+  const [category, setCategory] = useState('Trending')
+  const [angle, setAngle] = useState('')
+  const [filter, setFilter] = useState('all')
+  const inputRef = useRef(null)
 
   useEffect(() => {
-    setIsAnimating(true)
-    const timer = setTimeout(() => setIsAnimating(false), 2000)
-    return () => clearTimeout(timer)
-  }, [streak])
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isOpen])
 
-  const getStreakLevel = (s) => {
-    if (s >= 30) return { level: 'legendary', flames: 5, color: '#fbbf24' }
-    if (s >= 14) return { level: 'hot', flames: 4, color: '#f97316' }
-    if (s >= 7) return { level: 'warming', flames: 3, color: '#fb923c' }
-    if (s >= 3) return { level: 'building', flames: 2, color: '#fb7185' }
-    return { level: 'starting', flames: 1, color: '#94a3b8' }
+  const handleSave = () => {
+    if (title.trim()) {
+      onSave?.({ title: title.trim(), category, angle: angle.trim() })
+      setTitle('')
+      setAngle('')
+    }
   }
 
-  const { level, flames, color } = getStreakLevel(streak)
+  const filteredIdeas = filter === 'all' ? ideas : ideas.filter(i => i.category === filter)
+
+  const getCategoryColor = (cat) => {
+    const colors = { 'Trending': '#f97316', 'Myth-bust': '#dc2626', 'How-to': '#22c55e', 'Science': '#3b82f6', 'Listicle': '#a855f7' }
+    return colors[cat] || '#a1a1aa'
+  }
+
+  if (!isOpen) return null
 
   return (
-    <div className={`streak-fire ${level} ${isAnimating ? 'pulse' : ''}`}>
-      <div className="streak-flames">
-        {[...Array(flames)].map((_, i) => (
-          <span 
-            key={i} 
-            className="flame"
-            style={{ 
-              '--flame-delay': `${i * 0.15}s`,
-              '--flame-color': color 
-            }}
-          >
-            🔥
-          </span>
-        ))}
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content ideas-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>💡 Content Ideas Bank</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="ideas-form">
+          <div className="ideas-input-row">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="New content idea..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="ideas-title-input"
+            />
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="ideas-category-select">
+              <option value="Trending">🔥 Trending</option>
+              <option value="Myth-bust">💥 Myth-bust</option>
+              <option value="How-to">⚙️ How-to</option>
+              <option value="Science">🔬 Science</option>
+              <option value="Listicle">📋 Listicle</option>
+            </select>
+          </div>
+          <textarea
+            placeholder="Angle or hook idea..."
+            value={angle}
+            onChange={(e) => setAngle(e.target.value)}
+            rows={2}
+            className="ideas-angle-input"
+          />
+          <button className="ideas-save-btn" onClick={handleSave} disabled={!title.trim()}>
+            Add to Bank
+          </button>
+        </div>
+
+        <div className="ideas-filter">
+          <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All ({ideas.length})</button>
+          {['Trending', 'Myth-bust', 'How-to', 'Science', 'Listicle'].map(cat => (
+            <button key={cat} className={`filter-btn ${filter === cat ? 'active' : ''}`} onClick={() => setFilter(cat)}>
+              {cat} ({ideas.filter(i => i.category === cat).length})
+            </button>
+          ))}
+        </div>
+
+        <div className="ideas-list">
+          {filteredIdeas.length === 0 ? (
+            <div className="ideas-empty">No ideas yet. Add your first one above!</div>
+          ) : (
+            filteredIdeas.map(idea => (
+              <div key={idea.id} className="idea-card">
+                <div className="idea-header">
+                  <span className="idea-category" style={{ color: getCategoryColor(idea.category) }}>{idea.category}</span>
+                  <span className="idea-date">{new Date(idea.date).toLocaleDateString()}</span>
+                </div>
+                <div className="idea-title">{idea.title}</div>
+                {idea.angle && <div className="idea-angle">"{idea.angle}"</div>}
+                <div className="idea-actions">
+                  <button onClick={() => onMoveToDraft?.(idea.id)}>📝 Draft</button>
+                  <button onClick={() => onDelete?.(idea.id)}>🗑️</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
-      <div className="streak-info">
-        <span className="streak-number">{streak}</span>
-        <span className="streak-label">day streak</span>
-      </div>
-      <div className="streak-badge">{level}</div>
     </div>
   )
 }
@@ -165,6 +223,1337 @@ function SessionStats() {
             {stats.sessions > 0 ? Math.round(stats.words / stats.sessions) : 0}
           </span>
           <span className="session-stat-label">📊 Avg/Session</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Research Queue - topics waiting to be written
+function ResearchQueue({ isOpen, onClose, onSelect }) {
+  const [queue, setQueue] = useState(() => {
+    const saved = localStorage.getItem('renzo-research-queue')
+    return saved ? JSON.parse(saved) : [
+      { id: 1, topic: "Photobiomodulation therapy", priority: "high", notes: "Red light therapy research", date: "2026-03-10" },
+      { id: 2, topic: "Epigenetic age reversal protocols", priority: "medium", notes: "Look into TruAge data", date: "2026-03-08" },
+      { id: 3, topic: "Myostatin inhibition research", priority: "low", notes: "Future of muscle growth", date: "2026-03-05" },
+    ]
+  })
+  const [newTopic, setNewTopic] = useState({ topic: '', priority: 'medium', notes: '' })
+  
+  const addToQueue = () => {
+    if (newTopic.topic) {
+      const updated = [{ ...newTopic, id: Date.now(), date: new Date().toISOString() }, ...queue]
+      setQueue(updated)
+      localStorage.setItem('renzo-research-queue', JSON.stringify(updated))
+      setNewTopic({ topic: '', priority: 'medium', notes: '' })
+    }
+  }
+  
+  const removeFromQueue = (id) => {
+    const updated = queue.filter(q => q.id !== id)
+    setQueue(updated)
+    localStorage.setItem('renzo-research-queue', JSON.stringify(updated))
+  }
+  
+  const getPriorityColor = (p) => {
+    if (p === 'high') return '#ef4444'
+    if (p === 'medium') return '#f97316'
+    return '#22c55e'
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content research-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🔬 Research Queue</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="research-add">
+          <input
+            type="text"
+            placeholder="Topic to research..."
+            value={newTopic.topic}
+            onChange={(e) => setNewTopic({...newTopic, topic: e.target.value})}
+          />
+          <select 
+            value={newTopic.priority}
+            onChange={(e) => setNewTopic({...newTopic, priority: e.target.value})}
+          >
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+          <button onClick={addToQueue}>Add</button>
+        </div>
+        
+        <div className="research-list">
+          {queue.length === 0 ? (
+            <div className="research-empty">Queue is empty! Add topics to research.</div>
+          ) : (
+            queue.map(item => (
+              <div key={item.id} className="research-item">
+                <div className="research-priority" style={{ background: getPriorityColor(item.priority) }}>
+                  {item.priority.charAt(0).toUpperCase()}
+                </div>
+                <div className="research-content" onClick={() => { onSelect?.(item); onClose(); }}>
+                  <div className="research-topic">{item.topic}</div>
+                  {item.notes && <div className="research-notes">{item.notes}</div>}
+                </div>
+                <button className="research-remove" onClick={() => removeFromQueue(item.id)}>×</button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Saved Hooks Collection
+function SavedHooks({ isOpen, onClose }) {
+  const [hooks, setHooks] = useState(() => {
+    const saved = localStorage.getItem('renzo-saved-hooks')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [newHook, setNewHook] = useState('')
+  
+  const addHook = () => {
+    if (newHook.trim()) {
+      const updated = [{ text: newHook.trim(), date: new Date().toISOString(), used: false }, ...hooks]
+      setHooks(updated)
+      localStorage.setItem('renzo-saved-hooks', JSON.stringify(updated))
+      setNewHook('')
+    }
+  }
+  
+  const markAsUsed = (index) => {
+    const updated = [...hooks]
+    updated[index].used = !updated[index].used
+    setHooks(updated)
+    localStorage.setItem('renzo-saved-hooks', JSON.stringify(updated))
+  }
+  
+  const deleteHook = (index) => {
+    const updated = hooks.filter((_, i) => i !== index)
+    setHooks(updated)
+    localStorage.setItem('renzo-saved-hooks', JSON.stringify(updated))
+  }
+  
+  const copyHook = (text) => {
+    navigator.clipboard.writeText(text)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content hooks-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>⚡ Saved Hooks</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="hooks-add">
+          <input
+            type="text"
+            placeholder="Write a killer hook..."
+            value={newHook}
+            onChange={(e) => setNewHook(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addHook()}
+          />
+          <button onClick={addHook} disabled={!newHook.trim()}>Save</button>
+        </div>
+        
+        <div className="hooks-list">
+          {hooks.length === 0 ? (
+            <div className="hooks-empty">
+              <span>⚡</span>
+              <p>No saved hooks yet. Start collecting your best opening lines!</p>
+            </div>
+          ) : (
+            hooks.map((hook, i) => (
+              <div key={i} className={`hook-item ${hook.used ? 'used' : ''}`}>
+                <p className="hook-text" onClick={() => copyHook(hook.text)}>"{hook.text}"</p>
+                <div className="hook-actions">
+                  <button 
+                    className={`hook-use-btn ${hook.used ? 'active' : ''}`}
+                    onClick={() => markAsUsed(i)}
+                  >
+                    {hook.used ? '✓ Used' : 'Mark Used'}
+                  </button>
+                  <button className="hook-copy" onClick={() => copyHook(hook.text)}>📋</button>
+                  <button className="hook-delete" onClick={() => deleteHook(i)}>🗑️</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Headline Strategy Generator - 13 proven formulas
+const headlineFormulas = [
+  { name: 'Stats Punch', template: '[Winner] beats [Loser] for [Goal] — new study reveals', tier: 1, emoji: '📊' },
+  { name: 'Paradox Open', template: 'Everyone thinks [Common Belief]. Here\'s why they\'re wrong.', tier: 1, emoji: '🤔' },
+  { name: 'Myth Buster', template: 'The truth about [Common Myth] — science says otherwise', tier: 1, emoji: '🔬' },
+  { name: 'Number Lead', template: '[Surprising Stat]% of people don\'t know this about [Topic]', tier: 1, emoji: '🎯' },
+  { name: 'The Shocking', template: 'Scientists discovered [Unexpected Finding]. Here\'s what it means for you.', tier: 1, emoji: '⚡' },
+  { name: 'Vs Comparison', template: '[Method A] vs [Method B]: Which one actually works?', tier: 2, emoji: '⚖️' },
+  { name: 'How To', template: 'How to [Desired Outcome] in [Timeframe] — backed by research', tier: 2, emoji: '🛠️' },
+  { name: 'The Secret', template: 'The [Topic] secret nobody talks about', tier: 2, emoji: '🤫' },
+  { name: 'Why Most', template: 'Why most people fail at [Topic] — and the fix', tier: 2, emoji: '❌' },
+  { name: 'What If', template: 'What if everything you knew about [Topic] was wrong?', tier: 3, emoji: '💭' },
+  { name: 'List Format', template: '[Number] [Topic] myths that are holding you back', tier: 3, emoji: '📋' },
+  { name: 'Future Lead', template: 'In [Year], [Prediction] will change [Topic] forever', tier: 3, emoji: '🔮' },
+  { name: 'Authority Quote', template: '"[Quote about Topic]" — what top experts say', tier: 3, emoji: '💬' },
+]
+
+function HeadlineGenerator({ isOpen, onClose }) {
+  const [topic, setTopic] = useState('')
+  const [results, setResults] = useState([])
+  const [savedHeadlines, setSavedHeadlines] = useState(() => {
+    const saved = localStorage.getItem('renzo-generated-headlines')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [activeTab, setActiveTab] = useState('generate') // generate | saved
+  
+  const generateHeadlines = () => {
+    if (!topic.trim()) return
+    
+    const topicLower = topic.toLowerCase()
+    const topicWords = topic.split(' ').filter(w => w)
+    const winner = topicWords[0] || 'This'
+    const loser = topicWords[topicWords.length - 1] || 'that'
+    const goal = 'results'
+    const myth = topic
+    const surprisingStat = Math.floor(Math.random() * 40) + 30
+    
+    const generated = headlineFormulas.map(formula => {
+      let headline = formula.template
+        .replace('[Winner]', winner.charAt(0).toUpperCase() + winner.slice(1))
+        .replace('[Loser]', loser)
+        .replace('[Goal]', goal)
+        .replace('[Common Belief]', `${topic} is good for you`)
+        .replace('[Common Myth]', topic)
+        .replace('[Surprising Stat]', surprisingStat)
+        .replace('[Unexpected Finding]', `a surprising link between ${topicLower} and energy`)
+        .replace('[Method A]', 'Traditional approach')
+        .replace('[Method B]', 'New research-backed method')
+        .replace('[Desired Outcome]', topicLower)
+        .replace('[Timeframe]', '30 days')
+        .replace('[Topic]', topic)
+        .replace('[Number]', '7')
+        .replace('[Year]', '2027')
+        .replace('[Prediction]', topicLower)
+        .replace('[Quote]', `The data on ${topicLower} is undeniable`)
+      
+      return {
+        ...formula,
+        generated: headline,
+        filled: true
+      }
+    })
+    
+    setResults(generated)
+  }
+  
+  const saveHeadline = (headline) => {
+    const updated = [{ ...headline, savedAt: new Date().toISOString() }, ...savedHeadlines]
+    setSavedHeadlines(updated)
+    localStorage.setItem('renzo-generated-headlines', JSON.stringify(updated))
+  }
+  
+  const deleteHeadline = (index) => {
+    const updated = savedHeadlines.filter((_, i) => i !== index)
+    setSavedHeadlines(updated)
+    localStorage.setItem('renzo-generated-headlines', JSON.stringify(updated))
+  }
+  
+  const copyHeadline = (text) => {
+    navigator.clipboard.writeText(text)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content headline-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🎯 Headline Generator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="headline-tabs">
+          <button 
+            className={`headline-tab ${activeTab === 'generate' ? 'active' : ''}`}
+            onClick={() => setActiveTab('generate')}
+          >
+            Generate
+          </button>
+          <button 
+            className={`headline-tab ${activeTab === 'saved' ? 'active' : ''}`}
+            onClick={() => setActiveTab('saved')}
+          >
+            Saved ({savedHeadlines.length})
+          </button>
+        </div>
+        
+        {activeTab === 'generate' && (
+          <>
+            <div className="headline-input">
+              <input
+                type="text"
+                placeholder="Enter your topic (e.g., 'intermittent fasting', 'sleep optimization')..."
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && generateHeadlines()}
+              />
+              <button 
+                className="headline-generate-btn"
+                onClick={generateHeadlines}
+                disabled={!topic.trim()}
+              >
+                Generate
+              </button>
+            </div>
+            
+            {results.length > 0 && (
+              <div className="headline-results">
+                <div className="headline-results-header">
+                  <span>{results.length} headline strategies</span>
+                  <span className="tier-legend">
+                    <span className="tier-badge tier-1">Tier 1</span> Best
+                    <span className="tier-badge tier-2">Tier 2</span> Good
+                    <span className="tier-badge tier-3">Tier 3</span> Alternative
+                  </span>
+                </div>
+                <div className="headline-list">
+                  {results.map((h, i) => (
+                    <div key={i} className={`headline-item tier-${h.tier}`}>
+                      <span className="headline-emoji">{h.emoji}</span>
+                      <div className="headline-content">
+                        <span className="headline-formula">{h.name}</span>
+                        <p className="headline-text">"{h.generated}"</p>
+                      </div>
+                      <div className="headline-actions">
+                        <span className={`tier-badge tier-${h.tier}`}>T{h.tier}</span>
+                        <button className="headline-copy" onClick={() => copyHeadline(h.generated)}>📋</button>
+                        <button className="headline-save" onClick={() => saveHeadline(h)}>⭐</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+        
+        {activeTab === 'saved' && (
+          <div className="headline-saved">
+            {savedHeadlines.length === 0 ? (
+              <div className="headline-empty">
+                <span>🎯</span>
+                <p>No saved headlines yet. Generate some and save your favorites!</p>
+              </div>
+            ) : (
+              <div className="headline-list">
+                {savedHeadlines.map((h, i) => (
+                  <div key={i} className={`headline-item tier-${h.tier}`}>
+                    <span className="headline-emoji">{h.emoji}</span>
+                    <div className="headline-content">
+                      <span className="headline-formula">{h.name}</span>
+                      <p className="headline-text">"{h.generated}"</p>
+                    </div>
+                    <div className="headline-actions">
+                      <button className="headline-copy" onClick={() => copyHeadline(h.generated)}>📋</button>
+                      <button className="headline-delete" onClick={() => deleteHeadline(i)}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Word Sprint - Quick 15-min timed writing
+function WordSprint({ isOpen, onClose, onSave }) {
+  const [content, setContent] = useState('')
+  const [timeLeft, setTimeLeft] = useState(15 * 60) // 15 minutes
+  const [isRunning, setIsRunning] = useState(false)
+  const [sprintWords, setSprintWords] = useState(0)
+  
+  useEffect(() => {
+    let interval
+    if (isRunning && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft(t => t - 1)
+      }, 1000)
+    } else if (timeLeft === 0 && isRunning) {
+      setIsRunning(false)
+    }
+    return () => clearInterval(interval)
+  }, [isRunning, timeLeft])
+  
+  useEffect(() => {
+    const words = content.trim().split(/\s+/).filter(w => w).length
+    setSprintWords(words)
+  }, [content])
+  
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
+  }
+  
+  const handleSave = () => {
+    if (content.trim()) {
+      onSave?.({ title: `Sprint - ${new Date().toLocaleTimeString()}`, content, words: sprintWords, date: new Date().toISOString() })
+      setContent('')
+      setTimeLeft(15 * 60)
+      onClose()
+    }
+  }
+  
+  const resetSprint = () => {
+    setIsRunning(false)
+    setTimeLeft(15 * 60)
+    setContent('')
+  }
+  
+  if (!isOpen) return null
+  
+  const progress = ((15 * 60) - timeLeft) / (15 * 60) * 100
+  
+  return (
+    <div className="sprint-overlay">
+      <div className="sprint-container">
+        <div className="sprint-header">
+          <div className="sprint-timer">
+            <span className={`sprint-time ${timeLeft < 60 ? 'warning' : ''}`}>{formatTime(timeLeft)}</span>
+            <div className="sprint-progress-bar">
+              <div className="sprint-progress-fill" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+          <div className="sprint-controls">
+            <button className="sprint-btn primary" onClick={() => setIsRunning(!isRunning)}>
+              {isRunning ? 'Pause' : timeLeft === 15 * 60 ? 'Start Sprint' : 'Resume'}
+            </button>
+            <button className="sprint-btn" onClick={resetSprint}>Reset</button>
+            <button className="sprint-btn" onClick={onClose}>Exit</button>
+          </div>
+        </div>
+        
+        <div className="sprint-stats">
+          <div className="sprint-stat">
+            <span className="sprint-stat-value">{sprintWords}</span>
+            <span className="sprint-stat-label">words</span>
+          </div>
+          <div className="sprint-stat">
+            <span className="sprint-stat-value">{Math.max(0, Math.round((sprintWords / ((15 * 60 - timeLeft) || 1)) * 60))}</span>
+            <span className="sprint-stat-label">WPM</span>
+          </div>
+          <div className="sprint-stat">
+            <span className="sprint-stat-value">{timeLeft < 60 ? '🔴' : timeLeft < 180 ? '🟡' : '🟢'}</span>
+            <span className="sprint-stat-label">energy</span>
+          </div>
+        </div>
+        
+        <textarea
+          className="sprint-textarea"
+          placeholder="Go! Write your heart out..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          disabled={!isRunning && timeLeft === 15 * 60}
+        />
+        
+        <div className="sprint-footer">
+          <button className="sprint-save" onClick={handleSave} disabled={!content.trim()}>
+            Save Sprint ({sprintWords} words)
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Article Series Tracker
+function ArticleSeriesTracker({ isOpen, onClose }) {
+  const [series, setSeries] = useState(() => {
+    const saved = localStorage.getItem('renzo-article-series')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [newSeries, setNewSeries] = useState({ title: '', articles: [], expanded: false })
+  
+  const addSeries = () => {
+    if (newSeries.title) {
+      const updated = [...series, { ...newSeries, id: Date.now(), created: new Date().toISOString() }]
+      setSeries(updated)
+      localStorage.setItem('renzo-article-series', JSON.stringify(updated))
+      setNewSeries({ title: '', articles: [], expanded: false })
+    }
+  }
+  
+  const deleteSeries = (id) => {
+    const updated = series.filter(s => s.id !== id)
+    setSeries(updated)
+    localStorage.setItem('renzo-article-series', JSON.stringify(updated))
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content series-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📚 Article Series</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="series-add">
+          <input
+            type="text"
+            placeholder="New series title..."
+            value={newSeries.title}
+            onChange={(e) => setNewSeries({...newSeries, title: e.target.value})}
+          />
+          <button onClick={addSeries}>Create Series</button>
+        </div>
+        
+        <div className="series-list">
+          {series.length === 0 ? (
+            <div className="series-empty">
+              <span>📚</span>
+              <p>No article series yet. Group related articles together!</p>
+            </div>
+          ) : (
+            series.map(s => (
+              <div key={s.id} className="series-item">
+                <div className="series-header">
+                  <span className="series-title">{s.title}</span>
+                  <span className="series-count">{s.articles.length} articles</span>
+                  <button className="series-delete" onClick={() => deleteSeries(s.id)}>×</button>
+                </div>
+                <div className="series-progress">
+                  <div 
+                    className="series-progress-fill"
+                    style={{ width: `${(s.articles.filter(a => a.status === 'published').length / Math.max(s.articles.length, 1)) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Extended tips for v3.0
+const tips = [
+  "Paradox Open hooks convert 3x better than questions",
+  "Myth-busting articles hit 10/10 virality",
+  "First sentence must work as a standalone tweet",
+  "Specific mechanisms beat generic advice",
+  "Lead with the controversial take, then back it up",
+  "The Stats Punch formula: Lead with the number",
+  "Expansion Bridge: add detail after impact",
+  "Cut adjectives. Cut adverbs. Cut weak words.",
+  "Your CTA should tie directly back to your hook",
+  "If bores you, it bores them. Cut it.",
+  "The best headlines answer a question the reader didn't know they had",
+  "Always challenge assumptions — that's where the clicks live",
+]
+
+// Changelog Modal - Version history
+function ChangelogModal({ isOpen, onClose }) {
+  const changelog = [
+    { version: '3.8', date: '2026-03-13', changes: [
+      'Added Quick Tweet Generator - One-click tweet creation with tone selection (A key)',
+      'Added 4 tweet tones: Bold, Question, Stat, Story',
+      'Added keyboard shortcut (A) for Quick Tweet Generator',
+      'Updated version badge to v3.8'
+    ]},
+    { version: '3.7', date: '2026-03-13', changes: [
+      'Added Quick Mood Indicator in header - see your current mood at a glance',
+      'Added smooth fade-in and slide animations throughout the UI',
+      'Enhanced header with gradient glow effects and better visual hierarchy',
+      'Added responsive design improvements for mobile',
+      'Added animation utility classes for consistent motion design',
+      'Updated version badge to v3.7'
+    ]},
+    { version: '3.6', date: '2026-03-13', changes: [
+      'Fixed keyboard shortcut conflict (H was assigned to both Shortcuts and Headline Gen)',
+      'Added Daily Word Goal widget in header - track progress toward daily target',
+      'Improved keyboard shortcut handling with Cmd/Ctrl modifiers',
+      'Updated version badge to v3.6'
+    ]},
+    { version: '3.5', date: '2026-03-13', changes: [
+      'Added Content Ideas Bank - Save and organize content ideas for future articles (A key)',
+      'Added Writing Mood Tracker - Track your creative energy states',
+      'Added Category Performance chart - Visual breakdown by content category',
+      'Added SEO Score Calculator - Check article SEO potential',
+      'Updated version badge to v3.5',
+      'Fixed keyboard shortcut conflicts',
+      'Added quick mood selection to header'
+    ]},
+    { version: '3.3', date: '2026-03-13', changes: [
+      'Added Article Brief Generator - Generates full article brief from topic (I key)',
+      'Added Trending Hashtags widget - Track trending fitness hashtags for X content',
+      'Added keyboard shortcut (I) for Brief Generator',
+      'Updated version badge to v3.3',
+      'Brief Generator creates hook, problem, mechanism, solution, and CTA sections'
+    ]},
+    { version: '3.2', date: '2026-03-13', changes: [
+      'Added CTA Templates - 6 pre-built call-to-action templates',
+      'Added Hook Tester - Analyze hooks for effectiveness (curiosity, emotion, specificity, urgency)',
+      'Added keyboard shortcuts K (CTA) and J (Hook Tester)',
+      'Updated Keyboard Shortcuts modal with all current shortcuts',
+      'Added toolbar buttons for CTA and Hook Tester'
+    ]},
+    { version: '3.1', date: '2026-03-12', changes: [
+      'Added Headline Generator - 13 proven headline formulas',
+      'Added Tier ranking for headlines (Tier 1 = best performers)',
+      'Fixed missing CSS variables causing rendering issues',
+      'Added dark theme with proper color system',
+      'Added keyboard shortcut (H) for headline generator',
+      'Improved base styles with gradients and transitions',
+      'LocalStorage persistence for saved headlines'
+    ]},
+    { version: '3.0', date: '2026-03-12', changes: [
+      'Added Word Sprint - Quick 15-min timed writing sessions',
+      'Added Research Queue - Track topics needing research',
+      'Added Saved Hooks - Collect your best opening lines',
+      'Added Article Series Tracker - Group related articles',
+      'Added 7 new writing tips',
+      'Performance improvements and bug fixes'
+    ]},
+    { version: '2.9', date: '2026-03-12', changes: [
+      'Added Focus Mode (M) - Full-screen distraction-free writing',
+      'Added Writing Streak Calendar - Visual 28-day activity tracker',
+      'Added Quick Reference Panel (R) - Store citations & sources',
+      'Added Focus & Refs buttons to toolbar',
+      'Updated keyboard shortcuts'
+    ]},
+    { version: '2.8', date: '2026-03-12', changes: [
+      'Added Export Drafts feature (Markdown/JSON)',
+      'Added Reading Time Estimator',
+      'Added Word Count Goal Widget',
+      'Updated keyboard shortcuts',
+      'Improved performance'
+    ]},
+    { version: '2.7', date: '2026-03-07', changes: [
+      'Added Brainstorm Mode',
+      'Added Topic Generator',
+      'Added Clipboard History',
+      'Added Writing Timer (Pomodoro)',
+      'Added Daily Quote rotation'
+    ]},
+    { version: '2.6', date: '2026-03-05', changes: [
+      'Added Command Palette',
+      'Added Hot Take Generator',
+      'Added Virality Calculator',
+      'Added Quick Write Mode'
+    ]},
+    { version: '2.5', date: '2026-02-28', changes: [
+      'Initial release',
+      'Article dashboard',
+      'Metrics tracking',
+      'Notion sync'
+    ]}
+  ]
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content changelog-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📜 Changelog</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="changelog-list">
+          {changelog.map((entry, i) => (
+            <div key={i} className="changelog-entry">
+              <div className="changelog-header">
+                <span className="changelog-version">v{entry.version}</span>
+                <span className="changelog-date">{entry.date}</span>
+              </div>
+              <ul className="changelog-changes">
+                {entry.changes.map((change, j) => (
+                  <li key={j}>{change}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== FOCUS MODE ==========
+function FocusMode({ isOpen, onClose, onSave }) {
+  const [content, setContent] = useState('')
+  const [title, setTitle] = useState('')
+  const [wordCount, setWordCount] = useState(0)
+  const textareaRef = useRef(null)
+  
+  useEffect(() => {
+    if (isOpen && textareaRef.current) {
+      textareaRef.current.focus()
+    }
+  }, [isOpen])
+  
+  useEffect(() => {
+    const words = content.trim().split(/\s+/).filter(w => w.length > 0).length
+    setWordCount(words)
+  }, [content])
+  
+  const handleSave = () => {
+    if (title && content) {
+      onSave?.({ title, content, words: wordCount, date: new Date().toISOString() })
+      setContent('')
+      setTitle('')
+      onClose()
+    }
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="focus-mode-overlay">
+      <div className="focus-mode-container">
+        <div className="focus-mode-header">
+          <input
+            type="text"
+            className="focus-title-input"
+            placeholder="Article title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <div className="focus-mode-controls">
+            <span className="focus-word-count">{wordCount} words</span>
+            <span className="focus-time">{Math.max(1, Math.ceil(wordCount / 200))} min read</span>
+            <button className="focus-save-btn" onClick={handleSave} disabled={!title || !content}>
+              Save Draft
+            </button>
+            <button className="focus-close-btn" onClick={onClose}>Exit</button>
+          </div>
+        </div>
+        <textarea
+          ref={textareaRef}
+          className="focus-textarea"
+          placeholder="Start writing... (Shift+Enter for line break)"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+        <div className="focus-mode-footer">
+          <span className="focus-hint">Press Esc to exit • Auto-saves to localStorage</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== WRITING STREAK CALENDAR ==========
+function WritingStreakCalendar({ streak, articles }) {
+  const [days, setDays] = useState([])
+  
+  useEffect(() => {
+    // Generate last 28 days
+    const today = new Date()
+    const writingDays = articles.map(a => new Date(a.date).toDateString())
+    const newDays = []
+    
+    for (let i = 27; i >= 0; i--) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toDateString()
+      const hasWritten = writingDays.includes(dateStr)
+      newDays.push({
+        date: date,
+        day: date.getDate(),
+        hasWritten,
+        isToday: i === 0
+      })
+    }
+    setDays(newDays)
+  }, [articles])
+  
+  return (
+    <div className="streak-calendar">
+      <div className="streak-calendar-header">
+        <span className="streak-icon">🔥</span>
+        <span className="streak-count">{streak} day streak</span>
+      </div>
+      <div className="streak-grid">
+        {days.map((day, i) => (
+          <div 
+            key={i} 
+            className={`streak-day ${day.hasWritten ? 'active' : ''} ${day.isToday ? 'today' : ''}`}
+            title={`${day.date.toLocaleDateString()}${day.hasWritten ? ' - Wrote!' : ''}`}
+          >
+            {day.day}
+          </div>
+        ))}
+      </div>
+      <div className="streak-legend">
+        <span className="legend-item"><span className="legend-dot active"></span> Wrote</span>
+        <span className="legend-item"><span className="legend-dot"></span> No activity</span>
+      </div>
+    </div>
+  )
+}
+
+// ========== QUICK REFERENCE PANEL ==========
+function QuickReferencePanel({ isOpen, onClose }) {
+  const [references, setReferences] = useState(() => {
+    const saved = localStorage.getItem('renzo-references')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [newRef, setNewRef] = useState({ title: '', url: '', note: '' })
+  const [filter, setFilter] = useState('all')
+  
+  const categories = ['all', 'studies', 'tools', 'inspiration', 'citations']
+  
+  const addReference = () => {
+    if (newRef.title) {
+      const updated = [...references, { ...newRef, id: Date.now(), category: filter === 'all' ? 'studies' : filter, date: new Date().toISOString() }]
+      setReferences(updated)
+      localStorage.setItem('renzo-references', JSON.stringify(updated))
+      setNewRef({ title: '', url: '', note: '' })
+    }
+  }
+  
+  const deleteReference = (id) => {
+    const updated = references.filter(r => r.id !== id)
+    setReferences(updated)
+    localStorage.setItem('renzo-references', JSON.stringify(updated))
+  }
+  
+  const filteredRefs = filter === 'all' ? references : references.filter(r => r.category === filter)
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content reference-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📚 Quick Reference</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="reference-filters">
+          {categories.map(cat => (
+            <button 
+              key={cat}
+              className={`filter-btn ${filter === cat ? 'active' : ''}`}
+              onClick={() => setFilter(cat)}
+            >
+              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </button>
+          ))}
+        </div>
+        
+        <div className="reference-add">
+          <input
+            type="text"
+            placeholder="Title..."
+            value={newRef.title}
+            onChange={(e) => setNewRef({...newRef, title: e.target.value})}
+          />
+          <input
+            type="text"
+            placeholder="URL (optional)..."
+            value={newRef.url}
+            onChange={(e) => setNewRef({...newRef, url: e.target.value})}
+          />
+          <button onClick={addReference}>Add</button>
+        </div>
+        
+        <div className="reference-list">
+          {filteredRefs.length === 0 ? (
+            <div className="reference-empty">No references yet. Add some!</div>
+          ) : (
+            filteredRefs.map(ref => (
+              <div key={ref.id} className="reference-item">
+                <div className="reference-title">{ref.title}</div>
+                {ref.url && <a href={ref.url} target="_blank" rel="noopener noreferrer" className="reference-url">🔗</a>}
+                {ref.note && <div className="reference-note">{ref.note}</div>}
+                <div className="reference-meta">
+                  <span className="reference-category">{ref.category}</span>
+                  <button className="reference-delete" onClick={() => deleteReference(ref.id)}>🗑️</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Article Templates Library
+function ArticleTemplates({ isOpen, onClose, onSelect }) {
+  const templates = [
+    { 
+      id: 'myth-bust', 
+      name: 'Myth Buster', 
+      emoji: '🚫',
+      desc: 'Debunk common fitness misconceptions',
+      structure: ['Hook (contrarian claim)', 'The myth', 'The science', 'The truth', 'Actionable CTA']
+    },
+    { 
+      id: 'vs-compare', 
+      name: 'Vs. Comparison', 
+      emoji: '⚔️',
+      desc: 'Compare two approaches side by side',
+      structure: ['Hook (tension)', 'Option A analysis', 'Option B analysis', 'Winner (with data)', 'Recommendation']
+    },
+    { 
+      id: 'deep-dive', 
+      name: 'Deep Dive', 
+      emoji: '🔬',
+      desc: 'ComprehensiveExploration of a topic',
+      structure: ['Hook (intrigue)', 'Problem statement', 'Mechanism (science)', 'Applications', 'Summary + CTA']
+    },
+    { 
+      id: 'how-to', 
+      name: 'How-To Guide', 
+      emoji: '🛠️',
+      desc: 'Actionable step-by-step content',
+      structure: ['Hook (pain point)', 'Why it matters', 'Step 1', 'Step 2', 'Step 3', 'Common mistakes', 'CTA']
+    },
+    { 
+      id: 'hot-take', 
+      name: 'Hot Take', 
+      emoji: '🔥',
+      desc: 'Controversial opinion with backing',
+      structure: ['Bold claim', 'Evidence 1', 'Evidence 2', 'Counter-arguments', 'Final stance']
+    },
+    { 
+      id: 'listicle', 
+      name: 'Listicle', 
+      emoji: '📋',
+      desc: 'Numbered list of insights',
+      structure: ['Hook (numbered promise)', 'Item 1 (hook)', 'Item 2', 'Item 3', 'Summary', 'CTA']
+    }
+  ]
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content templates-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📝 Article Templates</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="templates-grid">
+          {templates.map((t) => (
+            <div 
+              key={t.id} 
+              className="template-card"
+              onClick={() => { onSelect?.(t); onClose(); }}
+            >
+              <span className="template-emoji">{t.emoji}</span>
+              <div className="template-name">{t.name}</div>
+              <div className="template-desc">{t.desc}</div>
+              <div className="template-structure">
+                {t.structure.slice(0, 3).map((s, i) => (
+                  <span key={i} className="structure-tag">{s}</span>
+                ))}
+                {t.structure.length > 3 && <span className="structure-more">+{t.structure.length - 3}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// CTA Templates Library
+function CTATemplates({ isOpen, onClose, onSelect }) {
+  const ctaTemplates = [
+    { 
+      id: 'direct-action',
+      name: 'Direct Action',
+      emoji: '🎯',
+      desc: 'Clear, immediate action step',
+      examples: [
+        'Start tonight. Your muscles will thank you tomorrow.',
+        'Try this for 2 weeks. Track your results.',
+        'Drop the guesswork. Start here.',
+        'Commit to one change today.'
+      ]
+    },
+    { 
+      id: 'question-cta',
+      name: 'Question CTA',
+      emoji: '❓',
+      desc: 'Engage reader with a question',
+      examples: [
+        'Ready to stop guessing? Let\'s go.',
+        'What\'s holding you back?',
+        'Who\'s ready to try this?',
+        'Which of these will you implement first?'
+      ]
+    },
+    { 
+      id: 'transformation',
+      name: 'Transformation',
+      emoji: '✨',
+      desc: 'Promise a result or change',
+      examples: [
+        'Your future self starts today.',
+        'Transform your training in 30 days.',
+        'Build the body you actually want.',
+        'This is the shortcut nobody talks about.'
+      ]
+    },
+    { 
+      id: 'community',
+      name: 'Community CTA',
+      emoji: '🤝',
+      desc: 'Social proof or community angle',
+      examples: [
+        'Join 10,000+ athletes doing this right now.',
+        'Tag someone who needs to hear this.',
+        'Drop a 🔥 if you\'re in.',
+        'Be the first to try it and report back.'
+      ]
+    },
+    { 
+      id: 'challenge',
+      name: 'Challenge CTA',
+      emoji: '🏆',
+      desc: 'Push reader to compete',
+      examples: [
+        'I dare you to try this for 30 days.',
+        'Prove the doubters wrong.',
+        'Take the 2-week challenge.',
+        'Who can hit this first?'
+      ]
+    },
+    { 
+      id: 'soft-cta',
+      name: 'Soft CTA',
+      emoji: '💬',
+      desc: 'Low-pressure invitation',
+      examples: [
+        'Save this for later.',
+        'Bookmark and come back when you\'re ready.',
+        'Share with a training partner.',
+        'Keep this in your back pocket.'
+      ]
+    }
+  ]
+
+  const [copiedId, setCopiedId] = useState(null)
+
+  const copyToClipboard = (text, id) => {
+    navigator.clipboard.writeText(text)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 1500)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content cta-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📣 CTA Templates</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+          Click any example to copy it
+        </p>
+        <div className="cta-templates-grid">
+          {ctaTemplates.map((cta) => (
+            <div key={cta.id} className="cta-template-card">
+              <div className="cta-template-header">
+                <span className="cta-emoji">{cta.emoji}</span>
+                <span className="cta-name">{cta.name}</span>
+              </div>
+              <div className="cta-desc">{cta.desc}</div>
+              <div className="cta-examples">
+                {cta.examples.map((ex, i) => (
+                  <div 
+                    key={i} 
+                    className="cta-example"
+                    onClick={() => copyToClipboard(ex, `${cta.id}-${i}`)}
+                  >
+                    {copiedId === `${cta.id}-${i}` ? '✓ Copied!' : ex}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Hook Effectiveness Tester
+function HookTester({ isOpen, onClose }) {
+  const [hook, setHook] = useState('')
+  const [analysis, setAnalysis] = useState(null)
+
+  const analyzeHook = (text) => {
+    const score = { total: 0, curiosity: 0, emotion: 0, specificity: 0, urgency: 0, clarity: 0 }
+    const feedback = []
+
+    // Curiosity check (question, gap, "secret", "truth", "myth", "what happens")
+    if (text.includes('?') || /\b(secret|truth|myth|what happens|why|how come)\b/i.test(text)) {
+      score.curiosity = 25
+      feedback.push('✅ Good curiosity gap')
+    } else {
+      score.curiosity = 10
+      feedback.push('💡 Add a question or curiosity gap')
+    }
+
+    // Emotion check (strong words)
+    const emotionWords = /\b(shocking|surprising|devastating|amazing|life-changing|insane|killer|deadly|real|honest|brutal|game-changer)\b/i
+    if (emotionWords.test(text)) {
+      score.emotion = 25
+      feedback.push('✅ Strong emotional language')
+    } else {
+      score.emotion = 10
+      feedback.push('💡 Add emotion with stronger words')
+    }
+
+    // Specificity check (numbers, конкрет)
+    if (/\d+/.test(text) || /\b(once|twice|exactly|specifically)\b/i.test(text)) {
+      score.specificity = 25
+      feedback.push('✅ Good specificity')
+    } else {
+      score.specificity = 10
+      feedback.push('💡 Add numbers or specific details')
+    }
+
+    // Urgency check (now, today, tonight, stop, start, don't)
+    if (/\b(now|today|tonight|stop|start|don\'t|never|finally)\b/i.test(text)) {
+      score.urgency = 15
+      feedback.push('✅ Creates urgency')
+    } else {
+      score.urgency = 5
+      feedback.push('💡 Add urgency words')
+    }
+
+    // Clarity check (short, readable)
+    if (text.length < 80) {
+      score.clarity = 10
+      feedback.push('✅ Good length for scroll')
+    } else if (text.length < 120) {
+      score.clarity = 5
+      feedback.push('⚠️ Getting long - consider trimming')
+    } else {
+      score.clarity = 0
+      feedback.push('❌ Too long - will get cut off')
+    }
+
+    score.total = score.curiosity + score.emotion + score.specificity + score.urgency + score.clarity
+
+    return { score, feedback }
+  }
+
+  const handleAnalyze = () => {
+    if (hook.trim()) {
+      setAnalysis(analyzeHook(hook))
+    }
+  }
+
+  const getScoreColor = (score) => {
+    if (score >= 80) return 'var(--accent-green)'
+    if (score >= 60) return 'var(--accent-blue)'
+    if (score >= 40) return 'var(--accent-orange)'
+    return 'var(--text-muted)'
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content hook-tester-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🔍 Hook Tester</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="hook-input-area">
+          <textarea
+            className="hook-input"
+            placeholder="Paste your hook here..."
+            value={hook}
+            onChange={(e) => setHook(e.target.value)}
+            rows={3}
+          />
+          <button className="analyze-btn" onClick={handleAnalyze} disabled={!hook.trim()}>
+            Analyze Hook
+          </button>
+        </div>
+        {analysis && (
+          <div className="hook-analysis">
+            <div className="hook-score-display">
+              <div className="score-circle" style={{ borderColor: getScoreColor(analysis.score.total) }}>
+                <span className="score-number" style={{ color: getScoreColor(analysis.score.total) }}>
+                  {analysis.score.total}
+                </span>
+                <span className="score-label">/100</span>
+              </div>
+            </div>
+            <div className="hook-feedback">
+              {analysis.feedback.map((f, i) => (
+                <div key={i} className="feedback-item">{f}</div>
+              ))}
+            </div>
+            <div className="score-breakdown">
+              <div className="breakdown-row">
+                <span>Curiosity</span>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: `${analysis.score.curiosity}%` }} />
+                </div>
+                <span>{analysis.score.curiosity}/25</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Emotion</span>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: `${analysis.score.emotion}%` }} />
+                </div>
+                <span>{analysis.score.emotion}/25</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Specificity</span>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: `${analysis.score.specificity}%` }} />
+                </div>
+                <span>{analysis.score.specificity}/25</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Urgency</span>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: `${analysis.score.urgency}%` }} />
+                </div>
+                <span>{analysis.score.urgency}/15</span>
+              </div>
+              <div className="breakdown-row">
+                <span>Clarity</span>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: `${analysis.score.clarity}%` }} />
+                </div>
+                <span>{analysis.score.clarity}/10</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Productivity Score Component
+function ProductivityScore({ articles, words, streak }) {
+  const [score, setScore] = useState(0)
+  const [breakdown, setBreakdown] = useState({ consistency: 0, output: 0, quality: 0 })
+  
+  useEffect(() => {
+    // Calculate productivity score
+    const consistencyScore = Math.min((streak / 30) * 100, 100) // 30-day streak = max
+    const outputScore = Math.min((words / 10000) * 100, 100) // 10k words = max
+    const qualityScore = articles.length > 0 
+      ? articles.reduce((sum, a) => sum + (a.engagement || 0), 0) / articles.length * 10 
+      : 0
+    
+    const totalScore = Math.round((consistencyScore * 0.3 + outputScore * 0.35 + qualityScore * 0.35))
+    
+    setBreakdown({ consistency: consistencyScore, output: outputScore, quality: qualityScore })
+    
+    // Animate score
+    let current = 0
+    const timer = setInterval(() => {
+      current += 2
+      if (current >= totalScore) {
+        setScore(totalScore)
+        clearInterval(timer)
+      } else {
+        setScore(current)
+      }
+    }, 20)
+    
+    return () => clearInterval(timer)
+  }, [articles, words, streak])
+  
+  const getScoreColor = (s) => {
+    if (s >= 80) return '#22c55e'
+    if (s >= 60) return '#3b82f6'
+    if (s >= 40) return '#f97316'
+    return '#ef4444'
+  }
+  
+  const getScoreLabel = (s) => {
+    if (s >= 80) return 'Elite'
+    if (s >= 60) return 'Strong'
+    if (s >= 40) return 'Average'
+    return 'Building'
+  }
+  
+  return (
+    <div className="productivity-score">
+      <div className="score-header">
+        <span className="score-icon">📈</span>
+        <span className="score-label">Productivity Score</span>
+      </div>
+      <div className="score-main">
+        <div className="score-circle" style={{ '--score-color': getScoreColor(score) }}>
+          <svg viewBox="0 0 100 100">
+            <circle className="score-bg-circle" cx="50" cy="50" r="45" />
+            <circle 
+              className="score-fill-circle" 
+              cx="50" 
+              cy="50" 
+              r="45" 
+              style={{ strokeDashoffset: 283 - (283 * score / 100) }}
+            />
+          </svg>
+          <div className="score-value">
+            <span className="score-number">{score}</span>
+            <span className="score-level">{getScoreLabel(score)}</span>
+          </div>
+        </div>
+      </div>
+      <div className="score-breakdown">
+        <div className="breakdown-item">
+          <span className="breakdown-label">Consistency</span>
+          <div className="breakdown-bar">
+            <div className="breakdown-fill" style={{ width: `${breakdown.consistency}%`, background: '#a855f7' }} />
+          </div>
+          <span className="breakdown-value">{Math.round(breakdown.consistency)}%</span>
+        </div>
+        <div className="breakdown-item">
+          <span className="breakdown-label">Output</span>
+          <div className="breakdown-bar">
+            <div className="breakdown-fill" style={{ width: `${breakdown.output}%`, background: '#3b82f6' }} />
+          </div>
+          <span className="breakdown-value">{Math.round(breakdown.output)}%</span>
+        </div>
+        <div className="breakdown-item">
+          <span className="breakdown-label">Quality</span>
+          <div className="breakdown-bar">
+            <div className="breakdown-fill" style={{ width: `${breakdown.quality}%`, background: '#22c55e' }} />
+          </div>
+          <span className="breakdown-value">{Math.round(breakdown.quality)}%</span>
         </div>
       </div>
     </div>
@@ -270,6 +1659,348 @@ function QuickStatGenerator() {
   )
 }
 
+// Trending Hashtags - For X/Twitter content
+function TrendingHashtags() {
+  const [hashtags, setHashtags] = useState([
+    { tag: '#FitnessTips', posts: '12.4K', trend: 'up' },
+    { tag: '#ScienceBased', posts: '8.2K', trend: 'up' },
+    { tag: '#MuscleGrowth', posts: '15.7K', trend: 'stable' },
+    { tag: '#Longevity', posts: '6.1K', trend: 'up' },
+    { tag: '#Training', posts: '22.3K', trend: 'down' },
+    { tag: '#Biohacking', posts: '4.8K', trend: 'up' },
+    { tag: '#HealthTips', posts: '18.9K', trend: 'stable' },
+    { tag: '#Science', posts: '31.2K', trend: 'up' },
+  ])
+  const [copiedTag, setCopiedTag] = useState(null)
+  
+  const copyTag = (tag) => {
+    navigator.clipboard.writeText(tag)
+    setCopiedTag(tag)
+    setTimeout(() => setCopiedTag(null), 1500)
+  }
+  
+  const getTrendIcon = (trend) => {
+    if (trend === 'up') return '↑'
+    if (trend === 'down') return '↓'
+    return '→'
+  }
+  
+  const getTrendColor = (trend) => {
+    if (trend === 'up') return '#22c55e'
+    if (trend === 'down') return '#ef4444'
+    return '#a1a1aa'
+  }
+  
+  return (
+    <div className="trending-hashtags">
+      <div className="hashtags-header">
+        <span className="hashtags-icon">🏷️</span>
+        <span className="hashtags-label">Trending Hashtags</span>
+        <button className="hashtags-refresh" onClick={() => setHashtags([...hashtags].sort(() => 0.5 - Math.random()))}>↻</button>
+      </div>
+      <div className="hashtags-list">
+        {hashtags.map((h, i) => (
+          <div key={i} className="hashtag-item" onClick={() => copyTag(h.tag)}>
+            <span className="hashtag-tag">{h.tag}</span>
+            <div className="hashtag-meta">
+              <span className="hashtag-posts">{h.posts} posts</span>
+              <span className="hashtag-trend" style={{ color: getTrendColor(h.trend) }}>
+                {getTrendIcon(h.trend)}
+              </span>
+            </div>
+            {copiedTag === h.tag && <span className="hashtag-copied">Copied!</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Article Brief Generator - Quick article brief from topic
+function ArticleBriefGenerator({ isOpen, onClose, onSave }) {
+  const [topic, setTopic] = useState('')
+  const [brief, setBrief] = useState(null)
+  const [generating, setGenerating] = useState(false)
+  
+  const generateBrief = () => {
+    if (!topic.trim()) return
+    
+    setGenerating(true)
+    setTimeout(() => {
+      const topics = topic.toLowerCase()
+      const isLongevity = topics.includes('longevity') || topics.includes('age') || topics.includes('biological')
+      const isTraining = topics.includes('training') || topics.includes('workout') || topics.includes('exercise')
+      const isScience = topics.includes('science') || topics.includes('research') || topics.includes('study')
+      const isRecovery = topics.includes('recovery') || topics.includes('sleep') || topics.includes('rest')
+      
+      let category = 'Science'
+      if (isLongevity) category = 'Longevity'
+      else if (isTraining) category = 'Training'
+      else if (isRecovery) category = 'Recovery'
+      
+      const templates = {
+        hook: [
+          `What if everything you knew about ${topic} was wrong?`,
+          `The truth about ${topic} that the industry doesn't want you to know`,
+          `Scientists just discovered something shocking about ${topic}`,
+        ],
+        problem: [
+          `Most people get ${topic} completely backwards`,
+          `You're probably doing ${topic} wrong — here's why`,
+          `The ${topic} myth that's costing you results`,
+        ],
+        mechanism: [
+          `Research shows that the mechanism behind ${topic} involves cellular-level changes`,
+          `New studies reveal ${topic} triggers specific metabolic pathways`,
+          `The science of ${topic} points to a surprising mechanism`,
+        ],
+        solution: [
+          `Here's the evidence-based approach to ${topic}`,
+          `The optimal strategy for ${topic}, backed by research`,
+          `What top experts recommend for ${topic}`,
+        ],
+        cta: [
+          `Try this tonight and track your results. Your body will thank you.`,
+          `Ready to optimize ${topic}? Start with one change today.`,
+          `Share this with someone who needs to hear the truth about ${topic}`,
+        ]
+      }
+      
+      const pick = (arr) => arr[Math.floor(Math.random() * arr.length)]
+      
+      const newBrief = {
+        topic,
+        category,
+        hook: pick(templates.hook),
+        problem: pick(templates.problem),
+        mechanism: pick(templates.mechanism),
+        solution: pick(templates.solution),
+        cta: pick(templates.cta),
+        targetWords: isLongevity ? 1200 : isTraining ? 1000 : 800,
+        sources: [
+          'PubMed / JISSN',
+          'Examine.com',
+          'Recent review articles',
+        ],
+        created: new Date().toISOString()
+      }
+      
+      setBrief(newBrief)
+      setGenerating(false)
+    }, 800)
+  }
+  
+  const copyBrief = () => {
+    if (!brief) return
+    const text = `
+📝 ARTICLE BRIEF: ${brief.topic}
+
+Category: ${brief.category}
+Target: ${brief.targetWords} words
+
+🪝 HOOK:
+${brief.hook}
+
+⚠️ PROBLEM:
+${brief.problem}
+
+🔬 MECHANISM:
+${brief.mechanism}
+
+✅ SOLUTION:
+${brief.solution}
+
+📣 CTA:
+${brief.cta}
+
+📚 SOURCES:
+${brief.sources.join('\n')}
+    `.trim()
+    navigator.clipboard.writeText(text)
+  }
+  
+  const saveBrief = () => {
+    if (brief) {
+      onSave?.(brief)
+      onClose()
+    }
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content brief-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📋 Article Brief Generator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="brief-input">
+          <input
+            type="text"
+            placeholder="Enter topic (e.g., 'intermittent fasting', 'sleep optimization')..."
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && generateBrief()}
+          />
+          <button 
+            className="brief-generate-btn"
+            onClick={generateBrief}
+            disabled={!topic.trim() || generating}
+          >
+            {generating ? 'Generating...' : 'Generate Brief'}
+          </button>
+        </div>
+        
+        {brief && (
+          <div className="brief-output">
+            <div className="brief-meta">
+              <span className="brief-category" style={{ color: categoryColors[brief.category] }}>
+                {brief.category}
+              </span>
+              <span className="brief-target">{brief.targetWords} words</span>
+            </div>
+            
+            <div className="brief-section">
+              <span className="brief-label">🪝 Hook</span>
+              <p>{brief.hook}</p>
+            </div>
+            
+            <div className="brief-section">
+              <span className="brief-label">⚠️ Problem</span>
+              <p>{brief.problem}</p>
+            </div>
+            
+            <div className="brief-section">
+              <span className="brief-label">🔬 Mechanism</span>
+              <p>{brief.mechanism}</p>
+            </div>
+            
+            <div className="brief-section">
+              <span className="brief-label">✅ Solution</span>
+              <p>{brief.solution}</p>
+            </div>
+            
+            <div className="brief-section">
+              <span className="brief-label">📣 CTA</span>
+              <p>{brief.cta}</p>
+            </div>
+            
+            <div className="brief-actions">
+              <button className="brief-copy-btn" onClick={copyBrief}>📋 Copy Brief</button>
+              <button className="brief-save-btn" onClick={saveBrief}>💾 Save to Drafts</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Content Calendar - Upcoming deadlines
+function ContentCalendar() {
+  const [events, setEvents] = useState(() => {
+    const saved = localStorage.getItem('renzo-content-calendar')
+    return saved ? JSON.parse(saved) : [
+      { id: 1, title: 'Weekly article', date: '2026-03-14', type: 'deadline', color: '#ef4444' },
+      { id: 2, title: 'X thread', date: '2026-03-15', type: 'schedule', color: '#3b82f6' },
+      { id: 3, title: 'Newsletter', date: '2026-03-18', type: 'deadline', color: '#ef4444' },
+    ]
+  })
+  const [showAddEvent, setShowAddEvent] = useState(false)
+  const [newEvent, setNewEvent] = useState({ title: '', date: '', type: 'deadline' })
+  
+  const getDaysUntil = (dateStr) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const eventDate = new Date(dateStr)
+    eventDate.setHours(0, 0, 0, 0)
+    const diff = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24))
+    if (diff === 0) return 'Today'
+    if (diff === 1) return 'Tomorrow'
+    if (diff < 0) return 'Overdue'
+    return `${diff}d`
+  }
+  
+  const getEventColor = (type) => {
+    if (type === 'deadline') return '#ef4444'
+    if (type === 'schedule') return '#3b82f6'
+    return '#22c55e'
+  }
+  
+  const addEvent = () => {
+    if (newEvent.title && newEvent.date) {
+      const updated = [...events, { ...newEvent, id: Date.now(), color: getEventColor(newEvent.type) }]
+      setEvents(updated)
+      localStorage.setItem('renzo-content-calendar', JSON.stringify(updated))
+      setNewEvent({ title: '', date: '', type: 'deadline' })
+      setShowAddEvent(false)
+    }
+  }
+  
+  const removeEvent = (id) => {
+    const updated = events.filter(e => e.id !== id)
+    setEvents(updated)
+    localStorage.setItem('renzo-content-calendar', JSON.stringify(updated))
+  }
+  
+  const sortedEvents = [...events].sort((a, b) => new Date(a.date) - new Date(b.date))
+  const upcomingEvents = sortedEvents.slice(0, 3)
+  
+  return (
+    <div className="content-calendar">
+      <div className="calendar-header">
+        <span className="calendar-icon">📅</span>
+        <span className="calendar-label">Content Calendar</span>
+        <button className="calendar-add-btn" onClick={() => setShowAddEvent(!showAddEvent)}>+</button>
+      </div>
+      
+      {showAddEvent && (
+        <div className="calendar-add-form">
+          <input
+            type="text"
+            placeholder="Event title..."
+            value={newEvent.title}
+            onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+          />
+          <input
+            type="date"
+            value={newEvent.date}
+            onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+          />
+          <select
+            value={newEvent.type}
+            onChange={(e) => setNewEvent({...newEvent, type: e.target.value})}
+          >
+            <option value="deadline">Deadline</option>
+            <option value="schedule">Schedule</option>
+            <option value="milestone">Milestone</option>
+          </select>
+          <button onClick={addEvent}>Add</button>
+        </div>
+      )}
+      
+      <div className="calendar-events">
+        {upcomingEvents.length === 0 ? (
+          <p className="calendar-empty">No upcoming events</p>
+        ) : (
+          upcomingEvents.map(event => (
+            <div key={event.id} className="calendar-event">
+              <div className="event-indicator" style={{ background: event.color }} />
+              <div className="event-content">
+                <span className="event-title">{event.title}</span>
+                <span className="event-days">{getDaysUntil(event.date)}</span>
+              </div>
+              <button className="event-remove" onClick={() => removeEvent(event.id)}>×</button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Content Formula Reference
 function ContentFormulaRef({ isOpen, onClose }) {
   const formula = [
@@ -307,15 +2038,35 @@ function ContentFormulaRef({ isOpen, onClose }) {
 // Keyboard Shortcuts Reference
 function KeyboardShortcuts({ isOpen, onClose }) {
   const shortcuts = [
-    { key: 'F', action: 'Open Content Formula' },
-    { key: 'G', action: 'Generate Topic' },
-    { key: 'C', action: 'Open Clipboard History' },
-    { key: 'K', action: 'Open Command Palette' },
-    { key: 'Q', action: 'Quick Write Mode' },
-    { key: 'S', action: 'Save Draft' },
     { key: 'N', action: 'New Article' },
+    { key: 'D', action: 'Quick Draft' },
+    { key: 'T', action: 'Article Templates' },
+    { key: 'K', action: 'CTA Templates' },
+    { key: 'J', action: 'Hook Tester' },
+    { key: 'Y', action: 'Hot Take Generator' },
+    { key: 'P', action: 'Writing Prompt' },
+    { key: 'V', action: 'Virality Calculator' },
+    { key: 'H', action: 'Headline Generator' },
+    { key: 'I', action: 'Brief Generator' },
+    { key: 'F', action: 'Content Formula' },
+    { key: 'G', action: 'Topic Generator' },
+    { key: 'B', action: 'Brainstorm Mode' },
+    { key: 'C', action: 'Clipboard History' },
+    { key: 'Q', action: 'Quick Capture' },
+    { key: 'W', action: 'Quick Write' },
+    { key: 'M', action: 'Focus Mode' },
+    { key: 'R', action: 'Reference Panel' },
+    { key: 'O', action: 'Research Queue' },
+    { key: 'U', action: 'Saved Hooks' },
+    { key: 'S', action: 'Word Sprint' },
+    { key: 'Z', action: 'Article Series' },
+    { key: 'P', action: 'Pipeline Tracker' },
+    { key: 'X', action: 'Thread Generator' },
+    { key: 'A', action: 'Quick Tweet' },
+    { key: 'E', action: 'Export Drafts' },
+    { key: 'L', action: 'Changelog' },
+    { key: '/', action: 'Search Articles' },
     { key: 'Esc', action: 'Close Modal' },
-    { key: '⏱️', action: 'Start/Stop Timer (in modal)' },
   ]
   
   if (!isOpen) return null
@@ -1071,6 +2822,7 @@ function CommandPalette({ isOpen, onClose, onAction }) {
 
   const commands = [
     { id: 'new', label: 'New Draft', icon: '📝', shortcut: 'D', category: 'Create' },
+    { id: 'ideas', label: 'Content Ideas Bank', icon: '💡', shortcut: 'A', category: 'Create' },
     { id: 'prompt', label: 'Random Prompt', icon: '💡', shortcut: 'P', category: 'Create' },
     { id: 'hottake', label: 'Hot Take Generator', icon: '🔥', shortcut: 'H', category: 'Create' },
     { id: 'trends', label: 'View Trends', icon: '🔥', shortcut: 'T', category: 'Research' },
@@ -1210,6 +2962,282 @@ function CategoryChart({ articles }) {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+// Writing Mood Tracker Component
+function WritingMoodTracker({ isOpen, onClose }) {
+  const [mood, setMood] = useState(() => localStorage.getItem('renzo-mood') || 'neutral')
+  const [moodHistory, setMoodHistory] = useState(() => {
+    const saved = localStorage.getItem('renzo-mood-history')
+    return saved ? JSON.parse(saved) : []
+  })
+  
+  const moods = [
+    { id: 'fired', emoji: '🔥', label: 'Fired Up', color: '#ef4444' },
+    { id: 'focused', emoji: '🎯', label: 'Focused', color: '#3b82f6' },
+    { id: 'neutral', emoji: '😐', label: 'Neutral', color: '#71717a' },
+    { id: 'tired', emoji: '😴', label: 'Tired', color: '#a855f7' },
+    { id: 'blocked', emoji: '🚧', label: 'Blocked', color: '#f97316' },
+  ]
+  
+  const handleMoodSelect = (moodId) => {
+    setMood(moodId)
+    const newEntry = { mood: moodId, time: new Date().toISOString() }
+    const updated = [newEntry, ...moodHistory].slice(0, 50)
+    setMoodHistory(updated)
+    localStorage.setItem('renzo-mood', moodId)
+    localStorage.setItem('renzo-mood-history', JSON.stringify(updated))
+  }
+  
+  const currentMood = moods.find(m => m.id === mood)
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content mood-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🎭 Writing Mood Tracker</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="mood-current">
+          <div className="mood-label">Current Mood</div>
+          <div className="mood-display" style={{ borderColor: currentMood?.color }}>
+            <span className="mood-emoji">{currentMood?.emoji}</span>
+            <span className="mood-text">{currentMood?.label}</span>
+          </div>
+        </div>
+        <div className="mood-selector">
+          <div className="mood-label">How are you feeling?</div>
+          <div className="mood-options">
+            {moods.map(m => (
+              <button 
+                key={m.id}
+                className={`mood-option ${mood === m.id ? 'active' : ''}`}
+                style={{ 
+                  '--mood-color': m.color,
+                  background: mood === m.id ? m.color + '20' : 'transparent'
+                }}
+                onClick={() => handleMoodSelect(m.id)}
+              >
+                <span className="mood-option-emoji">{m.emoji}</span>
+                <span className="mood-option-label">{m.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="mood-history">
+          <div className="mood-label">Recent Moods</div>
+          <div className="mood-history-list">
+            {moodHistory.length === 0 ? (
+              <div className="mood-empty">No mood history yet. Select your mood to start tracking.</div>
+            ) : (
+              moodHistory.slice(0, 10).map((entry, i) => {
+                const m = moods.find(md => md.id === entry.mood)
+                const time = new Date(entry.time)
+                return (
+                  <div key={i} className="mood-history-item">
+                    <span>{m?.emoji}</span>
+                    <span>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// SEO Score Calculator Component
+function SEOScoreCalculator({ isOpen, onClose }) {
+  const [title, setTitle] = useState('')
+  const [headline, setHeadline] = useState('')
+  const [hasMeta, setHasMeta] = useState(false)
+  const [hasKeywords, setHasKeywords] = useState(false)
+  const [wordCount, setWordCount] = useState(0)
+  const [hasStats, setHasStats] = useState(false)
+  const [hasQuestion, setHasQuestion] = useState(false)
+  
+  const calculateScore = () => {
+    let score = 0
+    const checks = []
+    
+    // Title checks
+    if (title.length >= 30 && title.length <= 60) {
+      score += 15
+      checks.push({ name: 'Title length (30-60 chars)', passed: true })
+    } else {
+      checks.push({ name: 'Title length (30-60 chars)', passed: false })
+    }
+    
+    if (title.includes('?') || title.includes(':') || title.includes('-')) {
+      score += 10
+      checks.push({ name: 'Title has power character', passed: true })
+    } else {
+      checks.push({ name: 'Title has power character', passed: false })
+    }
+    
+    // Headline check
+    if (headline.length > 0) {
+      score += 10
+      checks.push({ name: 'Headline provided', passed: true })
+    } else {
+      checks.push({ name: 'Headline provided', passed: false })
+    }
+    
+    // Meta description
+    if (hasMeta) {
+      score += 10
+      checks.push({ name: 'Meta description', passed: true })
+    } else {
+      checks.push({ name: 'Meta description', passed: false })
+    }
+    
+    // Keywords
+    if (hasKeywords) {
+      score += 15
+      checks.push({ name: 'Target keywords in content', passed: true })
+    } else {
+      checks.push({ name: 'Target keywords in content', passed: false })
+    }
+    
+    // Word count
+    if (wordCount >= 750) {
+      score += 15
+      checks.push({ name: 'Word count (750+)', passed: true })
+    } else if (wordCount >= 500) {
+      score += 10
+      checks.push({ name: 'Word count (500+)', passed: true })
+    } else {
+      checks.push({ name: 'Word count (500+)', passed: false })
+    }
+    
+    // Stats/research
+    if (hasStats) {
+      score += 15
+      checks.push({ name: 'Stats or research cited', passed: true })
+    } else {
+      checks.push({ name: 'Stats or research cited', passed: false })
+    }
+    
+    // Question for engagement
+    if (hasQuestion) {
+      score += 10
+      checks.push({ name: 'Question for reader engagement', passed: true })
+    } else {
+      checks.push({ name: 'Question for reader engagement', passed: false })
+    }
+    
+    return { score, checks }
+  }
+  
+  const { score, checks } = useMemo(() => calculateScore(), [title, headline, hasMeta, hasKeywords, wordCount, hasStats, hasQuestion])
+  
+  const getScoreColor = (s) => {
+    if (s >= 80) return '#22c55e'
+    if (s >= 60) return '#f97316'
+    return '#ef4444'
+  }
+  
+  const getScoreLabel = (s) => {
+    if (s >= 80) return 'Excellent'
+    if (s >= 60) return 'Good'
+    if (s >= 40) return 'Fair'
+    return 'Needs Work'
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content seo-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🎯 SEO Score Calculator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="seo-form">
+          <div className="seo-field">
+            <label>Article Title</label>
+            <input 
+              type="text" 
+              placeholder="Enter your article title..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <span className="seo-char-count">{title.length}/60</span>
+          </div>
+          <div className="seo-field">
+            <label>Hook / Headline</label>
+            <input 
+              type="text" 
+              placeholder="Your opening hook..."
+              value={headline}
+              onChange={(e) => setHeadline(e.target.value)}
+            />
+          </div>
+          <div className="seo-field">
+            <label>Word Count</label>
+            <input 
+              type="number" 
+              placeholder="Total words..."
+              value={wordCount || ''}
+              onChange={(e) => setWordCount(parseInt(e.target.value) || 0)}
+            />
+          </div>
+          <div className="seo-checkboxes">
+            <label className="seo-checkbox">
+              <input 
+                type="checkbox" 
+                checked={hasMeta}
+                onChange={(e) => setHasMeta(e.target.checked)}
+              />
+              <span>Meta description (150-160 chars)</span>
+            </label>
+            <label className="seo-checkbox">
+              <input 
+                type="checkbox" 
+                checked={hasKeywords}
+                onChange={(e) => setHasKeywords(e.target.checked)}
+              />
+              <span>Target keywords in first 100 words</span>
+            </label>
+            <label className="seo-checkbox">
+              <input 
+                type="checkbox" 
+                checked={hasStats}
+                onChange={(e) => setHasStats(e.target.checked)}
+              />
+              <span>Statistics or research cited</span>
+            </label>
+            <label className="seo-checkbox">
+              <input 
+                type="checkbox" 
+                checked={hasQuestion}
+                onChange={(e) => setHasQuestion(e.target.checked)}
+              />
+              <span>Question for reader engagement</span>
+            </label>
+          </div>
+        </div>
+        <div className="seo-score-display">
+          <div className="seo-score-circle" style={{ borderColor: getScoreColor(score) }}>
+            <span className="seo-score-value" style={{ color: getScoreColor(score) }}>{score}</span>
+            <span className="seo-score-label">{getScoreLabel(score)}</span>
+          </div>
+        </div>
+        <div className="seo-checks">
+          {checks.map((check, i) => (
+            <div key={i} className={`seo-check-item ${check.passed ? 'passed' : 'failed'}`}>
+              <span className="seo-check-icon">{check.passed ? '✓' : '✕'}</span>
+              <span>{check.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
@@ -1549,26 +3577,545 @@ const categoryColors = {
   "Recovery": "#ec4899"
 }
 
-const tips = [
-  "Paradox Open hooks convert 3x better than questions",
-  "Myth-busting articles hit 10/10 virality",
-  "First sentence must work as a standalone tweet",
-  "Specific mechanisms beat generic advice",
-  "Lead with the controversial take, then back it up"
-]
-
 const quickActions = [
   { label: "New Draft", icon: "📝", action: "new", shortcut: "D" },
-  { label: "Hot Take", icon: "🔥", action: "hottake", shortcut: "T" },
+  { label: "Templates", icon: "📋", action: "templates", shortcut: "T" },
+  { label: "CTA Templates", icon: "📣", action: "ctaTemplates", shortcut: "K" },
+  { label: "Hook Tester", icon: "🔍", action: "hookTester", shortcut: "J" },
+  { label: "Hot Take", icon: "🔥", action: "hottake", shortcut: "Y" },
   { label: "Writing Prompt", icon: "💡", action: "prompt", shortcut: "P" },
   { label: "Virality Score", icon: "🎯", action: "virality", shortcut: "V" },
   { label: "Check Trends", icon: "📈", action: "trends", shortcut: "R" },
-  { label: "Shortcuts", icon: "⌨️", action: "shortcuts", shortcut: "H" }
+  { label: "Shortcuts", icon: "⌨️", action: "shortcuts", shortcut: "H" },
+  { label: "Changelog", icon: "📜", action: "changelog", shortcut: "L" },
+  { label: "Export Drafts", icon: "📦", action: "exportDrafts", shortcut: "E" },
+  { label: "Mood Tracker", icon: "🎭", action: "moodTracker", shortcut: "1" },
+  { label: "SEO Score", icon: "🔎", action: "seoScore", shortcut: "2" },
+  { label: "Quick Tweet", icon: "🐦", action: "quickTweet", shortcut: "A" }
 ]
+
+// Reading Time Estimator Component
+function ReadingTimeEstimator({ wordCount }) {
+  const minutes = Math.ceil(wordCount / 200) // Average reading speed
+  
+  const getColor = () => {
+    if (minutes <= 3) return 'short'
+    if (minutes <= 7) return 'medium'
+    return 'long'
+  }
+  
+  return (
+    <div className={`reading-time ${getColor()}`}>
+      <span className="reading-icon">⏱️</span>
+      <span className="reading-minutes">{minutes} min read</span>
+    </div>
+  )
+}
+
+// Word Count Goal Progress
+function WordCountGoal({ current, goal }) {
+  const percentage = Math.min((current / goal) * 100, 100)
+  
+  return (
+    <div className="word-goal-widget">
+      <div className="word-goal-header">
+        <span className="word-goal-icon">📝</span>
+        <span className="word-goal-title">Daily Goal</span>
+        <span className="word-goal-pct">{Math.round(percentage)}%</span>
+      </div>
+      <div className="word-goal-bar">
+        <div 
+          className="word-goal-fill" 
+          style={{ 
+            width: `${percentage}%`,
+            background: percentage >= 100 ? 'var(--accent-green)' : 'var(--accent)'
+          }} 
+        />
+      </div>
+      <div className="word-goal-counts">
+        <span>{current.toLocaleString()}</span>
+        <span>/ {goal.toLocaleString()} words</span>
+      </div>
+    </div>
+  )
+}
+
+// Export Drafts Modal
+function ExportDraftsModal({ drafts, onClose }) {
+  const [exportFormat, setExportFormat] = useState('markdown')
+  
+  const exportContent = () => {
+    let content = ''
+    
+    if (exportFormat === 'markdown') {
+      drafts.forEach((draft, i) => {
+        content += `# ${draft.title || `Draft ${i + 1}`}\n\n`
+        content += `**Category:** ${draft.category || 'Uncategorized'}\n`
+        content += `**Date:** ${new Date(draft.date).toLocaleDateString()}\n\n`
+        content += `---\n\n`
+        content += `${draft.hook || ''}\n\n`
+        content += `---\n\n`
+      })
+    } else if (exportFormat === 'json') {
+      content = JSON.stringify(drafts, null, 2)
+    }
+    
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `renzo-drafts-${new Date().toISOString().split('T')[0]}.${exportFormat === 'markdown' ? 'md' : 'json'}`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+  
+  const copyAllToClipboard = async () => {
+    let text = ''
+    drafts.forEach((draft, i) => {
+      text += `${draft.title || `Draft ${i + 1}`}\n`
+      text += `Category: ${draft.category || 'Uncategorized'}\n`
+      text += `Date: ${new Date(draft.date).toLocaleDateString()}\n`
+      if (draft.hook) text += `Hook: ${draft.hook}\n`
+      text += '\n---\n\n'
+    })
+    
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch (err) {
+      console.error('Failed to copy:', err)
+      return false
+    }
+  }
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content export-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📦 Export Drafts</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="export-info">
+          <p>Export <strong>{drafts.length}</strong> drafts</p>
+        </div>
+        <div className="export-format">
+          <label>Format:</label>
+          <select value={exportFormat} onChange={e => setExportFormat(e.target.value)}>
+            <option value="markdown">Markdown (.md)</option>
+            <option value="json">JSON</option>
+          </select>
+        </div>
+        <div className="export-actions">
+          <button className="export-btn" onClick={exportContent}>
+            📥 Download
+          </button>
+          <button className="export-btn copy" onClick={async () => {
+            const success = await copyAllToClipboard()
+            if (success) {
+              alert('All drafts copied to clipboard!')
+            }
+          }}>
+            📋 Copy All
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Article Pipeline Tracker - Track articles through stages
+function ArticlePipelineTracker({ isOpen, onClose }) {
+  const [articles, setArticles] = useState(() => {
+    const saved = localStorage.getItem('renzo-pipeline')
+    return saved ? JSON.parse(saved) : [
+      { id: 1, title: "Muscle Memory After 30", stage: "published", date: "2026-03-10", words: 1200 },
+      { id: 2, title: "Sleep & Growth Hormone", stage: "review", date: "2026-03-11", words: 950 },
+      { id: 3, title: "HIIT vs Steady State", stage: "drafting", date: "2026-03-12", words: 400 },
+      { id: 4, title: "Protein Timing Myths", stage: "idea", date: "2026-03-12", words: 0 },
+    ]
+  })
+  const [draggedId, setDraggedId] = useState(null)
+  
+  const stages = [
+    { id: 'idea', label: '💡 Ideas', color: '#f97316' },
+    { id: 'drafting', label: '✍️ Drafting', color: '#3b82f6' },
+    { id: 'review', label: '👀 In Review', color: '#a855f7' },
+    { id: 'published', label: '✅ Published', color: '#22c55e' },
+  ]
+  
+  const moveArticle = (id, newStage) => {
+    const updated = articles.map(a => a.id === id ? { ...a, stage: newStage, date: new Date().toISOString() } : a)
+    setArticles(updated)
+    localStorage.setItem('renzo-pipeline', JSON.stringify(updated))
+  }
+  
+  const deleteArticle = (id) => {
+    const updated = articles.filter(a => a.id !== id)
+    setArticles(updated)
+    localStorage.setItem('renzo-pipeline', JSON.stringify(updated))
+  }
+  
+  const addArticle = (title) => {
+    if (!title.trim()) return
+    const newArticle = { 
+      id: Date.now(), 
+      title: title.trim(), 
+      stage: 'idea', 
+      date: new Date().toISOString(),
+      words: 0 
+    }
+    const updated = [newArticle, ...articles]
+    setArticles(updated)
+    localStorage.setItem('renzo-pipeline', JSON.stringify(updated))
+  }
+  
+  const handleDragStart = (e, id) => {
+    setDraggedId(id)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+  
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+  
+  const handleDrop = (e, stage) => {
+    e.preventDefault()
+    if (draggedId) {
+      moveArticle(draggedId, stage)
+      setDraggedId(null)
+    }
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content pipeline-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📊 Article Pipeline</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="pipeline-add">
+          <input 
+            type="text" 
+            placeholder="New article title..."
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') addArticle(e.target.value); e.target.value = ''
+            }}
+          />
+          <button onClick={(e) => {
+            const input = e.target.previousSibling
+            addArticle(input.value)
+            input.value = ''
+          }}>+ Add</button>
+        </div>
+        
+        <div className="pipeline-board">
+          {stages.map(stage => (
+            <div 
+              key={stage.id} 
+              className="pipeline-column"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, stage.id)}
+            >
+              <div className="pipeline-column-header" style={{ borderColor: stage.color }}>
+                {stage.label}
+                <span className="pipeline-count">
+                  {articles.filter(a => a.stage === stage.id).length}
+                </span>
+              </div>
+              <div className="pipeline-cards">
+                {articles.filter(a => a.stage === stage.id).map(article => (
+                  <div 
+                    key={article.id}
+                    className="pipeline-card"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, article.id)}
+                  >
+                    <div className="pipeline-card-title">{article.title}</div>
+                    <div className="pipeline-card-meta">
+                      <span>{article.words} words</span>
+                      <button 
+                        className="pipeline-delete" 
+                        onClick={() => deleteArticle(article.id)}
+                      >×</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Thread Generator - Convert articles to X/Twitter threads
+function ThreadGenerator({ isOpen, onClose, article }) {
+  const [content, setContent] = useState(article?.hook || article?.title || '')
+  const [thread, setThread] = useState([])
+  const [generated, setGenerated] = useState(false)
+  
+  const generateThread = () => {
+    if (!content.trim()) return
+    
+    // Split content into thread-friendly chunks
+    const paragraphs = content.split('\n\n').filter(p => p.trim())
+    const tweets = []
+    let counter = 1
+    
+    paragraphs.forEach((para, idx) => {
+      const words = para.split(/\s+/)
+      let chunk = ''
+      
+      words.forEach(word => {
+        if ((chunk + ' ' + word).length <= 280) {
+          chunk += (chunk ? ' ' : '') + word
+        } else {
+          if (chunk) {
+            tweets.push(`${counter}/🧵 ${chunk}`)
+            counter++
+            chunk = word
+          }
+        }
+      })
+      
+      if (chunk) {
+        tweets.push(`${counter}/🧵 ${chunk}`)
+        counter++
+      }
+    })
+    
+    // Add CTA tweet
+    tweets.push(`${counter}/🧵 👇 Follow for more evidence-based fitness insights.`)
+    
+    setThread(tweets)
+    setGenerated(true)
+  }
+  
+  const copyThread = () => {
+    navigator.clipboard.writeText(thread.join('\n\n'))
+    alert('Thread copied to clipboard!')
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content thread-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🐦 Thread Generator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="thread-input">
+          <label>Paste your article, hook, or key points:</label>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Paste your article content here..."
+            rows={6}
+          />
+        </div>
+        
+        <button 
+          className="thread-generate-btn"
+          onClick={generateThread}
+          disabled={!content.trim()}
+        >
+          🚀 Generate Thread
+        </button>
+        
+        {generated && (
+          <div className="thread-output">
+            <div className="thread-header">
+              <span>{thread.length} tweets</span>
+              <button onClick={copyThread}>📋 Copy All</button>
+            </div>
+            <div className="thread-tweets">
+              {thread.map((tweet, idx) => (
+                <div key={idx} className="thread-tweet">
+                  <span className="tweet-number">{idx + 1}</span>
+                  <p>{tweet}</p>
+                  <span className="tweet-length">{tweet.length}/280</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Quick Tweet Generator - Single tweet from topic
+function QuickTweetGenerator({ isOpen, onClose }) {
+  const [topic, setTopic] = useState('')
+  const [tone, setTone] = useState('bold')
+  const [generatedTweet, setGeneratedTweet] = useState('')
+  const [copied, setCopied] = useState(false)
+  
+  const toneExamples = {
+    bold: ['🚨 [TOPIC]: The truth nobody tells you', '🔥 Stop doing [TOPIC] the wrong way. Here\'s what actually works:', 'The [TOPIC] myth is DEAD. Here\'s why:'],
+    question: ['What if everything you knew about [TOPIC] was wrong?', 'Have you tried [TOPIC]? Here\'s what happened when I did:', 'Why is nobody talking about [TOPIC]?'],
+    stat: ['Only 12% of people know this about [TOPIC].', 'Study: [TOPIC] works 3x better when you do this.', 'The data on [TOPIC] will blow your mind.'],
+    story: ['I tested [TOPIC] for 30 days. Here\'s what happened:', 'A trainer told me [TOPIC] was useless. Then I saw the research.', 'Everyone ignores [TOPIC]. They shouldn\'t.']
+  }
+  
+  const generateTweet = () => {
+    if (!topic.trim()) return
+    
+    const templates = toneExamples[tone]
+    const template = templates[Math.floor(Math.random() * templates.length)]
+    const tweet = template.replace(/\[TOPIC\]/g, topic.trim())
+    
+    // Ensure it's under 280 chars
+    const finalTweet = tweet.length > 280 ? tweet.slice(0, 277) + '...' : tweet
+    setGeneratedTweet(finalTweet)
+    setCopied(false)
+  }
+  
+  const copyTweet = () => {
+    navigator.clipboard.writeText(generatedTweet)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content quicktweet-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>✍️ Quick Tweet</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="quicktweet-input">
+          <label>What's your topic?</label>
+          <input 
+            type="text" 
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="e.g., protein timing, zone 2 training..."
+            autoFocus
+          />
+        </div>
+        
+        <div className="quicktweet-tone">
+          <label>Choose your tone:</label>
+          <div className="tone-buttons">
+            {Object.keys(toneExamples).map(t => (
+              <button 
+                key={t}
+                className={`tone-btn ${tone === t ? 'active' : ''}`}
+                onClick={() => setTone(t)}
+              >
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <button 
+          className="quicktweet-generate-btn"
+          onClick={generateTweet}
+          disabled={!topic.trim()}
+        >
+          ⚡ Generate Tweet
+        </button>
+        
+        {generatedTweet && (
+          <div className="quicktweet-output">
+            <div className="tweet-preview">
+              <p>{generatedTweet}</p>
+              <span className="tweet-count">{generatedTweet.length}/280</span>
+            </div>
+            <button 
+              className={`copy-btn ${copied ? 'copied' : ''}`}
+              onClick={copyTweet}
+            >
+              {copied ? '✓ Copied!' : '📋 Copy Tweet'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Theme Toggle Component
+function ThemeToggle({ isDark, onToggle }) {
+  return (
+    <button 
+      className="theme-toggle" 
+      onClick={onToggle}
+      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {isDark ? '☀️' : '🌙'}
+    </button>
+  )
+}
+
+// Enhanced Animated Counter with direction
+function AnimatedCounterWithDirection({ end, duration = 1500, suffix = '', showDirection = false }) {
+  const [count, setCount] = useState(0)
+  const [prevCount, setPrevCount] = useState(end)
+  const ref = useRef(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          setPrevCount(0)
+        }
+      },
+      { threshold: 0.5 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isVisible) return
+    let start = 0
+    const increment = end / (duration / 16)
+    const timer = setInterval(() => {
+      start += increment
+      if (start >= end) {
+        setCount(end)
+        clearInterval(timer)
+      } else {
+        setCount(Math.floor(start))
+      }
+    }, 16)
+    return () => clearInterval(timer)
+  }, [end, duration, isVisible])
+
+  const direction = count > prevCount ? 'up' : count < prevCount ? 'down' : 'neutral'
+
+  return (
+    <span ref={ref} className={`counter-${direction}`}>
+      {count.toLocaleString()}{suffix}
+      {showDirection && direction !== 'neutral' && (
+        <span className={`counter-arrow ${direction}`}>{direction === 'up' ? '↑' : '↓'}</span>
+      )}
+    </span>
+  )
+}
 
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('renzo-theme')
+    return saved ? saved === 'dark' : true
+  })
   const [activeTip, setActiveTip] = useState(0)
   const [writingPulse, setWritingPulse] = useState(false)
   const [viewMode, setViewMode] = useState('dashboard')
@@ -1587,9 +4134,30 @@ function App() {
   const [drafts, setDrafts] = useState([])
   const [showHotTake, setShowHotTake] = useState(false)
   const [energyLevel, setEnergyLevel] = useState(80)
+  
+  // Mood state for quick indicator
+  const [mood, setMood] = useState(() => localStorage.getItem('renzo-mood') || 'neutral')
+  const moods = [
+    { id: 'fired', emoji: '🔥', label: 'Fired Up' },
+    { id: 'focused', emoji: '🎯', label: 'Focused' },
+    { id: 'neutral', emoji: '😐', label: 'Neutral' },
+    { id: 'tired', emoji: '😴', label: 'Tired' },
+    { id: 'blocked', emoji: '🚧', label: 'Blocked' },
+  ]
   const [wordsWritten, setWordsWritten] = useState(0)
   const [showQuickWrite, setShowQuickWrite] = useState(false)
-  const [todayWordCount, setTodayWordCount] = useState(0)
+  const [todayWordCount, setTodayWordCount] = useState(() => {
+    const saved = localStorage.getItem('renzo-today-word-count')
+    const savedDate = localStorage.getItem('renzo-today-word-count-date')
+    const today = new Date().toDateString()
+    if (saved && savedDate === today) {
+      return parseInt(saved) || 0
+    }
+    return 0
+  })
+  const [dailyWordGoal, setDailyWordGoal] = useState(() => {
+    return parseInt(localStorage.getItem('renzo-daily-word-goal')) || 1000
+  })
   const [soundEnabled, setSoundEnabled] = useState(() => {
     return localStorage.getItem('renzo-sound') !== 'false'
   })
@@ -1597,11 +4165,35 @@ function App() {
   const [showTopicGenerator, setShowTopicGenerator] = useState(false)
   const [showClipboard, setShowClipboard] = useState(false)
   const [showBrainstorm, setShowBrainstorm] = useState(false)
+  const [showExportDrafts, setShowExportDrafts] = useState(false)
+  const [showChangelog, setShowChangelog] = useState(false)
+  const [showTemplates, setShowTemplates] = useState(false)
+  const [showCTATemplates, setShowCTATemplates] = useState(false)
+  const [showHookTester, setShowHookTester] = useState(false)
+  const [showFocusMode, setShowFocusMode] = useState(false)
+  const [showReferencePanel, setShowReferencePanel] = useState(false)
+  const [showResearchQueue, setShowResearchQueue] = useState(false)
   const [showQuickCapture, setShowQuickCapture] = useState(false)
+  const [contentIdeas, setContentIdeas] = useState(() => {
+    const saved = localStorage.getItem('renzo-content-ideas')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [newIdea, setNewIdea] = useState({ title: '', category: 'Trending', angle: '' })
+  const [showIdeasBank, setShowIdeasBank] = useState(false)
   const [quickNotes, setQuickNotes] = useState(() => {
     const saved = localStorage.getItem('renzo-quick-notes')
     return saved ? JSON.parse(saved) : []
   })
+  const [showSavedHooks, setShowSavedHooks] = useState(false)
+  const [showWordSprint, setShowWordSprint] = useState(false)
+  const [showArticleSeries, setShowArticleSeries] = useState(false)
+  const [showPipeline, setShowPipeline] = useState(false)
+  const [showThread, setShowThread] = useState(false)
+  const [showQuickTweet, setShowQuickTweet] = useState(false)
+  const [showHeadlineGen, setShowHeadlineGen] = useState(false)
+  const [showBriefGen, setShowBriefGen] = useState(false)
+  const [showMoodTracker, setShowMoodTracker] = useState(false)
+  const [showSEOScore, setShowSEOScore] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -1677,6 +4269,55 @@ function App() {
     addToast('Note captured!', 'success')
   }
 
+  // Content Ideas Bank functions
+  const saveContentIdea = (idea) => {
+    const newIdeas = [{ ...idea, id: Date.now(), date: new Date().toISOString(), status: 'pending' }, ...contentIdeas]
+    setContentIdeas(newIdeas)
+    localStorage.setItem('renzo-content-ideas', JSON.stringify(newIdeas))
+    addActivity('prompt', `New idea: ${idea.title.slice(0, 30)}`)
+    addToast('Idea saved to bank!', 'success')
+  }
+
+  const deleteIdea = (id) => {
+    const updated = contentIdeas.filter(i => i.id !== id)
+    setContentIdeas(updated)
+    localStorage.setItem('renzo-content-ideas', JSON.stringify(updated))
+  }
+
+  const moveIdeaToDraft = (id) => {
+    const idea = contentIdeas.find(i => i.id === id)
+    if (idea) {
+      const draft = {
+        title: idea.title,
+        hook: idea.angle,
+        category: idea.category,
+        date: new Date().toISOString()
+      }
+      saveDraft(draft)
+      deleteIdea(id)
+      addToast('Moved to drafts!', 'success')
+    }
+  }
+
+  const getIdeaCategoryColor = (cat) => {
+    const colors = { 'Trending': '#f97316', 'Myth-bust': '#dc2626', 'How-to': '#22c55e', 'Science': '#3b82f6', 'Listicle': '#a855f7' }
+    return colors[cat] || '#a1a1aa'
+  }
+
+  // Toggle theme
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode
+    setIsDarkMode(newTheme)
+    localStorage.setItem('renzo-theme', newTheme ? 'dark' : 'light')
+    document.body.classList.toggle('light-mode', !newTheme)
+    addToast(newTheme ? '🌙 Dark mode enabled' : '☀️ Light mode enabled', 'info')
+  }
+
+  // Apply theme on mount
+  useEffect(() => {
+    document.body.classList.toggle('light-mode', !isDarkMode)
+  }, [])
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
@@ -1719,9 +4360,12 @@ function App() {
       const key = e.key.toUpperCase()
       if (key === 'N') setShowPrompt(true)
       if (key === 'P') setShowPrompt(true)
-      if (key === 'T') setShowHotTake(true)
+      if (key === 'T') setShowTemplates(true)
+      if (key === 'K') setShowCTATemplates(true)
+      if (key === 'J') setShowHookTester(true)
+      if (key === 'Y') setShowHotTake(true)
       if (key === 'D') setShowQuickDraft(true)
-      if (key === 'H') setShowShortcuts(true)
+      if (key === '?') setShowShortcuts(true)
       if (key === 'V') setShowVirality(true)
       if (key === 'W') setShowQuickWrite(true)
       if (key === 'F') setShowFormula(true)
@@ -1729,6 +4373,22 @@ function App() {
       if (key === 'C' && !e.metaKey && !e.ctrlKey) setShowClipboard(true)
       if (key === 'B') setShowBrainstorm(true)
       if (key === 'Q') setShowQuickCapture(true)
+      if (key === 'E') setShowExportDrafts(true)
+      if (key === 'L') setShowChangelog(true)
+      if (key === 'M') setShowFocusMode(true)
+      if (key === 'I') setShowBriefGen(true)
+      if (key === 'A') setShowIdeasBank(true)
+      if (key === 'R') setShowReferencePanel(true)
+      if (key === 'O') setShowResearchQueue(true)
+      if (key === 'U') setShowSavedHooks(true)
+      if (key === 'H') setShowHeadlineGen(true)
+      if (key === 'S' && !e.metaKey && !e.ctrlKey) setShowWordSprint(true)
+      if (key === 'Z') setShowArticleSeries(true)
+      if (key === 'P' && !e.metaKey && !e.ctrlKey) setShowPipeline(true)
+      if (key === 'X') setShowThread(true)
+      if (key === 'A') setShowQuickTweet(true)
+      if (key === '1') setShowMoodTracker(true)
+      if (key === '2') setShowSEOScore(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -1743,6 +4403,20 @@ function App() {
         setShowClipboard(false)
         setShowBrainstorm(false)
         setShowQuickCapture(false)
+        setShowChangelog(false)
+        setShowTemplates(false)
+        setShowFocusMode(false)
+        setShowReferencePanel(false)
+        setShowResearchQueue(false)
+        setShowSavedHooks(false)
+        setShowWordSprint(false)
+        setShowArticleSeries(false)
+        setShowPipeline(false)
+        setShowThread(false)
+        setShowHeadlineGen(false)
+        setShowBriefGen(false)
+        setShowMoodTracker(false)
+        setShowSEOScore(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -1753,6 +4427,10 @@ function App() {
     switch(actionId) {
       case 'new':
         setShowQuickWrite(true)
+        break
+      case 'ideas':
+        setShowIdeasBank(true)
+        addActivity('prompt', 'Opened Content Ideas Bank')
         break
       case 'prompt':
         setShowPrompt(true)
@@ -1775,6 +4453,36 @@ function App() {
         break
       case 'voice':
         setShowPrompt(true)
+        break
+      case 'exportDrafts':
+        setShowExportDrafts(true)
+        break
+      case 'templates':
+        setShowTemplates(true)
+        addActivity('prompt', 'Opened article templates')
+        break
+      case 'ctaTemplates':
+        setShowCTATemplates(true)
+        addActivity('prompt', 'Opened CTA templates')
+        break
+      case 'hookTester':
+        setShowHookTester(true)
+        addActivity('prompt', 'Opened hook tester')
+        break
+      case 'moodTracker':
+        setShowMoodTracker(true)
+        addActivity('prompt', 'Opened mood tracker')
+        break
+      case 'seoScore':
+        setShowSEOScore(true)
+        addActivity('prompt', 'Opened SEO calculator')
+        break
+      case 'briefGenerator':
+        setShowBriefGen(true)
+        addActivity('prompt', 'Opened brief generator')
+        break
+      case 'changelog':
+        setShowChangelog(true)
         break
       case 'sync':
         addToast('Syncing with Notion...', 'info')
@@ -1878,23 +4586,137 @@ function App() {
       )}
       {showShortcuts && <ShortcutsPanel onClose={() => setShowShortcuts(false)} />}
       {showVirality && <ViralityCalculator onClose={() => setShowVirality(false)} />}
-      {showQuickCapture && (
-        <QuickCapture 
-          isOpen={showQuickCapture} 
-          onClose={() => setShowQuickCapture(false)}
-          onSave={saveQuickNote}
-        />
-      )}
       {showQuickWrite && (
         <QuickWriteMode 
           onClose={() => setShowQuickWrite(false)} 
           onSave={saveQuickWrite}
         />
       )}
+      {showExportDrafts && (
+        <ExportDraftsModal 
+          drafts={drafts} 
+          onClose={() => setShowExportDrafts(false)} 
+        />
+      )}
+      {showChangelog && (
+        <ChangelogModal 
+          isOpen={showChangelog} 
+          onClose={() => setShowChangelog(false)} 
+        />
+      )}
+      {showTemplates && (
+        <ArticleTemplates 
+          isOpen={showTemplates} 
+          onClose={() => setShowTemplates(false)}
+          onSelect={(template) => {
+            addToast(`Selected template: ${template.name}`, 'success')
+          }}
+        />
+      )}
+      {showCTATemplates && (
+        <CTATemplates 
+          isOpen={showCTATemplates} 
+          onClose={() => setShowCTATemplates(false)}
+          onSelect={(cta) => {
+            addToast(`Copied CTA: ${cta.name}`, 'success')
+          }}
+        />
+      )}
+      {showHookTester && (
+        <HookTester 
+          isOpen={showHookTester} 
+          onClose={() => setShowHookTester(false)}
+        />
+      )}
+      {showFocusMode && (
+        <FocusMode 
+          isOpen={showFocusMode} 
+          onClose={() => setShowFocusMode(false)}
+          onSave={saveQuickWrite}
+        />
+      )}
+      {showReferencePanel && (
+        <QuickReferencePanel 
+          isOpen={showReferencePanel} 
+          onClose={() => setShowReferencePanel(false)}
+        />
+      )}
+      {showResearchQueue && (
+        <ResearchQueue 
+          isOpen={showResearchQueue} 
+          onClose={() => setShowResearchQueue(false)}
+          onSelect={(item) => addToast(`Selected: ${item.topic}`, 'info')}
+        />
+      )}
+      <SavedHooks 
+        isOpen={showSavedHooks} 
+        onClose={() => setShowSavedHooks(false)}
+      />
+      <WordSprint 
+        isOpen={showWordSprint} 
+        onClose={() => setShowWordSprint(false)}
+        onSave={saveQuickWrite}
+      />
+      <ArticleSeriesTracker 
+        isOpen={showArticleSeries} 
+        onClose={() => setShowArticleSeries(false)}
+      />
+      <ArticlePipelineTracker
+        isOpen={showPipeline}
+        onClose={() => setShowPipeline(false)}
+      />
+      <ThreadGenerator
+        isOpen={showThread}
+        onClose={() => setShowThread(false)}
+      />
+      <QuickTweetGenerator
+        isOpen={showQuickTweet}
+        onClose={() => setShowQuickTweet(false)}
+      />
+      <HeadlineGenerator
+        isOpen={showHeadlineGen}
+        onClose={() => setShowHeadlineGen(false)}
+      />
+      <ArticleBriefGenerator
+        isOpen={showBriefGen}
+        onClose={() => setShowBriefGen(false)}
+        onSave={(brief) => {
+          const draft = {
+            title: `Brief: ${brief.topic}`,
+            category: brief.category,
+            hook: brief.hook,
+            content: `${brief.hook}\n\n${brief.problem}\n\n${brief.mechanism}\n\n${brief.solution}\n\n${brief.cta}`,
+            words: brief.targetWords,
+            date: new Date().toISOString()
+          }
+          saveDraft(draft)
+        }}
+      />
+      <WritingMoodTracker
+        isOpen={showMoodTracker}
+        onClose={() => setShowMoodTracker(false)}
+      />
+      <SEOScoreCalculator
+        isOpen={showSEOScore}
+        onClose={() => setShowSEOScore(false)}
+      />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
       <BrainstormMode isOpen={showBrainstorm} onClose={() => setShowBrainstorm(false)} />
+      <QuickCapture 
+        isOpen={showQuickCapture} 
+        onClose={() => setShowQuickCapture(false)}
+        onSave={saveQuickNote}
+      />
+      <ContentIdeasBank
+        isOpen={showIdeasBank}
+        onClose={() => setShowIdeasBank(false)}
+        ideas={contentIdeas}
+        onSave={saveContentIdea}
+        onDelete={deleteIdea}
+        onMoveToDraft={moveIdeaToDraft}
+      />
       <CommandPalette 
         isOpen={showCommandPalette} 
         onClose={() => setShowCommandPalette(false)}
@@ -1919,9 +4741,36 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v2.8</span>
+          <span className="logo-badge">v3.8</span>
         </div>
         <div className="header-right">
+          {/* Daily Word Goal Progress */}
+          <div className="daily-goal-widget" title="Daily word goal">
+            <span className="goal-icon">🎯</span>
+            <div className="goal-progress">
+              <div 
+                className="goal-fill" 
+                style={{ width: `${Math.min((wordsWritten / dailyWordGoal) * 100, 100)}%` }}
+              />
+            </div>
+            <span className="goal-count">{wordsWritten}/{dailyWordGoal}</span>
+          </div>
+          
+          {/* Quick Mood Indicator */}
+          <div 
+            className="mood-indicator" 
+            onClick={() => setShowMoodTracker(true)}
+            title="Click to change mood"
+          >
+            <span className="mood-emoji">
+              {moods.find(m => m.id === mood)?.emoji || '😐'}
+            </span>
+            <span className="mood-text">
+              {moods.find(m => m.id === mood)?.label || 'Neutral'}
+            </span>
+          </div>
+          
+          <ThemeToggle isDark={isDarkMode} onToggle={toggleTheme} />
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
           <button 
             className="sound-toggle" 
@@ -1978,30 +4827,107 @@ function App() {
           <DailyQuote />
           <StudySpotlight />
           <QuickStatGenerator />
+          <TrendingHashtags />
+          <ContentCalendar />
           <WritingTimer onComplete={() => addToast('Session complete! Take a break ☕', 'success')} />
-          <SessionStats />
+          <WritingStreakCalendar streak={metrics.currentStreak} articles={recentArticles} />
         </section>
         
         <section className="feature-buttons-row">
-          <button className="feature-btn" onClick={() => setShowQuickCapture(true)}>
-            <span>⚡</span>
-            <span>Capture</span>
-            <span className="feature-hint">Q</span>
-          </button>
           <button className="feature-btn" onClick={() => setShowFormula(true)}>
             <span>📝</span>
             <span>Formula</span>
             <span className="feature-hint">F</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowTemplates(true)}>
+            <span>📋</span>
+            <span>Templates</span>
+            <span className="feature-hint">T</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowCTATemplates(true)}>
+            <span>📣</span>
+            <span>CTA</span>
+            <span className="feature-hint">K</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowHookTester(true)}>
+            <span>🔍</span>
+            <span>Hook Test</span>
+            <span className="feature-hint">J</span>
           </button>
           <button className="feature-btn" onClick={() => setShowTopicGenerator(true)}>
             <span>💡</span>
             <span>Topic</span>
             <span className="feature-hint">G</span>
           </button>
-          <button className="feature-btn" onClick={() => setShowClipboard(true)}>
+          <button className="feature-btn" onClick={() => setShowBrainstorm(true)}>
+            <span>🧠</span>
+            <span>Brainstorm</span>
+            <span className="feature-hint">B</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowFocusMode(true)}>
+            <span>🎯</span>
+            <span>Focus</span>
+            <span className="feature-hint">M</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowReferencePanel(true)}>
+            <span>📚</span>
+            <span>Refs</span>
+            <span className="feature-hint">R</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowChangelog(true)}>
+            <span>📜</span>
+            <span>Changelog</span>
+            <span className="feature-hint">L</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowWordSprint(true)}>
+            <span>⚡</span>
+            <span>Sprint</span>
+            <span className="feature-hint">S</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowResearchQueue(true)}>
+            <span>🔬</span>
+            <span>Research</span>
+            <span className="feature-hint">O</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowSavedHooks(true)}>
+            <span>⚡</span>
+            <span>Hooks</span>
+            <span className="feature-hint">U</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowArticleSeries(true)}>
+            <span>📚</span>
+            <span>Series</span>
+            <span className="feature-hint">Z</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowPipeline(true)}>
+            <span>📊</span>
+            <span>Pipeline</span>
+            <span className="feature-hint">P</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowThread(true)}>
+            <span>🐦</span>
+            <span>Thread</span>
+            <span className="feature-hint">X</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowHeadlineGen(true)}>
+            <span>✍️</span>
+            <span>Headlines</span>
+            <span className="feature-hint">H</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowBriefGen(true)}>
             <span>📋</span>
-            <span>Clips</span>
-            <span className="feature-hint">C</span>
+            <span>Brief</span>
+            <span className="feature-hint">I</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowMoodTracker(true)}>
+            <span>🎭</span>
+            <span>Mood</span>
+            <span className="feature-hint">1</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowSEOScore(true)}>
+            <span>🎯</span>
+            <span>SEO</span>
+            <span className="feature-hint">2</span>
           </button>
         </section>
 
@@ -2018,11 +4944,17 @@ function App() {
                 className="action-btn"
                 onClick={() => {
                   if (action.action === 'new') setShowQuickDraft(true)
+                  else if (action.action === 'templates') setShowTemplates(true)
                   else if (action.action === 'prompt') setShowPrompt(true)
                   else if (action.action === 'hottake') setShowHotTake(true)
                   else if (action.action === 'trends') document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth' })
                   else if (action.action === 'shortcuts') setShowShortcuts(true)
+                  else if (action.action === 'changelog') setShowChangelog(true)
+                  else if (action.action === 'exportDrafts') setShowExportDrafts(true)
                   else if (action.action === 'sync') addToast('Syncing with Notion...', 'info')
+                  else if (action.action === 'quickTweet') setShowQuickTweet(true)
+                  else if (action.action === 'moodTracker') setShowMoodTracker(true)
+                  else if (action.action === 'seoScore') setShowSEOScore(true)
                 }}
               >
                 <span className="action-icon">{action.icon}</span>
@@ -2086,6 +5018,21 @@ function App() {
             <div className="metric-label">Total Reads</div>
             <div className="metric-trend">📈 {metrics.avgEngagement}/10 avg</div>
           </div>
+        </section>
+
+        {/* Productivity Score */}
+        <section className="productivity-section">
+          <div className="section-header">
+            <h2 className="section-title">
+              <span className="section-icon">📈</span>
+              Productivity Score
+            </h2>
+          </div>
+          <ProductivityScore 
+            articles={recentArticles} 
+            words={metrics.totalWords} 
+            streak={metrics.currentStreak} 
+          />
         </section>
 
         {/* Trending Topics */}
@@ -2351,7 +5298,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.8 • Press ⌘K for commands, Q for quick capture</p>
+        <p className="footer-version">v3.4 • Press ⌘K for commands, H for shortcuts</p>
       </footer>
     </div>
   )
