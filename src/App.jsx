@@ -6553,6 +6553,21 @@ function App() {
             <span>Cite</span>
             <span className="feature-hint">5</span>
           </button>
+          <button className="feature-btn" onClick={() => setShowPublishingPrep(true)}>
+            <span>🚀</span>
+            <span>Publish</span>
+            <span className="feature-hint">6</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowPerformanceTracker(true)}>
+            <span>📊</span>
+            <span>Perf</span>
+            <span className="feature-hint">7</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowDraftCollections(true)}>
+            <span>📁</span>
+            <span>Collect</span>
+            <span className="feature-hint">8</span>
+          </button>
         </section>
 
         {/* Quick Actions Panel */}
