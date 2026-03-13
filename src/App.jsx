@@ -777,6 +777,12 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '3.8', date: '2026-03-13', changes: [
+      'Added Quick Tweet Generator - One-click tweet creation with tone selection (A key)',
+      'Added 4 tweet tones: Bold, Question, Stat, Story',
+      'Added keyboard shortcut (A) for Quick Tweet Generator',
+      'Updated version badge to v3.8'
+    ]},
     { version: '3.7', date: '2026-03-13', changes: [
       'Added Quick Mood Indicator in header - see your current mood at a glance',
       'Added smooth fade-in and slide animations throughout the UI',
@@ -2056,6 +2062,7 @@ function KeyboardShortcuts({ isOpen, onClose }) {
     { key: 'Z', action: 'Article Series' },
     { key: 'P', action: 'Pipeline Tracker' },
     { key: 'X', action: 'Thread Generator' },
+    { key: 'A', action: 'Quick Tweet' },
     { key: 'E', action: 'Export Drafts' },
     { key: 'L', action: 'Changelog' },
     { key: '/', action: 'Search Articles' },
@@ -3583,7 +3590,8 @@ const quickActions = [
   { label: "Changelog", icon: "📜", action: "changelog", shortcut: "L" },
   { label: "Export Drafts", icon: "📦", action: "exportDrafts", shortcut: "E" },
   { label: "Mood Tracker", icon: "🎭", action: "moodTracker", shortcut: "1" },
-  { label: "SEO Score", icon: "🎯", action: "seoScore", shortcut: "2" }
+  { label: "SEO Score", icon: "🔎", action: "seoScore", shortcut: "2" },
+  { label: "Quick Tweet", icon: "🐦", action: "quickTweet", shortcut: "A" }
 ]
 
 // Reading Time Estimator Component
@@ -3943,6 +3951,102 @@ function ThreadGenerator({ isOpen, onClose, article }) {
   )
 }
 
+// Quick Tweet Generator - Single tweet from topic
+function QuickTweetGenerator({ isOpen, onClose }) {
+  const [topic, setTopic] = useState('')
+  const [tone, setTone] = useState('bold')
+  const [generatedTweet, setGeneratedTweet] = useState('')
+  const [copied, setCopied] = useState(false)
+  
+  const toneExamples = {
+    bold: ['🚨 [TOPIC]: The truth nobody tells you', '🔥 Stop doing [TOPIC] the wrong way. Here\'s what actually works:', 'The [TOPIC] myth is DEAD. Here\'s why:'],
+    question: ['What if everything you knew about [TOPIC] was wrong?', 'Have you tried [TOPIC]? Here\'s what happened when I did:', 'Why is nobody talking about [TOPIC]?'],
+    stat: ['Only 12% of people know this about [TOPIC].', 'Study: [TOPIC] works 3x better when you do this.', 'The data on [TOPIC] will blow your mind.'],
+    story: ['I tested [TOPIC] for 30 days. Here\'s what happened:', 'A trainer told me [TOPIC] was useless. Then I saw the research.', 'Everyone ignores [TOPIC]. They shouldn\'t.']
+  }
+  
+  const generateTweet = () => {
+    if (!topic.trim()) return
+    
+    const templates = toneExamples[tone]
+    const template = templates[Math.floor(Math.random() * templates.length)]
+    const tweet = template.replace(/\[TOPIC\]/g, topic.trim())
+    
+    // Ensure it's under 280 chars
+    const finalTweet = tweet.length > 280 ? tweet.slice(0, 277) + '...' : tweet
+    setGeneratedTweet(finalTweet)
+    setCopied(false)
+  }
+  
+  const copyTweet = () => {
+    navigator.clipboard.writeText(generatedTweet)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content quicktweet-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>✍️ Quick Tweet</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="quicktweet-input">
+          <label>What's your topic?</label>
+          <input 
+            type="text" 
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="e.g., protein timing, zone 2 training..."
+            autoFocus
+          />
+        </div>
+        
+        <div className="quicktweet-tone">
+          <label>Choose your tone:</label>
+          <div className="tone-buttons">
+            {Object.keys(toneExamples).map(t => (
+              <button 
+                key={t}
+                className={`tone-btn ${tone === t ? 'active' : ''}`}
+                onClick={() => setTone(t)}
+              >
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <button 
+          className="quicktweet-generate-btn"
+          onClick={generateTweet}
+          disabled={!topic.trim()}
+        >
+          ⚡ Generate Tweet
+        </button>
+        
+        {generatedTweet && (
+          <div className="quicktweet-output">
+            <div className="tweet-preview">
+              <p>{generatedTweet}</p>
+              <span className="tweet-count">{generatedTweet.length}/280</span>
+            </div>
+            <button 
+              className={`copy-btn ${copied ? 'copied' : ''}`}
+              onClick={copyTweet}
+            >
+              {copied ? '✓ Copied!' : '📋 Copy Tweet'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Theme Toggle Component
 function ThemeToggle({ isDark, onToggle }) {
   return (
@@ -4085,6 +4189,7 @@ function App() {
   const [showArticleSeries, setShowArticleSeries] = useState(false)
   const [showPipeline, setShowPipeline] = useState(false)
   const [showThread, setShowThread] = useState(false)
+  const [showQuickTweet, setShowQuickTweet] = useState(false)
   const [showHeadlineGen, setShowHeadlineGen] = useState(false)
   const [showBriefGen, setShowBriefGen] = useState(false)
   const [showMoodTracker, setShowMoodTracker] = useState(false)
@@ -4281,6 +4386,7 @@ function App() {
       if (key === 'Z') setShowArticleSeries(true)
       if (key === 'P' && !e.metaKey && !e.ctrlKey) setShowPipeline(true)
       if (key === 'X') setShowThread(true)
+      if (key === 'A') setShowQuickTweet(true)
       if (key === '1') setShowMoodTracker(true)
       if (key === '2') setShowSEOScore(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
@@ -4563,6 +4669,10 @@ function App() {
         isOpen={showThread}
         onClose={() => setShowThread(false)}
       />
+      <QuickTweetGenerator
+        isOpen={showQuickTweet}
+        onClose={() => setShowQuickTweet(false)}
+      />
       <HeadlineGenerator
         isOpen={showHeadlineGen}
         onClose={() => setShowHeadlineGen(false)}
@@ -4631,7 +4741,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v3.7</span>
+          <span className="logo-badge">v3.8</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -4842,6 +4952,9 @@ function App() {
                   else if (action.action === 'changelog') setShowChangelog(true)
                   else if (action.action === 'exportDrafts') setShowExportDrafts(true)
                   else if (action.action === 'sync') addToast('Syncing with Notion...', 'info')
+                  else if (action.action === 'quickTweet') setShowQuickTweet(true)
+                  else if (action.action === 'moodTracker') setShowMoodTracker(true)
+                  else if (action.action === 'seoScore') setShowSEOScore(true)
                 }}
               >
                 <span className="action-icon">{action.icon}</span>
