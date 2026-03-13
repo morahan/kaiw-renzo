@@ -674,6 +674,14 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '3.4', date: '2026-03-13', changes: [
+      'Added Writing Mood Tracker - Track your creative energy states',
+      'Added Category Performance chart - Visual breakdown by content category',
+      'Added SEO Score Calculator - Check article SEO potential',
+      'Updated version badge to v3.4',
+      'Fixed keyboard shortcut conflicts',
+      'Added quick mood selection to header'
+    ]},
     { version: '3.3', date: '2026-03-13', changes: [
       'Added Article Brief Generator - Generates full article brief from topic (I key)',
       'Added Trending Hashtags widget - Track trending fitness hashtags for X content',
@@ -2832,6 +2840,282 @@ function CategoryChart({ articles }) {
   )
 }
 
+// Writing Mood Tracker Component
+function WritingMoodTracker({ isOpen, onClose }) {
+  const [mood, setMood] = useState(() => localStorage.getItem('renzo-mood') || 'neutral')
+  const [moodHistory, setMoodHistory] = useState(() => {
+    const saved = localStorage.getItem('renzo-mood-history')
+    return saved ? JSON.parse(saved) : []
+  })
+  
+  const moods = [
+    { id: 'fired', emoji: '🔥', label: 'Fired Up', color: '#ef4444' },
+    { id: 'focused', emoji: '🎯', label: 'Focused', color: '#3b82f6' },
+    { id: 'neutral', emoji: '😐', label: 'Neutral', color: '#71717a' },
+    { id: 'tired', emoji: '😴', label: 'Tired', color: '#a855f7' },
+    { id: 'blocked', emoji: '🚧', label: 'Blocked', color: '#f97316' },
+  ]
+  
+  const handleMoodSelect = (moodId) => {
+    setMood(moodId)
+    const newEntry = { mood: moodId, time: new Date().toISOString() }
+    const updated = [newEntry, ...moodHistory].slice(0, 50)
+    setMoodHistory(updated)
+    localStorage.setItem('renzo-mood', moodId)
+    localStorage.setItem('renzo-mood-history', JSON.stringify(updated))
+  }
+  
+  const currentMood = moods.find(m => m.id === mood)
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content mood-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🎭 Writing Mood Tracker</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="mood-current">
+          <div className="mood-label">Current Mood</div>
+          <div className="mood-display" style={{ borderColor: currentMood?.color }}>
+            <span className="mood-emoji">{currentMood?.emoji}</span>
+            <span className="mood-text">{currentMood?.label}</span>
+          </div>
+        </div>
+        <div className="mood-selector">
+          <div className="mood-label">How are you feeling?</div>
+          <div className="mood-options">
+            {moods.map(m => (
+              <button 
+                key={m.id}
+                className={`mood-option ${mood === m.id ? 'active' : ''}`}
+                style={{ 
+                  '--mood-color': m.color,
+                  background: mood === m.id ? m.color + '20' : 'transparent'
+                }}
+                onClick={() => handleMoodSelect(m.id)}
+              >
+                <span className="mood-option-emoji">{m.emoji}</span>
+                <span className="mood-option-label">{m.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="mood-history">
+          <div className="mood-label">Recent Moods</div>
+          <div className="mood-history-list">
+            {moodHistory.length === 0 ? (
+              <div className="mood-empty">No mood history yet. Select your mood to start tracking.</div>
+            ) : (
+              moodHistory.slice(0, 10).map((entry, i) => {
+                const m = moods.find(md => md.id === entry.mood)
+                const time = new Date(entry.time)
+                return (
+                  <div key={i} className="mood-history-item">
+                    <span>{m?.emoji}</span>
+                    <span>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// SEO Score Calculator Component
+function SEOScoreCalculator({ isOpen, onClose }) {
+  const [title, setTitle] = useState('')
+  const [headline, setHeadline] = useState('')
+  const [hasMeta, setHasMeta] = useState(false)
+  const [hasKeywords, setHasKeywords] = useState(false)
+  const [wordCount, setWordCount] = useState(0)
+  const [hasStats, setHasStats] = useState(false)
+  const [hasQuestion, setHasQuestion] = useState(false)
+  
+  const calculateScore = () => {
+    let score = 0
+    const checks = []
+    
+    // Title checks
+    if (title.length >= 30 && title.length <= 60) {
+      score += 15
+      checks.push({ name: 'Title length (30-60 chars)', passed: true })
+    } else {
+      checks.push({ name: 'Title length (30-60 chars)', passed: false })
+    }
+    
+    if (title.includes('?') || title.includes(':') || title.includes('-')) {
+      score += 10
+      checks.push({ name: 'Title has power character', passed: true })
+    } else {
+      checks.push({ name: 'Title has power character', passed: false })
+    }
+    
+    // Headline check
+    if (headline.length > 0) {
+      score += 10
+      checks.push({ name: 'Headline provided', passed: true })
+    } else {
+      checks.push({ name: 'Headline provided', passed: false })
+    }
+    
+    // Meta description
+    if (hasMeta) {
+      score += 10
+      checks.push({ name: 'Meta description', passed: true })
+    } else {
+      checks.push({ name: 'Meta description', passed: false })
+    }
+    
+    // Keywords
+    if (hasKeywords) {
+      score += 15
+      checks.push({ name: 'Target keywords in content', passed: true })
+    } else {
+      checks.push({ name: 'Target keywords in content', passed: false })
+    }
+    
+    // Word count
+    if (wordCount >= 750) {
+      score += 15
+      checks.push({ name: 'Word count (750+)', passed: true })
+    } else if (wordCount >= 500) {
+      score += 10
+      checks.push({ name: 'Word count (500+)', passed: true })
+    } else {
+      checks.push({ name: 'Word count (500+)', passed: false })
+    }
+    
+    // Stats/research
+    if (hasStats) {
+      score += 15
+      checks.push({ name: 'Stats or research cited', passed: true })
+    } else {
+      checks.push({ name: 'Stats or research cited', passed: false })
+    }
+    
+    // Question for engagement
+    if (hasQuestion) {
+      score += 10
+      checks.push({ name: 'Question for reader engagement', passed: true })
+    } else {
+      checks.push({ name: 'Question for reader engagement', passed: false })
+    }
+    
+    return { score, checks }
+  }
+  
+  const { score, checks } = useMemo(() => calculateScore(), [title, headline, hasMeta, hasKeywords, wordCount, hasStats, hasQuestion])
+  
+  const getScoreColor = (s) => {
+    if (s >= 80) return '#22c55e'
+    if (s >= 60) return '#f97316'
+    return '#ef4444'
+  }
+  
+  const getScoreLabel = (s) => {
+    if (s >= 80) return 'Excellent'
+    if (s >= 60) return 'Good'
+    if (s >= 40) return 'Fair'
+    return 'Needs Work'
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content seo-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🎯 SEO Score Calculator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="seo-form">
+          <div className="seo-field">
+            <label>Article Title</label>
+            <input 
+              type="text" 
+              placeholder="Enter your article title..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <span className="seo-char-count">{title.length}/60</span>
+          </div>
+          <div className="seo-field">
+            <label>Hook / Headline</label>
+            <input 
+              type="text" 
+              placeholder="Your opening hook..."
+              value={headline}
+              onChange={(e) => setHeadline(e.target.value)}
+            />
+          </div>
+          <div className="seo-field">
+            <label>Word Count</label>
+            <input 
+              type="number" 
+              placeholder="Total words..."
+              value={wordCount || ''}
+              onChange={(e) => setWordCount(parseInt(e.target.value) || 0)}
+            />
+          </div>
+          <div className="seo-checkboxes">
+            <label className="seo-checkbox">
+              <input 
+                type="checkbox" 
+                checked={hasMeta}
+                onChange={(e) => setHasMeta(e.target.checked)}
+              />
+              <span>Meta description (150-160 chars)</span>
+            </label>
+            <label className="seo-checkbox">
+              <input 
+                type="checkbox" 
+                checked={hasKeywords}
+                onChange={(e) => setHasKeywords(e.target.checked)}
+              />
+              <span>Target keywords in first 100 words</span>
+            </label>
+            <label className="seo-checkbox">
+              <input 
+                type="checkbox" 
+                checked={hasStats}
+                onChange={(e) => setHasStats(e.target.checked)}
+              />
+              <span>Statistics or research cited</span>
+            </label>
+            <label className="seo-checkbox">
+              <input 
+                type="checkbox" 
+                checked={hasQuestion}
+                onChange={(e) => setHasQuestion(e.target.checked)}
+              />
+              <span>Question for reader engagement</span>
+            </label>
+          </div>
+        </div>
+        <div className="seo-score-display">
+          <div className="seo-score-circle" style={{ borderColor: getScoreColor(score) }}>
+            <span className="seo-score-value" style={{ color: getScoreColor(score) }}>{score}</span>
+            <span className="seo-score-label">{getScoreLabel(score)}</span>
+          </div>
+        </div>
+        <div className="seo-checks">
+          {checks.map((check, i) => (
+            <div key={i} className={`seo-check-item ${check.passed ? 'passed' : 'failed'}`}>
+              <span className="seo-check-icon">{check.passed ? '✓' : '✕'}</span>
+              <span>{check.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Writing prompt component
 function WritingPrompt({ onClose }) {
   const prompts = [
@@ -3178,7 +3462,9 @@ const quickActions = [
   { label: "Check Trends", icon: "📈", action: "trends", shortcut: "R" },
   { label: "Shortcuts", icon: "⌨️", action: "shortcuts", shortcut: "H" },
   { label: "Changelog", icon: "📜", action: "changelog", shortcut: "L" },
-  { label: "Export Drafts", icon: "📦", action: "exportDrafts", shortcut: "E" }
+  { label: "Export Drafts", icon: "📦", action: "exportDrafts", shortcut: "E" },
+  { label: "Mood Tracker", icon: "🎭", action: "moodTracker", shortcut: "1" },
+  { label: "SEO Score", icon: "🎯", action: "seoScore", shortcut: "2" }
 ]
 
 // Reading Time Estimator Component
@@ -3655,6 +3941,8 @@ function App() {
   const [showThread, setShowThread] = useState(false)
   const [showHeadlineGen, setShowHeadlineGen] = useState(false)
   const [showBriefGen, setShowBriefGen] = useState(false)
+  const [showMoodTracker, setShowMoodTracker] = useState(false)
+  const [showSEOScore, setShowSEOScore] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -3811,6 +4099,8 @@ function App() {
       if (key === 'Z') setShowArticleSeries(true)
       if (key === 'P' && !e.metaKey && !e.ctrlKey) setShowPipeline(true)
       if (key === 'X') setShowThread(true)
+      if (key === '1') setShowMoodTracker(true)
+      if (key === '2') setShowSEOScore(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -3837,6 +4127,8 @@ function App() {
         setShowThread(false)
         setShowHeadlineGen(false)
         setShowBriefGen(false)
+        setShowMoodTracker(false)
+        setShowSEOScore(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -3884,6 +4176,14 @@ function App() {
       case 'hookTester':
         setShowHookTester(true)
         addActivity('prompt', 'Opened hook tester')
+        break
+      case 'moodTracker':
+        setShowMoodTracker(true)
+        addActivity('prompt', 'Opened mood tracker')
+        break
+      case 'seoScore':
+        setShowSEOScore(true)
+        addActivity('prompt', 'Opened SEO calculator')
         break
       case 'briefGenerator':
         setShowBriefGen(true)
@@ -4096,6 +4396,14 @@ function App() {
           saveDraft(draft)
         }}
       />
+      <WritingMoodTracker
+        isOpen={showMoodTracker}
+        onClose={() => setShowMoodTracker(false)}
+      />
+      <SEOScoreCalculator
+        isOpen={showSEOScore}
+        onClose={() => setShowSEOScore(false)}
+      />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
@@ -4129,7 +4437,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v3.3</span>
+          <span className="logo-badge">v3.4</span>
         </div>
         <div className="header-right">
           <ThemeToggle isDark={isDarkMode} onToggle={toggleTheme} />
@@ -4280,6 +4588,16 @@ function App() {
             <span>📋</span>
             <span>Brief</span>
             <span className="feature-hint">I</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowMoodTracker(true)}>
+            <span>🎭</span>
+            <span>Mood</span>
+            <span className="feature-hint">1</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowSEOScore(true)}>
+            <span>🎯</span>
+            <span>SEO</span>
+            <span className="feature-hint">2</span>
           </button>
         </section>
 
