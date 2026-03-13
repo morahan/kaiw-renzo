@@ -6,6 +6,13 @@ import './App.css'
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '2.9', date: '2026-03-12', changes: [
+      'Added Focus Mode (M) - Full-screen distraction-free writing',
+      'Added Writing Streak Calendar - Visual 28-day activity tracker',
+      'Added Quick Reference Panel (R) - Store citations & sources',
+      'Added Focus & Refs buttons to toolbar',
+      'Updated keyboard shortcuts'
+    ]},
     { version: '2.8', date: '2026-03-12', changes: [
       'Added Export Drafts feature (Markdown/JSON)',
       'Added Reading Time Estimator',
@@ -57,6 +64,208 @@ function ChangelogModal({ isOpen, onClose }) {
               </ul>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== FOCUS MODE ==========
+function FocusMode({ isOpen, onClose, onSave }) {
+  const [content, setContent] = useState('')
+  const [title, setTitle] = useState('')
+  const [wordCount, setWordCount] = useState(0)
+  const textareaRef = useRef(null)
+  
+  useEffect(() => {
+    if (isOpen && textareaRef.current) {
+      textareaRef.current.focus()
+    }
+  }, [isOpen])
+  
+  useEffect(() => {
+    const words = content.trim().split(/\s+/).filter(w => w.length > 0).length
+    setWordCount(words)
+  }, [content])
+  
+  const handleSave = () => {
+    if (title && content) {
+      onSave?.({ title, content, words: wordCount, date: new Date().toISOString() })
+      setContent('')
+      setTitle('')
+      onClose()
+    }
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="focus-mode-overlay">
+      <div className="focus-mode-container">
+        <div className="focus-mode-header">
+          <input
+            type="text"
+            className="focus-title-input"
+            placeholder="Article title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <div className="focus-mode-controls">
+            <span className="focus-word-count">{wordCount} words</span>
+            <span className="focus-time">{Math.max(1, Math.ceil(wordCount / 200))} min read</span>
+            <button className="focus-save-btn" onClick={handleSave} disabled={!title || !content}>
+              Save Draft
+            </button>
+            <button className="focus-close-btn" onClick={onClose}>Exit</button>
+          </div>
+        </div>
+        <textarea
+          ref={textareaRef}
+          className="focus-textarea"
+          placeholder="Start writing... (Shift+Enter for line break)"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+        <div className="focus-mode-footer">
+          <span className="focus-hint">Press Esc to exit • Auto-saves to localStorage</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== WRITING STREAK CALENDAR ==========
+function WritingStreakCalendar({ streak, articles }) {
+  const [days, setDays] = useState([])
+  
+  useEffect(() => {
+    // Generate last 28 days
+    const today = new Date()
+    const writingDays = articles.map(a => new Date(a.date).toDateString())
+    const newDays = []
+    
+    for (let i = 27; i >= 0; i--) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toDateString()
+      const hasWritten = writingDays.includes(dateStr)
+      newDays.push({
+        date: date,
+        day: date.getDate(),
+        hasWritten,
+        isToday: i === 0
+      })
+    }
+    setDays(newDays)
+  }, [articles])
+  
+  return (
+    <div className="streak-calendar">
+      <div className="streak-calendar-header">
+        <span className="streak-icon">🔥</span>
+        <span className="streak-count">{streak} day streak</span>
+      </div>
+      <div className="streak-grid">
+        {days.map((day, i) => (
+          <div 
+            key={i} 
+            className={`streak-day ${day.hasWritten ? 'active' : ''} ${day.isToday ? 'today' : ''}`}
+            title={`${day.date.toLocaleDateString()}${day.hasWritten ? ' - Wrote!' : ''}`}
+          >
+            {day.day}
+          </div>
+        ))}
+      </div>
+      <div className="streak-legend">
+        <span className="legend-item"><span className="legend-dot active"></span> Wrote</span>
+        <span className="legend-item"><span className="legend-dot"></span> No activity</span>
+      </div>
+    </div>
+  )
+}
+
+// ========== QUICK REFERENCE PANEL ==========
+function QuickReferencePanel({ isOpen, onClose }) {
+  const [references, setReferences] = useState(() => {
+    const saved = localStorage.getItem('renzo-references')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [newRef, setNewRef] = useState({ title: '', url: '', note: '' })
+  const [filter, setFilter] = useState('all')
+  
+  const categories = ['all', 'studies', 'tools', 'inspiration', 'citations']
+  
+  const addReference = () => {
+    if (newRef.title) {
+      const updated = [...references, { ...newRef, id: Date.now(), category: filter === 'all' ? 'studies' : filter, date: new Date().toISOString() }]
+      setReferences(updated)
+      localStorage.setItem('renzo-references', JSON.stringify(updated))
+      setNewRef({ title: '', url: '', note: '' })
+    }
+  }
+  
+  const deleteReference = (id) => {
+    const updated = references.filter(r => r.id !== id)
+    setReferences(updated)
+    localStorage.setItem('renzo-references', JSON.stringify(updated))
+  }
+  
+  const filteredRefs = filter === 'all' ? references : references.filter(r => r.category === filter)
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content reference-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📚 Quick Reference</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="reference-filters">
+          {categories.map(cat => (
+            <button 
+              key={cat}
+              className={`filter-btn ${filter === cat ? 'active' : ''}`}
+              onClick={() => setFilter(cat)}
+            >
+              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </button>
+          ))}
+        </div>
+        
+        <div className="reference-add">
+          <input
+            type="text"
+            placeholder="Title..."
+            value={newRef.title}
+            onChange={(e) => setNewRef({...newRef, title: e.target.value})}
+          />
+          <input
+            type="text"
+            placeholder="URL (optional)..."
+            value={newRef.url}
+            onChange={(e) => setNewRef({...newRef, url: e.target.value})}
+          />
+          <button onClick={addReference}>Add</button>
+        </div>
+        
+        <div className="reference-list">
+          {filteredRefs.length === 0 ? (
+            <div className="reference-empty">No references yet. Add some!</div>
+          ) : (
+            filteredRefs.map(ref => (
+              <div key={ref.id} className="reference-item">
+                <div className="reference-title">{ref.title}</div>
+                {ref.url && <a href={ref.url} target="_blank" rel="noopener noreferrer" className="reference-url">🔗</a>}
+                {ref.note && <div className="reference-note">{ref.note}</div>}
+                <div className="reference-meta">
+                  <span className="reference-category">{ref.category}</span>
+                  <button className="reference-delete" onClick={() => deleteReference(ref.id)}>🗑️</button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
@@ -1774,6 +1983,8 @@ function App() {
   const [showExportDrafts, setShowExportDrafts] = useState(false)
   const [showChangelog, setShowChangelog] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
+  const [showFocusMode, setShowFocusMode] = useState(false)
+  const [showReferencePanel, setShowReferencePanel] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -1894,6 +2105,8 @@ function App() {
       if (key === 'B') setShowBrainstorm(true)
       if (key === 'E') setShowExportDrafts(true)
       if (key === 'L') setShowChangelog(true)
+      if (key === 'M') setShowFocusMode(true)
+      if (key === 'R') setShowReferencePanel(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -1909,6 +2122,8 @@ function App() {
         setShowBrainstorm(false)
         setShowChangelog(false)
         setShowTemplates(false)
+        setShowFocusMode(false)
+        setShowReferencePanel(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -2081,6 +2296,19 @@ function App() {
           }}
         />
       )}
+      {showFocusMode && (
+        <FocusMode 
+          isOpen={showFocusMode} 
+          onClose={() => setShowFocusMode(false)}
+          onSave={saveQuickWrite}
+        />
+      )}
+      {showReferencePanel && (
+        <QuickReferencePanel 
+          isOpen={showReferencePanel} 
+          onClose={() => setShowReferencePanel(false)}
+        />
+      )}
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
@@ -2109,7 +2337,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v2.7</span>
+          <span className="logo-badge">v2.9</span>
         </div>
         <div className="header-right">
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
@@ -2169,6 +2397,7 @@ function App() {
           <StudySpotlight />
           <QuickStatGenerator />
           <WritingTimer onComplete={() => addToast('Session complete! Take a break ☕', 'success')} />
+          <WritingStreakCalendar streak={metrics.currentStreak} articles={articles} />
         </section>
         
         <section className="feature-buttons-row">
@@ -2191,6 +2420,16 @@ function App() {
             <span>🧠</span>
             <span>Brainstorm</span>
             <span className="feature-hint">B</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowFocusMode(true)}>
+            <span>🎯</span>
+            <span>Focus</span>
+            <span className="feature-hint">M</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowReferencePanel(true)}>
+            <span>📚</span>
+            <span>Refs</span>
+            <span className="feature-hint">R</span>
           </button>
           <button className="feature-btn" onClick={() => setShowChangelog(true)}>
             <span>📜</span>
@@ -2563,7 +2802,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v2.7 • Press ⌘K for commands, H for shortcuts</p>
+        <p className="footer-version">v2.9 • Press ⌘K for commands, H for shortcuts</p>
       </footer>
     </div>
   )
