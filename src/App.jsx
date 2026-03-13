@@ -1301,6 +1301,12 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '4.3', date: '2026-03-13', changes: [
+      'Fixed keyboard shortcut conflict — A key was mapped to both Ideas Bank and Quick Tweet',
+      'Changed Quick Tweet shortcut from A to N for better organization',
+      'Improved feature button row with better visual grouping',
+      'Updated version badge to v4.3'
+    ]},
     { version: '4.2', date: '2026-03-13', changes: [
       'Added Citation Formatter (5 key) — Generate APA, MLA, Chicago, and BibTeX citations',
       'Added Writing Heatmap — GitHub-style 12-week contribution graph',
@@ -4647,7 +4653,7 @@ const quickActions = [
   { label: "Global Search", icon: "🔍", action: "globalSearch", shortcut: "3" },
   { label: "Settings", icon: "⚙️", action: "settings", shortcut: "," },
   { label: "Data Backup", icon: "💾", action: "dataManagement", shortcut: "4" },
-  { label: "Quick Tweet", icon: "🐦", action: "quickTweet", shortcut: "A" }
+  { label: "Quick Tweet", icon: "🐦", action: "quickTweet", shortcut: "N" }
 ]
 
 // Reading Time Estimator Component
@@ -5486,7 +5492,7 @@ function App() {
       if (key === 'Z') setShowArticleSeries(true)
       if (key === 'P' && !e.metaKey && !e.ctrlKey) setShowPipeline(true)
       if (key === 'X') setShowThread(true)
-      if (key === 'A') setShowQuickTweet(true)
+      if (key === 'N') setShowQuickTweet(true)  // N for New Tweet
       if (key === '1') setShowMoodTracker(true)
       if (key === '2') setShowSEOScore(true)
       if (key === '3' && !e.metaKey && !e.ctrlKey) setShowGlobalSearch(true)
@@ -5910,7 +5916,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v4.2</span>
+          <span className="logo-badge">v4.3</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}

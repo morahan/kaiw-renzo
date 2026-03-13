@@ -1,4 +1,4 @@
-# RENZO — Content Writing Interface (v4.0)
+# RENZO — Content Writing Interface (v4.3)
 
 A comprehensive web-based writing and content management interface for fitness article creation, built with React + Vite.
 
@@ -53,6 +53,7 @@ H               Headline Generator
 I               Article Brief Generator
 D               Quick Draft
 M               Focus Mode
+N               Quick Tweet
 S               Word Sprint
 Q               Quick Capture
 A               Content Ideas Bank
@@ -108,6 +109,12 @@ npm run preview
 - Smooth transitions and animations
 - Mobile-responsive design
 - Accessibility-first approach
+
+## What's New in v4.3
+
+✅ **Keyboard Shortcut Fix** — Fixed conflict where A key was mapped to both Ideas Bank and Quick Tweet
+✅ **Quick Tweet Shortcut Updated** — Changed from A to N for better organization
+✅ **Bug Fixes** — Improved keyboard shortcut handling
 
 ## What's New in v4.0
 
