@@ -1,6 +1,302 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import './App.css'
 
+// ========== GLOBAL SEARCH FEATURE (NEW v3.6) ==========
+function GlobalSearch({ isOpen, onClose, allData }) {
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const searchRef = useRef(null)
+
+  useEffect(() => {
+    if (isOpen && searchRef.current) {
+      searchRef.current.focus()
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults([])
+      return
+    }
+
+    const q = query.toLowerCase()
+    const found = []
+
+    // Search hooks
+    if (allData.hooks) {
+      allData.hooks.forEach((hook, i) => {
+        if (hook.text.toLowerCase().includes(q)) {
+          found.push({ type: 'Hook', title: hook.text.slice(0, 60), id: i, section: 'hooks' })
+        }
+      })
+    }
+
+    // Search ideas
+    if (allData.ideas) {
+      allData.ideas.forEach((idea, i) => {
+        if (idea.title.toLowerCase().includes(q) || idea.angle.toLowerCase().includes(q)) {
+          found.push({ type: 'Idea', title: idea.title, id: i, section: 'ideas' })
+        }
+      })
+    }
+
+    // Search headlines
+    if (allData.headlines) {
+      allData.headlines.forEach((h, i) => {
+        if (h.generated.toLowerCase().includes(q)) {
+          found.push({ type: 'Headline', title: h.generated.slice(0, 60), id: i, section: 'headlines' })
+        }
+      })
+    }
+
+    // Search references
+    if (allData.references) {
+      allData.references.forEach((ref, i) => {
+        if (ref.title.toLowerCase().includes(q)) {
+          found.push({ type: 'Reference', title: ref.title, id: i, section: 'references' })
+        }
+      })
+    }
+
+    setResults(found.slice(0, 20))
+  }, [query, allData])
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content search-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🔍 Global Search</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <input
+          ref={searchRef}
+          type="text"
+          className="search-input"
+          placeholder="Search hooks, ideas, headlines, references..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <div className="search-results">
+          {query && results.length === 0 ? (
+            <div className="search-empty">No results found</div>
+          ) : !query ? (
+            <div className="search-empty">Start typing to search...</div>
+          ) : (
+            results.map((result, i) => (
+              <div key={i} className="search-result">
+                <span className="search-type">{result.type}</span>
+                <span className="search-title">{result.title}</span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== SETTINGS MODAL (NEW v3.6) ==========
+function SettingsModal({ isOpen, onClose, settings, onUpdate }) {
+  const [localSettings, setLocalSettings] = useState(settings)
+
+  const handleChange = (key, value) => {
+    const updated = { ...localSettings, [key]: value }
+    setLocalSettings(updated)
+    onUpdate?.(updated)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content settings-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>⚙️ Settings</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="settings-section">
+          <h4>Writing Preferences</h4>
+          <label className="setting-item">
+            <span>Daily Word Goal</span>
+            <input
+              type="number"
+              value={localSettings.dailyWordGoal}
+              onChange={(e) => handleChange('dailyWordGoal', parseInt(e.target.value) || 1000)}
+              min="100"
+              max="10000"
+            />
+          </label>
+          <label className="setting-item">
+            <span>Default Sprint Duration (minutes)</span>
+            <input
+              type="number"
+              value={localSettings.sprintDuration}
+              onChange={(e) => handleChange('sprintDuration', parseInt(e.target.value) || 15)}
+              min="5"
+              max="60"
+            />
+          </label>
+        </div>
+
+        <div className="settings-section">
+          <h4>Notifications</h4>
+          <label className="setting-toggle">
+            <input
+              type="checkbox"
+              checked={localSettings.soundEnabled}
+              onChange={(e) => handleChange('soundEnabled', e.target.checked)}
+            />
+            <span>Sound Effects</span>
+          </label>
+          <label className="setting-toggle">
+            <input
+              type="checkbox"
+              checked={localSettings.notificationsEnabled}
+              onChange={(e) => handleChange('notificationsEnabled', e.target.checked)}
+            />
+            <span>Browser Notifications</span>
+          </label>
+        </div>
+
+        <div className="settings-section">
+          <h4>Interface</h4>
+          <label className="setting-item">
+            <span>Theme</span>
+            <select value={localSettings.theme} onChange={(e) => handleChange('theme', e.target.value)}>
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="auto">Auto</option>
+            </select>
+          </label>
+          <label className="setting-toggle">
+            <input
+              type="checkbox"
+              checked={localSettings.compactMode}
+              onChange={(e) => handleChange('compactMode', e.target.checked)}
+            />
+            <span>Compact Mode</span>
+          </label>
+        </div>
+
+        <div className="settings-section">
+          <h4>Auto-Save</h4>
+          <label className="setting-toggle">
+            <input
+              type="checkbox"
+              checked={localSettings.autoSaveEnabled}
+              onChange={(e) => handleChange('autoSaveEnabled', e.target.checked)}
+            />
+            <span>Auto-save drafts</span>
+          </label>
+          <label className="setting-item">
+            <span>Auto-save interval (seconds)</span>
+            <input
+              type="number"
+              value={localSettings.autoSaveInterval}
+              onChange={(e) => handleChange('autoSaveInterval', parseInt(e.target.value) || 30)}
+              min="10"
+              max="300"
+            />
+          </label>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== DATA MANAGEMENT MODAL (NEW v3.6) ==========
+function DataManagement({ isOpen, onClose, onExport, onImport }) {
+  const [exportStatus, setExportStatus] = useState('')
+  const importRef = useRef(null)
+
+  const handleExport = () => {
+    try {
+      onExport?.()
+      setExportStatus('✓ Data exported successfully')
+      setTimeout(() => setExportStatus(''), 3000)
+    } catch (e) {
+      setExportStatus('✗ Export failed')
+    }
+  }
+
+  const handleImport = () => {
+    importRef.current?.click()
+  }
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target?.result)
+          onImport?.(data)
+          setExportStatus('✓ Data imported successfully')
+          setTimeout(() => setExportStatus(''), 3000)
+        } catch {
+          setExportStatus('✗ Invalid file format')
+        }
+      }
+      reader.readAsText(file)
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content data-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>💾 Data Management</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="data-section">
+          <h4>Backup & Restore</h4>
+          <p className="data-description">Export all your data (hooks, ideas, headlines, etc.) as a JSON file for backup or transfer.</p>
+          <button className="data-action-btn" onClick={handleExport}>
+            📥 Export All Data
+          </button>
+        </div>
+
+        <div className="data-section">
+          <h4>Import Data</h4>
+          <p className="data-description">Import previously exported data from a JSON file.</p>
+          <input
+            ref={importRef}
+            type="file"
+            accept=".json"
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+          />
+          <button className="data-action-btn" onClick={handleImport}>
+            📤 Import Data
+          </button>
+        </div>
+
+        <div className="data-section">
+          <h4>Clear Data</h4>
+          <p className="data-description warning">⚠️ This action cannot be undone.</p>
+          <button className="data-danger-btn" onClick={() => {
+            if (confirm('Are you sure? This will clear all saved data.')) {
+              localStorage.clear()
+              setExportStatus('✓ All data cleared')
+              setTimeout(() => setExportStatus(''), 3000)
+            }
+          }}>
+            🗑️ Clear All Data
+          </button>
+        </div>
+
+        {exportStatus && <div className="data-status">{exportStatus}</div>}
+      </div>
+    </div>
+  )
+}
+
 // ========== NEW FEATURES v3.0 ==========
 
 // Quick Capture - Quick idea capture (press Q)
@@ -777,6 +1073,15 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '3.9', date: '2026-03-13', changes: [
+      'Added Global Search (3 key) - Search across all hooks, ideas, headlines, and references',
+      'Added Settings Modal (comma key) - Customize daily goals, sprint duration, notifications, theme, and auto-save',
+      'Added Data Management Modal (4 key) - Export/import all data as JSON for backup and transfer',
+      'Added Data persistence improvements - All settings now stored with localStorage',
+      'Improved keyboard shortcuts with new quick access keys',
+      'Updated version badge to v3.9',
+      'Enhanced UI with better data management workflow'
+    ]},
     { version: '3.8', date: '2026-03-13', changes: [
       'Added Quick Tweet Generator - One-click tweet creation with tone selection (A key)',
       'Added 4 tweet tones: Bold, Question, Stat, Story',
@@ -3591,6 +3896,9 @@ const quickActions = [
   { label: "Export Drafts", icon: "📦", action: "exportDrafts", shortcut: "E" },
   { label: "Mood Tracker", icon: "🎭", action: "moodTracker", shortcut: "1" },
   { label: "SEO Score", icon: "🔎", action: "seoScore", shortcut: "2" },
+  { label: "Global Search", icon: "🔍", action: "globalSearch", shortcut: "3" },
+  { label: "Settings", icon: "⚙️", action: "settings", shortcut: "," },
+  { label: "Data Backup", icon: "💾", action: "dataManagement", shortcut: "4" },
   { label: "Quick Tweet", icon: "🐦", action: "quickTweet", shortcut: "A" }
 ]
 
@@ -4194,6 +4502,22 @@ function App() {
   const [showBriefGen, setShowBriefGen] = useState(false)
   const [showMoodTracker, setShowMoodTracker] = useState(false)
   const [showSEOScore, setShowSEOScore] = useState(false)
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [showDataManagement, setShowDataManagement] = useState(false)
+  const [appSettings, setAppSettings] = useState(() => {
+    const saved = localStorage.getItem('renzo-app-settings')
+    return saved ? JSON.parse(saved) : {
+      dailyWordGoal: 1000,
+      sprintDuration: 15,
+      soundEnabled: true,
+      notificationsEnabled: true,
+      theme: 'dark',
+      compactMode: false,
+      autoSaveEnabled: true,
+      autoSaveInterval: 30
+    }
+  })
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -4389,10 +4713,16 @@ function App() {
       if (key === 'A') setShowQuickTweet(true)
       if (key === '1') setShowMoodTracker(true)
       if (key === '2') setShowSEOScore(true)
+      if (key === '3' && !e.metaKey && !e.ctrlKey) setShowGlobalSearch(true)
+      if (key === ',') setShowSettings(true)
+      if (key === '4') setShowDataManagement(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
         setShowCommandPalette(false)
+        setShowGlobalSearch(false)
+        setShowSettings(false)
+        setShowDataManagement(false)
         setSearchQuery('')
         setShowQuickDraft(false)
         setShowShortcuts(false)
@@ -4717,6 +5047,62 @@ function App() {
         onDelete={deleteIdea}
         onMoveToDraft={moveIdeaToDraft}
       />
+      <GlobalSearch
+        isOpen={showGlobalSearch}
+        onClose={() => setShowGlobalSearch(false)}
+        allData={{
+          hooks: JSON.parse(localStorage.getItem('renzo-saved-hooks') || '[]'),
+          ideas: contentIdeas,
+          headlines: JSON.parse(localStorage.getItem('renzo-generated-headlines') || '[]'),
+          references: JSON.parse(localStorage.getItem('renzo-references') || '[]')
+        }}
+      />
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        settings={appSettings}
+        onUpdate={(newSettings) => {
+          setAppSettings(newSettings)
+          localStorage.setItem('renzo-app-settings', JSON.stringify(newSettings))
+          addToast('Settings saved', 'success')
+        }}
+      />
+      <DataManagement
+        isOpen={showDataManagement}
+        onClose={() => setShowDataManagement(false)}
+        onExport={() => {
+          const data = {
+            hooks: JSON.parse(localStorage.getItem('renzo-saved-hooks') || '[]'),
+            ideas: contentIdeas,
+            headlines: JSON.parse(localStorage.getItem('renzo-generated-headlines') || '[]'),
+            references: JSON.parse(localStorage.getItem('renzo-references') || '[]'),
+            drafts: drafts,
+            settings: appSettings,
+            exportDate: new Date().toISOString()
+          }
+          const dataStr = JSON.stringify(data, null, 2)
+          const dataBlob = new Blob([dataStr], { type: 'application/json' })
+          const url = URL.createObjectURL(dataBlob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `renzo-backup-${new Date().toISOString().split('T')[0]}.json`
+          link.click()
+          URL.revokeObjectURL(url)
+        }}
+        onImport={(data) => {
+          if (data.hooks) localStorage.setItem('renzo-saved-hooks', JSON.stringify(data.hooks))
+          if (data.ideas) setContentIdeas(data.ideas)
+          if (data.headlines) localStorage.setItem('renzo-generated-headlines', JSON.stringify(data.headlines))
+          if (data.references) localStorage.setItem('renzo-references', JSON.stringify(data.references))
+          if (data.drafts) setDrafts(data.drafts)
+          if (data.settings) {
+            setAppSettings(data.settings)
+            localStorage.setItem('renzo-app-settings', JSON.stringify(data.settings))
+          }
+          addToast('Data imported successfully', 'success')
+          setShowDataManagement(false)
+        }}
+      />
       <CommandPalette 
         isOpen={showCommandPalette} 
         onClose={() => setShowCommandPalette(false)}
@@ -4741,7 +5127,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v3.8</span>
+          <span className="logo-badge">v3.9</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -4955,6 +5341,12 @@ function App() {
                   else if (action.action === 'quickTweet') setShowQuickTweet(true)
                   else if (action.action === 'moodTracker') setShowMoodTracker(true)
                   else if (action.action === 'seoScore') setShowSEOScore(true)
+                  else if (action.action === 'globalSearch') setShowGlobalSearch(true)
+                  else if (action.action === 'settings') setShowSettings(true)
+                  else if (action.action === 'dataManagement') setShowDataManagement(true)
+                  else if (action.action === 'ctaTemplates') setShowCTATemplates(true)
+                  else if (action.action === 'hookTester') setShowHookTester(true)
+                  else if (action.action === 'virality') setShowVirality(true)
                 }}
               >
                 <span className="action-icon">{action.icon}</span>
@@ -5298,7 +5690,7 @@ function App() {
 
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v3.4 • Press ⌘K for commands, H for shortcuts</p>
+        <p className="footer-version">v3.9 • Press ⌘K for commands, 3 for search, , for settings, 4 for data</p>
       </footer>
     </div>
   )
