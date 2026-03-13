@@ -9,6 +9,8 @@ A comprehensive web-based writing and content management interface for fitness a
 - **Focus Mode** (M) — Full-screen distraction-free writing environment
 - **Word Sprint** (S) — Pomodoro-style timed writing sessions (15 min default)
 - **Quick Draft** (D) — Create articles quickly
+- **Quick Write** (W) — Fast capture mode for quick ideas
+- **Thread Format** (X) — Generate X/Twitter thread structures with 4 templates
 - **Article Templates** (T) — 6 pre-built article structures (myth-bust, comparison, deep-dive, how-to, hot take, listicle)
 
 ### Content Organization
@@ -24,12 +26,14 @@ A comprehensive web-based writing and content management interface for fitness a
 - **Hot Take Generator** (Y) — Create controversial opinions with backing
 - **Quick Tweet Generator** (A) — One-click tweet creation with 4 tones
 
-### Analytics & Optimization
+### Analytics & Tracking
 - **Virality Score Calculator** (V) — Estimate article virality potential
 - **SEO Score Checker** (2) — Analyze article SEO effectiveness
 - **Reading Time Estimator** — Auto-calculate reading time
 - **Writing Streak Calendar** — Visual 28-day activity tracker
+- **Article Publishing Timer** — Days since last published (urges you to ship!)
 - **Performance Dashboard** — Track metrics over time
+- **Quick Stat Generator** — Random fitness facts with study sources
 
 ### Data Management (NEW v4.0)
 - **Floating Action Button (FAB)** — Quick access to 5 core actions from anywhere
@@ -107,11 +111,13 @@ npm run preview
 
 ## What's New in v4.0
 
-✅ **Floating Action Button (FAB)** — Quick access to 5 core actions (Draft, Focus, Sprint, Headlines, Ideas)
+✅ **Thread Format Generator** — One-click X/Twitter thread templates (Hook→CTA, Listicle, Story, MythBust)
+✅ **Article Publishing Timer** — Visual countdown showing days since your last published article (triggers urgency at 3+ days)
+✅ **Enhanced Quick Stats** — Random fitness facts now include study sources and PubMed links
+✅ **Floating Action Button (FAB)** — Quick access to 5 core actions
 ✅ **Mini Command Bar** — Press Ctrl+Space for lightning-fast command input
 ✅ **Light Mode Theme** — Toggle between dark and light themes in Settings
-✅ **Enhanced Keyboard Shortcuts** — Comma (,) for settings, 3 for search
-✅ **Improved Workflow** — FAB + command bar = maximum productivity
+✅ **Enhanced Keyboard Shortcuts** — X for Thread Format, , for settings, 3 for search
 
 ## Previous Versions
 
