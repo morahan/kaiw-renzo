@@ -46,6 +46,10 @@ A comprehensive web-based writing and content management interface for fitness a
 - **Settings Modal** (,) — Customize daily goals, notifications, theme, auto-save
 - **Data Management** (4) — Export/import all data as JSON for backup
 
+### New in v4.7
+- **Reading List** (0) — Save URLs for research, filter by read/unread, persistent storage
+- **Quick AI Prompt** (\`) — Enter custom prompts, view history, copy results
+
 ### Visual Polish (v4.5)
 - Enhanced animations with smoother transitions throughout
 - Keyboard shortcut hints on feature buttons for better discoverability
@@ -63,6 +67,9 @@ Ctrl+Space      Mini Command Bar
 6               Publishing Prep Workflow (NEW)
 7               Performance Tracker (NEW)
 8               Draft Collections (NEW)
+9               Inspiration Board
+0               Reading List (NEW)
+`               Quick AI Prompt (NEW)
 H               Headline Generator
 I               Article Brief Generator
 D               Quick Draft
