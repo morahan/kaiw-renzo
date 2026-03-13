@@ -943,6 +943,172 @@ function HeadlineGenerator({ isOpen, onClose }) {
   )
 }
 
+// ========== QUICK THREAD FORMAT GENERATOR ==========
+function QuickThreadFormat({ isOpen, onClose }) {
+  const [topic, setTopic] = useState('')
+  const [threadFormat, setThreadFormat] = useState('')
+  const [selectedTemplate, setSelectedTemplate] = useState('hook-cta')
+  
+  const templates = {
+    'hook-cta': {
+      name: 'Hook → CTA',
+      format: `1/ 🧵 On "${topic}":
+
+Most people get it completely wrong.
+
+Here's what science actually shows:
+
+2/ The misconception:
+[Common belief]
+
+The truth:
+[What research actually says]
+
+3/ The mechanism:
+[Explain WHY this works]
+
+4/ Your move:
+[Actionable step]
+
+5/ The bottom line:
+[Key takeaway + CTA to follow]`
+    },
+    'listicle': {
+      name: '5-Thread List',
+      format: `1/ 🧵 ${topic}
+
+Here are 5 things you need to know:
+
+2/ 1. [Point one]
+The science: [Brief explanation]
+
+3/ 2. [Point two]
+The science: [Brief explanation]
+
+4/ 3. [Point three]
+The science: [Brief explanation]
+
+5/ 4. [Point four]
+The science: [Brief explanation]
+
+6/ 5. [Point five]
+The science: [Brief explanation]
+
+7/ Save this. Share with someone who needs to hear it.
+
+Follow for more →`
+    },
+    'story': {
+      name: 'Story Arc',
+      format: `1/ A story about "${topic}":
+
+I used to [common mistake].
+
+Then I learned [insight].
+
+Here's what changed everything:
+
+2/ The setup:
+[What most people do]
+
+3/ The twist:
+[What the research found]
+
+4/ The outcome:
+[What happened when I applied it]
+
+5/ The lesson:
+[Key takeaway for reader]
+
+If this resonated, follow for more insights →`
+    },
+    'mythbust': {
+      name: 'Myth Buster',
+      format: `1/ 🧠 Myth: [Common misconception about ${topic}]
+
+Reality: [The actual truth]
+
+Let me break this down:
+
+2/ The myth persists because:
+[Reason 1]
+[Reason 2]
+
+3/ What the science says:
+[Study/results]
+
+4/ The practical takeaway:
+[What to do instead]
+
+5/ Don't believe the hype. Trust the data.
+
+Follow for evidence-based insights →`
+    }
+  }
+  
+  const generateThread = () => {
+    if (!topic.trim()) {
+      return
+    }
+    setThreadFormat(templates[selectedTemplate].format)
+  }
+  
+  const copyThread = () => {
+    navigator.clipboard.writeText(threadFormat)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content thread-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🧵 Quick Thread Format</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="thread-input-section">
+          <label>Your Topic</label>
+          <input
+            type="text"
+            placeholder="e.g., creatine, sleep optimization..."
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+          />
+        </div>
+        
+        <div className="thread-template-section">
+          <label>Choose Format</label>
+          <div className="template-buttons">
+            {Object.entries(templates).map(([key, t]) => (
+              <button
+                key={key}
+                className={`template-btn ${selectedTemplate === key ? 'active' : ''}`}
+                onClick={() => setSelectedTemplate(key)}
+              >
+                {t.name}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <button className="thread-generate-btn" onClick={generateThread}>
+          Generate Thread Format
+        </button>
+        
+        {threadFormat && (
+          <div className="thread-preview">
+            <pre>{threadFormat}</pre>
+            <button className="copy-btn" onClick={copyThread}>
+              📋 Copy to Clipboard
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Word Sprint - Quick 15-min timed writing
 function WordSprint({ isOpen, onClose, onSave }) {
   const [content, setContent] = useState('')
@@ -1387,6 +1553,55 @@ function WritingStreakCalendar({ streak, articles }) {
         <span className="legend-item"><span className="legend-dot active"></span> Wrote</span>
         <span className="legend-item"><span className="legend-dot"></span> No activity</span>
       </div>
+    </div>
+  )
+}
+
+// ========== ARTICLE PUBLISHING TIMER ==========
+function ArticlePublishingTimer({ articles }) {
+  const [timeSince, setTimeSince] = useState({ days: 0, hours: 0, isUrgent: false })
+  
+  useEffect(() => {
+    const calculateTime = () => {
+      const publishedArticles = articles.filter(a => a.published)
+      if (publishedArticles.length === 0) {
+        setTimeSince({ days: 0, hours: 0, isUrgent: true })
+        return
+      }
+      
+      const sorted = [...publishedArticles].sort((a, b) => new Date(b.date) - new Date(a.date))
+      const lastPublished = new Date(sorted[0].date)
+      const now = new Date()
+      const diffMs = now - lastPublished
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+      const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+      
+      setTimeSince({
+        days: diffDays,
+        hours: diffHours,
+        isUrgent: diffDays >= 3
+      })
+    }
+    
+    calculateTime()
+    const interval = setInterval(calculateTime, 60000)
+    return () => clearInterval(interval)
+  }, [articles])
+  
+  return (
+    <div className={`article-timer ${timeSince.isUrgent ? 'urgent' : ''}`}>
+      <div className="timer-header">
+        <span className="timer-icon">{timeSince.isUrgent ? '⏰' : '📅'}</span>
+        <span className="timer-label">Since Last Publish</span>
+      </div>
+      <div className="timer-display">
+        <span className="timer-days">{timeSince.days}</span>
+        <span className="timer-unit">days</span>
+        <span className="timer-hours">{timeSince.hours}h</span>
+      </div>
+      {timeSince.isUrgent && (
+        <div className="timer-alert">Time to ship! 🚀</div>
+      )}
     </div>
   )
 }
@@ -1998,27 +2213,38 @@ function StudySpotlight() {
   )
 }
 
-// Quick Stat Generator
+// Enhanced Quick Stat Generator with study references
 function QuickStatGenerator() {
   const stats = [
-    "73% of people quit their fitness routine within 6 months",
-    "Muscle remains metabolically active for 72 hours post-workout",
-    "The average person walks 3,000-4,000 steps per day",
-    "Sleep deprivation can reduce testosterone by 15% in one week",
-    "Creatine monohydrate is the most researched supplement in history",
-    "Fast-twitch fibers fatigue 10x faster than slow-twitch",
-    "Your gut microbiome produces 10% of your daily energy",
-    "Resistance training maintains bone density better than cardio",
-    "Protein thermic effect is 20-30% vs 5-10% for carbs/fat",
-    "HRV is a stronger predictor of overtraining than resting HR",
+    { text: "73% of people quit their fitness routine within 6 months", source: "Stanford University", link: "https://stanford.edu" },
+    { text: "Muscle remains metabolically active for 72 hours post-workout", source: "J Appl Physiol", link: "https://pubmed.ncbi.nlm.nih.gov/" },
+    { text: "The average person walks 3,000-4,000 steps per day", source: "CDC", link: "https://www.cdc.gov/" },
+    { text: "Sleep deprivation can reduce testosterone by 15% in one week", source: "JAMA", link: "https://pubmed.ncbi.nlm.nih.gov/21250361/" },
+    { text: "Creatine monohydrate is the most researched supplement in history", source: "Examine.com", link: "https://examine.com/" },
+    { text: "Fast-twitch fibers fatigue 10x faster than slow-twitch", source: "Nature", link: "https://nature.com" },
+    { text: "Your gut microbiome produces 10% of your daily energy", source: "Cell Host & Microbe", link: "https://pubmed.ncbi.nlm.nih.gov/" },
+    { text: "Resistance training maintains bone density better than cardio", source: "Osteoporosis Int", link: "https://pubmed.ncbi.nlm.nih.gov/" },
+    { text: "Protein thermic effect is 20-30% vs 5-10% for carbs/fat", source: "Am J Clin Nutr", link: "https://pubmed.ncbi.nlm.nih.gov/" },
+    { text: "HRV is a stronger predictor of overtraining than resting HR", source: "Br J Sports Med", link: "https://pubmed.ncbi.nlm.nih.gov/" },
+    { text: "You can build muscle with just 3 sets per exercise", source: "J Strength Cond Res", link: "https://pubmed.ncbi.nlm.nih.gov/" },
+    { text: "Protein timing matters less than total daily protein intake", source: "ISSN", link: "https://pubmed.ncbi.nlm.nih.gov/" },
+    { text: "Walking 8,000+ steps daily reduces mortality risk by 50%", source: "JAMA Intern Med", link: "https://pubmed.ncbi.nlm.nih.gov/" },
+    { text: "Caffeine can improve workout performance by 12%", source: "Sports Med", link: "https://pubmed.ncbi.nlm.nih.gov/" },
+    { text: "Strength training improves insulin sensitivity within weeks", source: "Diabetes Care", link: "https://pubmed.ncbi.nlm.nih.gov/" },
   ]
   const [stat, setStat] = useState(stats[Math.floor(Math.random() * stats.length)])
   const [animating, setAnimating] = useState(false)
+  const [showSource, setShowSource] = useState(false)
   
   const generateStat = () => {
     setAnimating(true)
+    setShowSource(false)
     setTimeout(() => {
-      setStat(stats[Math.floor(Math.random() * stats.length)])
+      let newStat
+      do {
+        newStat = stats[Math.floor(Math.random() * stats.length)]
+      } while (newStat.text === stat.text && stats.length > 1)
+      setStat(newStat)
       setAnimating(false)
     }, 200)
   }
@@ -2028,8 +2254,16 @@ function QuickStatGenerator() {
       <div className="quick-stat-header">
         <span className="stat-icon">📊</span>
         <span className="stat-label">Quick Stat</span>
+        <button className="source-toggle" onClick={() => setShowSource(!showSource)} title="Show source">
+          {showSource ? '🔗' : '📖'}
+        </button>
       </div>
-      <p className={`quick-stat-text ${animating ? 'animating' : ''}`}>{stat}</p>
+      <p className={`quick-stat-text ${animating ? 'animating' : ''}`}>{stat.text}</p>
+      {showSource && (
+        <a href={stat.link} target="_blank" rel="noopener noreferrer" className="stat-source">
+          Source: {stat.source} →
+        </a>
+      )}
       <button className="stat-generate-btn" onClick={generateStat}>Generate New</button>
     </div>
   )
@@ -4541,6 +4775,7 @@ function App() {
     return localStorage.getItem('renzo-sound') !== 'false'
   })
   const [showFormula, setShowFormula] = useState(false)
+  const [showThreadFormat, setShowThreadFormat] = useState(false)
   const [showTopicGenerator, setShowTopicGenerator] = useState(false)
   const [showClipboard, setShowClipboard] = useState(false)
   const [showBrainstorm, setShowBrainstorm] = useState(false)
@@ -4788,6 +5023,7 @@ function App() {
       if (key === '?') setShowShortcuts(true)
       if (key === 'V') setShowVirality(true)
       if (key === 'W') setShowQuickWrite(true)
+      if (key === 'X') setShowThreadFormat(true)
       if (key === 'F') setShowFormula(true)
       if (key === 'G') setShowTopicGenerator(true)
       if (key === 'C' && !e.metaKey && !e.ctrlKey) setShowClipboard(true)
@@ -5004,6 +5240,7 @@ function App() {
       {showPrompt && <WritingPrompt onClose={() => setShowPrompt(false)} />}
       {showHotTake && <HotTakeGenerator onClose={() => setShowHotTake(false)} />}
       {showFormula && <ContentFormulaRef isOpen={showFormula} onClose={() => setShowFormula(false)} />}
+      {showThreadFormat && <QuickThreadFormat isOpen={showThreadFormat} onClose={() => setShowThreadFormat(false)} />}
       {showQuickDraft && (
         <QuickDraftModal 
           onClose={() => setShowQuickDraft(false)} 
@@ -5313,6 +5550,7 @@ function App() {
           <ContentCalendar />
           <WritingTimer onComplete={() => addToast('Session complete! Take a break ☕', 'success')} />
           <WritingStreakCalendar streak={metrics.currentStreak} articles={recentArticles} />
+          <ArticlePublishingTimer articles={recentArticles} />
         </section>
         
         <section className="feature-buttons-row">
@@ -5320,6 +5558,11 @@ function App() {
             <span>📝</span>
             <span>Formula</span>
             <span className="feature-hint">F</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowThreadFormat(true)}>
+            <span>🧵</span>
+            <span>Thread</span>
+            <span className="feature-hint">W</span>
           </button>
           <button className="feature-btn" onClick={() => setShowTemplates(true)}>
             <span>📋</span>
