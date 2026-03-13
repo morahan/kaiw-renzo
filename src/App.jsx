@@ -294,6 +294,194 @@ function SavedHooks({ isOpen, onClose }) {
   )
 }
 
+// Headline Strategy Generator - 13 proven formulas
+const headlineFormulas = [
+  { name: 'Stats Punch', template: '[Winner] beats [Loser] for [Goal] — new study reveals', tier: 1, emoji: '📊' },
+  { name: 'Paradox Open', template: 'Everyone thinks [Common Belief]. Here\'s why they\'re wrong.', tier: 1, emoji: '🤔' },
+  { name: 'Myth Buster', template: 'The truth about [Common Myth] — science says otherwise', tier: 1, emoji: '🔬' },
+  { name: 'Number Lead', template: '[Surprising Stat]% of people don\'t know this about [Topic]', tier: 1, emoji: '🎯' },
+  { name: 'The Shocking', template: 'Scientists discovered [Unexpected Finding]. Here\'s what it means for you.', tier: 1, emoji: '⚡' },
+  { name: 'Vs Comparison', template: '[Method A] vs [Method B]: Which one actually works?', tier: 2, emoji: '⚖️' },
+  { name: 'How To', template: 'How to [Desired Outcome] in [Timeframe] — backed by research', tier: 2, emoji: '🛠️' },
+  { name: 'The Secret', template: 'The [Topic] secret nobody talks about', tier: 2, emoji: '🤫' },
+  { name: 'Why Most', template: 'Why most people fail at [Topic] — and the fix', tier: 2, emoji: '❌' },
+  { name: 'What If', template: 'What if everything you knew about [Topic] was wrong?', tier: 3, emoji: '💭' },
+  { name: 'List Format', template: '[Number] [Topic] myths that are holding you back', tier: 3, emoji: '📋' },
+  { name: 'Future Lead', template: 'In [Year], [Prediction] will change [Topic] forever', tier: 3, emoji: '🔮' },
+  { name: 'Authority Quote', template: '"[Quote about Topic]" — what top experts say', tier: 3, emoji: '💬' },
+]
+
+function HeadlineGenerator({ isOpen, onClose }) {
+  const [topic, setTopic] = useState('')
+  const [results, setResults] = useState([])
+  const [savedHeadlines, setSavedHeadlines] = useState(() => {
+    const saved = localStorage.getItem('renzo-generated-headlines')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [activeTab, setActiveTab] = useState('generate') // generate | saved
+  
+  const generateHeadlines = () => {
+    if (!topic.trim()) return
+    
+    const topicLower = topic.toLowerCase()
+    const topicWords = topic.split(' ').filter(w => w)
+    const winner = topicWords[0] || 'This'
+    const loser = topicWords[topicWords.length - 1] || 'that'
+    const goal = 'results'
+    const myth = topic
+    const surprisingStat = Math.floor(Math.random() * 40) + 30
+    
+    const generated = headlineFormulas.map(formula => {
+      let headline = formula.template
+        .replace('[Winner]', winner.charAt(0).toUpperCase() + winner.slice(1))
+        .replace('[Loser]', loser)
+        .replace('[Goal]', goal)
+        .replace('[Common Belief]', `${topic} is good for you`)
+        .replace('[Common Myth]', topic)
+        .replace('[Surprising Stat]', surprisingStat)
+        .replace('[Unexpected Finding]', `a surprising link between ${topicLower} and energy`)
+        .replace('[Method A]', 'Traditional approach')
+        .replace('[Method B]', 'New research-backed method')
+        .replace('[Desired Outcome]', topicLower)
+        .replace('[Timeframe]', '30 days')
+        .replace('[Topic]', topic)
+        .replace('[Number]', '7')
+        .replace('[Year]', '2027')
+        .replace('[Prediction]', topicLower)
+        .replace('[Quote]', `The data on ${topicLower} is undeniable`)
+      
+      return {
+        ...formula,
+        generated: headline,
+        filled: true
+      }
+    })
+    
+    setResults(generated)
+  }
+  
+  const saveHeadline = (headline) => {
+    const updated = [{ ...headline, savedAt: new Date().toISOString() }, ...savedHeadlines]
+    setSavedHeadlines(updated)
+    localStorage.setItem('renzo-generated-headlines', JSON.stringify(updated))
+  }
+  
+  const deleteHeadline = (index) => {
+    const updated = savedHeadlines.filter((_, i) => i !== index)
+    setSavedHeadlines(updated)
+    localStorage.setItem('renzo-generated-headlines', JSON.stringify(updated))
+  }
+  
+  const copyHeadline = (text) => {
+    navigator.clipboard.writeText(text)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content headline-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🎯 Headline Generator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="headline-tabs">
+          <button 
+            className={`headline-tab ${activeTab === 'generate' ? 'active' : ''}`}
+            onClick={() => setActiveTab('generate')}
+          >
+            Generate
+          </button>
+          <button 
+            className={`headline-tab ${activeTab === 'saved' ? 'active' : ''}`}
+            onClick={() => setActiveTab('saved')}
+          >
+            Saved ({savedHeadlines.length})
+          </button>
+        </div>
+        
+        {activeTab === 'generate' && (
+          <>
+            <div className="headline-input">
+              <input
+                type="text"
+                placeholder="Enter your topic (e.g., 'intermittent fasting', 'sleep optimization')..."
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && generateHeadlines()}
+              />
+              <button 
+                className="headline-generate-btn"
+                onClick={generateHeadlines}
+                disabled={!topic.trim()}
+              >
+                Generate
+              </button>
+            </div>
+            
+            {results.length > 0 && (
+              <div className="headline-results">
+                <div className="headline-results-header">
+                  <span>{results.length} headline strategies</span>
+                  <span className="tier-legend">
+                    <span className="tier-badge tier-1">Tier 1</span> Best
+                    <span className="tier-badge tier-2">Tier 2</span> Good
+                    <span className="tier-badge tier-3">Tier 3</span> Alternative
+                  </span>
+                </div>
+                <div className="headline-list">
+                  {results.map((h, i) => (
+                    <div key={i} className={`headline-item tier-${h.tier}`}>
+                      <span className="headline-emoji">{h.emoji}</span>
+                      <div className="headline-content">
+                        <span className="headline-formula">{h.name}</span>
+                        <p className="headline-text">"{h.generated}"</p>
+                      </div>
+                      <div className="headline-actions">
+                        <span className={`tier-badge tier-${h.tier}`}>T{h.tier}</span>
+                        <button className="headline-copy" onClick={() => copyHeadline(h.generated)}>📋</button>
+                        <button className="headline-save" onClick={() => saveHeadline(h)}>⭐</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+        
+        {activeTab === 'saved' && (
+          <div className="headline-saved">
+            {savedHeadlines.length === 0 ? (
+              <div className="headline-empty">
+                <span>🎯</span>
+                <p>No saved headlines yet. Generate some and save your favorites!</p>
+              </div>
+            ) : (
+              <div className="headline-list">
+                {savedHeadlines.map((h, i) => (
+                  <div key={i} className={`headline-item tier-${h.tier}`}>
+                    <span className="headline-emoji">{h.emoji}</span>
+                    <div className="headline-content">
+                      <span className="headline-formula">{h.name}</span>
+                      <p className="headline-text">"{h.generated}"</p>
+                    </div>
+                    <div className="headline-actions">
+                      <button className="headline-copy" onClick={() => copyHeadline(h.generated)}>📋</button>
+                      <button className="headline-delete" onClick={() => deleteHeadline(i)}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Word Sprint - Quick 15-min timed writing
 function WordSprint({ isOpen, onClose, onSave }) {
   const [content, setContent] = useState('')
@@ -2900,6 +3088,7 @@ function App() {
   const [showArticleSeries, setShowArticleSeries] = useState(false)
   const [showPipeline, setShowPipeline] = useState(false)
   const [showThread, setShowThread] = useState(false)
+  const [showHeadlineGen, setShowHeadlineGen] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -3048,6 +3237,7 @@ function App() {
       if (key === 'R') setShowReferencePanel(true)
       if (key === 'O') setShowResearchQueue(true)
       if (key === 'U') setShowSavedHooks(true)
+      if (key === 'H') setShowHeadlineGen(true)
       if (key === 'S' && !e.metaKey && !e.ctrlKey) setShowWordSprint(true)
       if (key === 'Z') setShowArticleSeries(true)
       if (key === 'P' && !e.metaKey && !e.ctrlKey) setShowPipeline(true)
@@ -3289,6 +3479,10 @@ function App() {
         isOpen={showThread}
         onClose={() => setShowThread(false)}
       />
+      <HeadlineGenerator
+        isOpen={showHeadlineGen}
+        onClose={() => setShowHeadlineGen(false)}
+      />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
@@ -3452,6 +3646,11 @@ function App() {
             <span>🐦</span>
             <span>Thread</span>
             <span className="feature-hint">X</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowHeadlineGen(true)}>
+            <span>✍️</span>
+            <span>Headlines</span>
+            <span className="feature-hint">H</span>
           </button>
         </section>
 
