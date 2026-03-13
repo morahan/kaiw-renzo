@@ -777,12 +777,18 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
-    { version: '3.4', date: '2026-03-13', changes: [
+    { version: '3.6', date: '2026-03-13', changes: [
+      'Fixed keyboard shortcut conflict (H was assigned to both Shortcuts and Headline Gen)',
+      'Added Daily Word Goal widget in header - track progress toward daily target',
+      'Improved keyboard shortcut handling with Cmd/Ctrl modifiers',
+      'Updated version badge to v3.6'
+    ]},
+    { version: '3.5', date: '2026-03-13', changes: [
       'Added Content Ideas Bank - Save and organize content ideas for future articles (A key)',
       'Added Writing Mood Tracker - Track your creative energy states',
       'Added Category Performance chart - Visual breakdown by content category',
       'Added SEO Score Calculator - Check article SEO potential',
-      'Updated version badge to v3.4',
+      'Updated version badge to v3.5',
       'Fixed keyboard shortcut conflicts',
       'Added quick mood selection to header'
     ]},
@@ -4018,7 +4024,18 @@ function App() {
   const [energyLevel, setEnergyLevel] = useState(80)
   const [wordsWritten, setWordsWritten] = useState(0)
   const [showQuickWrite, setShowQuickWrite] = useState(false)
-  const [todayWordCount, setTodayWordCount] = useState(0)
+  const [todayWordCount, setTodayWordCount] = useState(() => {
+    const saved = localStorage.getItem('renzo-today-word-count')
+    const savedDate = localStorage.getItem('renzo-today-word-count-date')
+    const today = new Date().toDateString()
+    if (saved && savedDate === today) {
+      return parseInt(saved) || 0
+    }
+    return 0
+  })
+  const [dailyWordGoal, setDailyWordGoal] = useState(() => {
+    return parseInt(localStorage.getItem('renzo-daily-word-goal')) || 1000
+  })
   const [soundEnabled, setSoundEnabled] = useState(() => {
     return localStorage.getItem('renzo-sound') !== 'false'
   })
@@ -4225,7 +4242,7 @@ function App() {
       if (key === 'J') setShowHookTester(true)
       if (key === 'Y') setShowHotTake(true)
       if (key === 'D') setShowQuickDraft(true)
-      if (key === 'H') setShowShortcuts(true)
+      if (key === '?') setShowShortcuts(true)
       if (key === 'V') setShowVirality(true)
       if (key === 'W') setShowQuickWrite(true)
       if (key === 'F') setShowFormula(true)
@@ -4596,9 +4613,20 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v3.4</span>
+          <span className="logo-badge">v3.6</span>
         </div>
         <div className="header-right">
+          {/* Daily Word Goal Progress */}
+          <div className="daily-goal-widget" title="Daily word goal">
+            <span className="goal-icon">🎯</span>
+            <div className="goal-progress">
+              <div 
+                className="goal-fill" 
+                style={{ width: `${Math.min((wordsWritten / dailyWordGoal) * 100, 100)}%` }}
+              />
+            </div>
+            <span className="goal-count">{wordsWritten}/{dailyWordGoal}</span>
+          </div>
           <ThemeToggle isDark={isDarkMode} onToggle={toggleTheme} />
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
           <button 

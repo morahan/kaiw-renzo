@@ -3,6 +3,50 @@
   background: var(--accent-hover);
 }
 
+/* ========== DAILY GOAL WIDGET ========== */
+.daily-goal-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.daily-goal-widget:hover {
+  border-color: var(--accent);
+}
+
+.goal-icon {
+  font-size: 1rem;
+}
+
+.goal-progress {
+  width: 60px;
+  height: 6px;
+  background: var(--bg-hover);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.goal-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-green) 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.goal-count {
+  color: var(--text-secondary);
+  font-weight: 500;
+  min-width: 45px;
+  text-align: right;
+}
+
 /* ========== WRITING MOOD TRACKER ========== */
 .mood-modal {
   width: 90%;
