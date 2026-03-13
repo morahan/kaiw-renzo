@@ -909,3 +909,60 @@
   overflow-y: auto;
   margin-bottom: 1rem;
 }
+
+/* ========== CITATION FORMATTER (v4.2) ========== */
+.citation-modal { max-width: 600px; max-height: 90vh; overflow-y: auto; }
+.citation-format-select { margin-bottom: 1.5rem; }
+.citation-format-select label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; }
+.citation-buttons { display: flex; gap: 0.5rem; }
+.citation-style-btn { flex: 1; padding: 0.5rem; font-size: 0.8rem; font-weight: 600; }
+.citation-style-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.citation-fields { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+.citation-field { display: flex; flex-direction: column; gap: 0.25rem; }
+.citation-field.small { flex: 1; }
+.citation-field label { font-size: 0.8rem; color: var(--text-secondary); }
+.citation-field input { padding: 0.6rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.9rem; }
+.citation-row { display: flex; gap: 1rem; }
+.citation-output { background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border); }
+.citation-output label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.citation-result { background: var(--bg-primary); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; }
+.citation-result p { font-size: 0.9rem; line-height: 1.6; color: var(--text-primary); margin: 0; }
+.citation-copy-btn { width: 100%; padding: 0.75rem; background: var(--accent); color: white; border: none; }
+.citation-copy-btn:hover { background: var(--accent-hover); }
+.citation-copy-btn.copied { background: var(--accent-green); }
+
+/* ========== WRITING HEATMAP (v4.2) ========== */
+.writing-heatmap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem; flex: 1; min-width: 280px; }
+.heatmap-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.heatmap-title { font-weight: 600; font-size: 0.9rem; }
+.heatmap-total { font-size: 0.75rem; color: var(--text-secondary); }
+.heatmap-container { overflow-x: auto; }
+.heatmap-months { display: grid; grid-template-columns: repeat(84, 1fr); font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.25rem; padding-left: 2rem; }
+.heatmap-grid { display: flex; gap: 0.25rem; }
+.heatmap-days { display: flex; flex-direction: column; font-size: 0.6rem; color: var(--text-muted); gap: 2px; }
+.heatmap-days span { height: 10px; line-height: 10px; }
+.heatmap-days .hide { visibility: hidden; }
+.heatmap-cells { display: grid; grid-template-rows: repeat(7, 10px); grid-auto-flow: column; gap: 2px; }
+.heatmap-cell { width: 10px; height: 10px; border-radius: 2px; cursor: pointer; transition: transform var(--transition-fast); }
+.heatmap-cell:hover { transform: scale(1.3); }
+.heatmap-legend { display: flex; align-items: center; justify-content: flex-end; gap: 0.25rem; margin-top: 0.75rem; font-size: 0.65rem; color: var(--text-muted); }
+.legend-cell { width: 10px; height: 10px; border-radius: 2px; }
+
+/* ========== WEEKLY STATS DASHBOARD (v4.2) ========== */
+.weekly-stats { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem; flex: 1; min-width: 280px; }
+.weekly-stats .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.weekly-stats .stats-title { font-weight: 600; font-size: 0.9rem; }
+.weekly-stats .stats-change { font-size: 0.8rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); }
+.weekly-stats .stats-change.positive { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+.weekly-stats .stats-change.negative { background: rgba(239, 68, 68, 0.2); color: var(--accent); }
+.weekly-stats .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+.weekly-stats .stat-card { background: var(--bg-secondary); padding: 0.75rem; border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.weekly-stats .stat-icon { font-size: 1.2rem; margin-bottom: 0.25rem; }
+.weekly-stats .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+.weekly-stats .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.stats-categories { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.categories-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 0.5rem; }
+.categories-list { display: flex; flex-direction: column; gap: 0.25rem; }
+.category-item { display: flex; justify-content: space-between; font-size: 0.8rem; }
+.category-name { color: var(--text-secondary); }
+.category-count { color: var(--text-primary); font-weight: 600; }

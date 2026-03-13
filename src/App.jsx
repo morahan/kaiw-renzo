@@ -1301,6 +1301,13 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '4.2', date: '2026-03-13', changes: [
+      'Added Citation Formatter (5 key) — Generate APA, MLA, Chicago, and BibTeX citations',
+      'Added Writing Heatmap — GitHub-style 12-week contribution graph',
+      'Added Weekly Stats Dashboard — Track weekly output, streak, avg words, best writing day',
+      'New Cite button in feature toolbar',
+      'Updated version badge to v4.2'
+    ]},
     { version: '4.0', date: '2026-03-13', changes: [
       'Added Floating Action Button (FAB) - Quick access to 5 core actions from anywhere',
       'Added Mini Command Bar (Ctrl+Space) - Quick command input for fast navigation',
@@ -2147,6 +2154,442 @@ function ProductivityScore({ articles, words, streak }) {
           <span className="breakdown-value">{Math.round(breakdown.quality)}%</span>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ========== CITATION FORMATTER (NEW v4.2) ==========
+function CitationFormatter({ isOpen, onClose }) {
+  const [citation, setCitation] = useState({
+    authors: '',
+    title: '',
+    journal: '',
+    year: '',
+    volume: '',
+    issue: '',
+    pages: '',
+    doi: '',
+    url: '',
+    accessDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  })
+  const [format, setFormat] = useState('apa')
+  const [copied, setCopied] = useState(false)
+
+  const formats = {
+    apa: (c) => {
+      let auth = c.authors.split(',').map((a, i) => {
+        const parts = a.trim().split(' ')
+        if (parts.length === 1) return parts[0]
+        return `${parts[parts.length - 1]}, ${parts[0].charAt(0)}.`
+      }).join(', ')
+      let result = `${auth} (${c.year}). ${c.title}. `
+      if (c.journal) result += `*${c.journal}*`
+      if (c.volume) result += `, *${c.volume}*`
+      if (c.issue) result += `(${c.issue})`
+      if (c.pages) result += `, ${c.pages}`
+      result += '.'
+      if (c.doi) result += ` https://doi.org/${c.doi}`
+      else if (c.url) result += ` ${c.url}`
+      return result
+    },
+    mla: (c) => {
+      let auth = c.authors.split(',').map((a, i) => {
+        const parts = a.trim().split(' ')
+        if (parts.length === 1) return parts[0]
+        if (i === 0) return `${parts[parts.length - 1]}, ${parts.slice(0, -1).join(' ')}`
+        return a.trim()
+      }).join(', ')
+      let result = `${auth}. "${c.title}." `
+      if (c.journal) result += `*${c.journal}*`
+      if (c.volume) result += `, vol. ${c.volume}`
+      if (c.issue) result += `, no. ${c.issue}`
+      result += `, ${c.year}`
+      if (c.pages) result += `, pp. ${c.pages}`
+      if (c.doi) result += `. doi:${c.doi}`
+      result += '.'
+      return result
+    },
+    chicago: (c) => {
+      let auth = c.authors.split(',').map((a, i) => {
+        const parts = a.trim().split(' ')
+        if (parts.length === 1) return parts[0]
+        if (i === 0) return `${parts[parts.length - 1]}, ${parts.slice(0, -1).join(' ')}`
+        return a.trim()
+      }).join(', ')
+      let result = `${auth}. "${c.title}." `
+      if (c.journal) result += `*${c.journal}*`
+      if (c.volume) result += ` ${c.volume}`
+      if (c.issue) result += `, no. ${c.issue}`
+      result += ` (${c.year})`
+      if (c.pages) result += `: ${c.pages}`
+      result += '.'
+      if (c.doi) result += ` https://doi.org/${c.doi}`
+      return result
+    },
+    bibtex: (c) => {
+      const key = c.authors.split(',')[0].trim().split(' ')[0].toLowerCase() + c.year
+      return `@article{${key},\n  author = {${c.authors}},\n  title = {${c.title}},\n  journal = {${c.journal || ''}},\n  year = {${c.year}},\n  volume = {${c.volume || ''}},\n  number = {${c.issue || ''}},\n  pages = {${c.pages || ''}},\n  doi = {${c.doi || ''}}\n}`
+    }
+  }
+
+  const generateCitation = () => formats[format](citation)
+
+  const copyCitation = () => {
+    navigator.clipboard.writeText(generateCitation())
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const updateField = (field, value) => {
+    setCitation(prev => ({ ...prev, [field]: value }))
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content citation-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📚 Citation Formatter</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="citation-format-select">
+          <label>Citation Style:</label>
+          <div className="citation-buttons">
+            {['apa', 'mla', 'chicago', 'bibtex'].map(f => (
+              <button 
+                key={f}
+                className={`citation-style-btn ${format === f ? 'active' : ''}`}
+                onClick={() => setFormat(f)}
+              >
+                {f.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="citation-fields">
+          <div className="citation-field">
+            <label>Authors (comma separated)</label>
+            <input 
+              type="text" 
+              placeholder="Smith, John, Doe, Jane"
+              value={citation.authors}
+              onChange={(e) => updateField('authors', e.target.value)}
+            />
+          </div>
+          <div className="citation-field">
+            <label>Article Title</label>
+            <input 
+              type="text" 
+              placeholder="The effects of exercise on..."
+              value={citation.title}
+              onChange={(e) => updateField('title', e.target.value)}
+            />
+          </div>
+          <div className="citation-field">
+            <label>Journal Name</label>
+            <input 
+              type="text" 
+              placeholder="Journal of Sports Science"
+              value={citation.journal}
+              onChange={(e) => updateField('journal', e.target.value)}
+            />
+          </div>
+          <div className="citation-row">
+            <div className="citation-field small">
+              <label>Year</label>
+              <input 
+                type="text" 
+                placeholder="2024"
+                value={citation.year}
+                onChange={(e) => updateField('year', e.target.value)}
+              />
+            </div>
+            <div className="citation-field small">
+              <label>Volume</label>
+              <input 
+                type="text" 
+                placeholder="12"
+                value={citation.volume}
+                onChange={(e) => updateField('volume', e.target.value)}
+              />
+            </div>
+            <div className="citation-field small">
+              <label>Issue</label>
+              <input 
+                type="text" 
+                placeholder="3"
+                value={citation.issue}
+                onChange={(e) => updateField('issue', e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="citation-row">
+            <div className="citation-field small">
+              <label>Pages</label>
+              <input 
+                type="text" 
+                placeholder="45-67"
+                value={citation.pages}
+                onChange={(e) => updateField('pages', e.target.value)}
+              />
+            </div>
+            <div className="citation-field">
+              <label>DOI</label>
+              <input 
+                type="text" 
+                placeholder="10.1000/xyz123"
+                value={citation.doi}
+                onChange={(e) => updateField('doi', e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {citation.title && (
+          <div className="citation-output">
+            <label>Generated Citation:</label>
+            <div className="citation-result">
+              <p>{generateCitation()}</p>
+            </div>
+            <button 
+              className={`citation-copy-btn ${copied ? 'copied' : ''}`}
+              onClick={copyCitation}
+            >
+              {copied ? '✓ Copied!' : '📋 Copy Citation'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ========== WRITING HEATMAP (NEW v4.2) ==========
+function WritingHeatmap() {
+  const [data, setData] = useState([])
+  const [totalWords, setTotalWords] = useState(0)
+  
+  useEffect(() => {
+    const today = new Date()
+    const writingData = JSON.parse(localStorage.getItem('renzo-writing-history') || '[]')
+    const wordsByDate = {}
+    
+    writingData.forEach(entry => {
+      const date = new Date(entry.date).toDateString()
+      wordsByDate[date] = (wordsByDate[date] || 0) + (entry.words || 0)
+    })
+    
+    const newData = []
+    let total = 0
+    
+    for (let i = 83; i >= 0; i--) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toDateString()
+      const words = wordsByDate[dateStr] || 0
+      total += words
+      newData.push({
+        date: date,
+        day: date.getDay(),
+        words: words,
+        level: words === 0 ? 0 : words < 250 ? 1 : words < 500 ? 2 : words < 1000 ? 3 : 4
+      })
+    }
+    
+    setData(newData)
+    setTotalWords(total)
+  }, [])
+  
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  
+  const getMonthLabels = () => {
+    const labels = []
+    let lastMonth = -1
+    data.forEach((d, i) => {
+      const month = d.date.getMonth()
+      if (month !== lastMonth) {
+        labels.push({ month: months[month], index: i })
+        lastMonth = month
+      }
+    })
+    return labels
+  }
+  
+  const getLevelColor = (level) => {
+    if (level === 0) return 'var(--bg-hover)'
+    if (level === 1) return 'rgba(220, 38, 38, 0.2)'
+    if (level === 2) return 'rgba(220, 38, 38, 0.4)'
+    if (level === 3) return 'rgba(220, 38, 38, 0.7)'
+    return 'var(--accent)'
+  }
+  
+  return (
+    <div className="writing-heatmap">
+      <div className="heatmap-header">
+        <span className="heatmap-title">📊 Writing Activity</span>
+        <span className="heatmap-total">{totalWords.toLocaleString()} words / 12 weeks</span>
+      </div>
+      <div className="heatmap-container">
+        <div className="heatmap-months">
+          {getMonthLabels().map((m, i) => (
+            <span key={i} style={{ gridColumnStart: m.index + 1 }}>{m.month}</span>
+          ))}
+        </div>
+        <div className="heatmap-grid">
+          <div className="heatmap-days">
+            {days.map((d, i) => (
+              <span key={i} className={i % 2 === 0 ? '' : 'hide'}>{d}</span>
+            ))}
+          </div>
+          <div className="heatmap-cells">
+            {data.map((d, i) => (
+              <div 
+                key={i} 
+                className="heatmap-cell"
+                style={{ background: getLevelColor(d.level) }}
+                title={`${d.date.toLocaleDateString()}: ${d.words} words`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="heatmap-legend">
+        <span>Less</span>
+        {[0, 1, 2, 3, 4].map(l => (
+          <div key={l} className="legend-cell" style={{ background: getLevelColor(l) }} />
+        ))}
+        <span>More</span>
+      </div>
+    </div>
+  )
+}
+
+// ========== WEEKLY STATS DASHBOARD (NEW v4.2) ==========
+function WeeklyStatsDashboard({ articles }) {
+  const [stats, setStats] = useState({
+    thisWeek: 0,
+    lastWeek: 0,
+    avgWords: 0,
+    totalPublished: 0,
+    avgEngagement: 0,
+    streak: 0,
+    bestDay: '',
+    categoryBreakdown: {}
+  })
+  
+  useEffect(() => {
+    const now = new Date()
+    const weekAgo = new Date(now)
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    const twoWeeksAgo = new Date(now)
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14)
+    
+    const drafts = JSON.parse(localStorage.getItem('renzo-drafts') || '[]')
+    
+    const thisWeekDrafts = drafts.filter(d => new Date(d.date) > weekAgo)
+    const lastWeekDrafts = drafts.filter(d => {
+      const date = new Date(d.date)
+      return date > twoWeeksAgo && date <= weekAgo
+    })
+    
+    const thisWeekWords = thisWeekDrafts.reduce((sum, d) => sum + (d.words || 0), 0)
+    const lastWeekWords = lastWeekDrafts.reduce((sum, d) => sum + (d.words || 0), 0)
+    
+    const categories = {}
+    drafts.forEach(d => {
+      const cat = d.category || 'Uncategorized'
+      categories[cat] = (categories[cat] || 0) + 1
+    })
+    
+    const dayCounts = [0, 0, 0, 0, 0, 0, 0]
+    drafts.forEach(d => {
+      dayCounts[new Date(d.date).getDay()] += (d.words || 0)
+    })
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    const bestDay = dayNames[dayCounts.indexOf(Math.max(...dayCounts))]
+    
+    let streak = 0
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    for (let i = 0; i < 365; i++) {
+      const checkDate = new Date(today)
+      checkDate.setDate(checkDate.getDate() - i)
+      const hasWritten = drafts.some(d => 
+        new Date(d.date).toDateString() === checkDate.toDateString()
+      )
+      if (hasWritten) streak++
+      else if (i > 0) break
+    }
+    
+    setStats({
+      thisWeek: thisWeekWords,
+      lastWeek: lastWeekWords,
+      avgWords: drafts.length > 0 ? Math.round(drafts.reduce((s, d) => s + (d.words || 0), 0) / drafts.length) : 0,
+      totalPublished: drafts.filter(d => d.status === 'published').length,
+      avgEngagement: 8.2,
+      streak: streak,
+      bestDay: bestDay,
+      categoryBreakdown: categories
+    })
+  }, [articles])
+  
+  const weekChange = stats.lastWeek > 0 
+    ? Math.round(((stats.thisWeek - stats.lastWeek) / stats.lastWeek) * 100)
+    : stats.thisWeek > 0 ? 100 : 0
+  
+  return (
+    <div className="weekly-stats">
+      <div className="stats-header">
+        <span className="stats-title">📈 Weekly Stats</span>
+        <span className={`stats-change ${weekChange >= 0 ? 'positive' : 'negative'}`}>
+          {weekChange >= 0 ? '↑' : '↓'} {Math.abs(weekChange)}%
+        </span>
+      </div>
+      
+      <div className="stats-grid">
+        <div className="stat-card">
+          <span className="stat-icon">📝</span>
+          <span className="stat-value">{stats.thisWeek.toLocaleString()}</span>
+          <span className="stat-label">This Week</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-icon">🔥</span>
+          <span className="stat-value">{stats.streak}</span>
+          <span className="stat-label">Day Streak</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-icon">📊</span>
+          <span className="stat-value">{stats.avgWords}</span>
+          <span className="stat-label">Avg Words</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-icon">🏆</span>
+          <span className="stat-value">{stats.bestDay}</span>
+          <span className="stat-label">Best Day</span>
+        </div>
+      </div>
+      
+      {Object.keys(stats.categoryBreakdown).length > 0 && (
+        <div className="stats-categories">
+          <span className="categories-title">Categories</span>
+          <div className="categories-list">
+            {Object.entries(stats.categoryBreakdown)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 4)
+              .map(([cat, count], i) => (
+                <div key={i} className="category-item">
+                  <span className="category-name">{cat}</span>
+                  <span className="category-count">{count}</span>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -4808,6 +5251,7 @@ function App() {
   const [showBriefGen, setShowBriefGen] = useState(false)
   const [showMoodTracker, setShowMoodTracker] = useState(false)
   const [showSEOScore, setShowSEOScore] = useState(false)
+  const [showCitationFormatter, setShowCitationFormatter] = useState(false)
   const [showGlobalSearch, setShowGlobalSearch] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showDataManagement, setShowDataManagement] = useState(false)
@@ -5048,6 +5492,7 @@ function App() {
       if (key === '3' && !e.metaKey && !e.ctrlKey) setShowGlobalSearch(true)
       if (key === ',') setShowSettings(true)
       if (key === '4') setShowDataManagement(true)
+      if (key === '5') setShowCitationFormatter(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -5079,6 +5524,7 @@ function App() {
         setShowBriefGen(false)
         setShowMoodTracker(false)
         setShowSEOScore(false)
+        setShowCitationFormatter(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -5363,6 +5809,10 @@ function App() {
         isOpen={showSEOScore}
         onClose={() => setShowSEOScore(false)}
       />
+      <CitationFormatter
+        isOpen={showCitationFormatter}
+        onClose={() => setShowCitationFormatter(false)}
+      />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
@@ -5460,7 +5910,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v4.0</span>
+          <span className="logo-badge">v4.2</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -5550,6 +6000,8 @@ function App() {
           <ContentCalendar />
           <WritingTimer onComplete={() => addToast('Session complete! Take a break ☕', 'success')} />
           <WritingStreakCalendar streak={metrics.currentStreak} articles={recentArticles} />
+          <WritingHeatmap />
+          <WeeklyStatsDashboard articles={recentArticles} />
           <ArticlePublishingTimer articles={recentArticles} />
         </section>
         
@@ -5653,6 +6105,11 @@ function App() {
             <span>🎯</span>
             <span>SEO</span>
             <span className="feature-hint">2</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowCitationFormatter(true)}>
+            <span>📚</span>
+            <span>Cite</span>
+            <span className="feature-hint">5</span>
           </button>
         </section>
 
