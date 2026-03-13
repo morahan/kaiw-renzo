@@ -212,13 +212,66 @@ function DataManagement({ isOpen, onClose, onExport, onImport }) {
   const [exportStatus, setExportStatus] = useState('')
   const importRef = useRef(null)
 
-  const handleExport = () => {
+  // Gather all data for export
+  const gatherAllData = () => {
+    return {
+      hooks: JSON.parse(localStorage.getItem('renzo-saved-hooks') || '[]'),
+      ideas: JSON.parse(localStorage.getItem('renzo-content-ideas') || '[]'),
+      headlines: JSON.parse(localStorage.getItem('renzo-generated-headlines') || '[]'),
+      references: JSON.parse(localStorage.getItem('renzo-references') || '[]'),
+      researchQueue: JSON.parse(localStorage.getItem('renzo-research-queue') || '[]'),
+      series: JSON.parse(localStorage.getItem('renzo-article-series') || '[]'),
+      pipeline: JSON.parse(localStorage.getItem('renzo-pipeline') || '[]'),
+      drafts: JSON.parse(localStorage.getItem('renzo-drafts') || '[]'),
+      clipboardHistory: JSON.parse(localStorage.getItem('renzo-clipboard-history') || '[]'),
+      moodHistory: JSON.parse(localStorage.getItem('renzo-mood-history') || '[]'),
+      exportedAt: new Date().toISOString()
+    }
+  }
+
+  const handleExportJSON = () => {
     try {
-      onExport?.()
-      setExportStatus('✓ Data exported successfully')
+      const data = gatherAllData()
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `renzo-backup-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      setExportStatus('✓ JSON exported successfully')
       setTimeout(() => setExportStatus(''), 3000)
     } catch (e) {
       setExportStatus('✗ Export failed')
+    }
+  }
+
+  const handleExportCSV = () => {
+    try {
+      const data = gatherAllData()
+      
+      // Export ideas as CSV (most useful for spreadsheet analysis)
+      const headers = ['ID', 'Title', 'Category', 'Angle', 'Date']
+      const rows = data.ideas.map((idea, i) => [
+        i + 1,
+        `"${(idea.title || '').replace(/"/g, '""')}"`,
+        `"${(idea.category || '').replace(/"/g, '""')}"`,
+        `"${(idea.angle || '').replace(/"/g, '""')}"`,
+        idea.date || ''
+      ])
+      
+      const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+      const blob = new Blob([csv], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `renzo-ideas-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      setExportStatus('✓ CSV exported successfully')
+      setTimeout(() => setExportStatus(''), 3000)
+    } catch (e) {
+      setExportStatus('✗ CSV export failed')
     }
   }
 
@@ -233,7 +286,11 @@ function DataManagement({ isOpen, onClose, onExport, onImport }) {
       reader.onload = (event) => {
         try {
           const data = JSON.parse(event.target?.result)
-          onImport?.(data)
+          // Restore each data type
+          if (data.hooks) localStorage.setItem('renzo-saved-hooks', JSON.stringify(data.hooks))
+          if (data.ideas) localStorage.setItem('renzo-content-ideas', JSON.stringify(data.ideas))
+          if (data.headlines) localStorage.setItem('renzo-generated-headlines', JSON.stringify(data.headlines))
+          if (data.references) localStorage.setItem('renzo-references', JSON.stringify(data.references))
           setExportStatus('✓ Data imported successfully')
           setTimeout(() => setExportStatus(''), 3000)
         } catch {
@@ -255,11 +312,16 @@ function DataManagement({ isOpen, onClose, onExport, onImport }) {
         </div>
         
         <div className="data-section">
-          <h4>Backup & Restore</h4>
-          <p className="data-description">Export all your data (hooks, ideas, headlines, etc.) as a JSON file for backup or transfer.</p>
-          <button className="data-action-btn" onClick={handleExport}>
-            📥 Export All Data
-          </button>
+          <h4>Export Data</h4>
+          <p className="data-description">Export all your data for backup or analysis.</p>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="data-action-btn" onClick={handleExportJSON}>
+              📥 Export JSON (Full Backup)
+            </button>
+            <button className="data-action-btn" style={{ background: 'var(--accent-purple)' }} onClick={handleExportCSV}>
+              📊 Export CSV (Ideas Only)
+            </button>
+          </div>
         </div>
 
         <div className="data-section">
@@ -4645,13 +4707,15 @@ function App() {
     const newTheme = !isDarkMode
     setIsDarkMode(newTheme)
     localStorage.setItem('renzo-theme', newTheme ? 'dark' : 'light')
-    document.body.classList.toggle('light-mode', !newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme ? 'dark' : 'light')
     addToast(newTheme ? '🌙 Dark mode enabled' : '☀️ Light mode enabled', 'info')
   }
 
   // Apply theme on mount
   useEffect(() => {
-    document.body.classList.toggle('light-mode', !isDarkMode)
+    const savedTheme = localStorage.getItem('renzo-theme') || 'dark'
+    document.documentElement.setAttribute('data-theme', savedTheme)
+    setIsDarkMode(savedTheme === 'dark')
   }, [])
 
   useEffect(() => {
