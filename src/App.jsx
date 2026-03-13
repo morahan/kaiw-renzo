@@ -674,6 +674,15 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '3.1', date: '2026-03-12', changes: [
+      'Added Headline Generator - 13 proven headline formulas',
+      'Added Tier ranking for headlines (Tier 1 = best performers)',
+      'Fixed missing CSS variables causing rendering issues',
+      'Added dark theme with proper color system',
+      'Added keyboard shortcut (H) for headline generator',
+      'Improved base styles with gradients and transitions',
+      'LocalStorage persistence for saved headlines'
+    ]},
     { version: '3.0', date: '2026-03-12', changes: [
       'Added Word Sprint - Quick 15-min timed writing sessions',
       'Added Research Queue - Track topics needing research',
