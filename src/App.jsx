@@ -1073,6 +1073,15 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '4.0', date: '2026-03-13', changes: [
+      'Added Floating Action Button (FAB) - Quick access to 5 core actions from anywhere',
+      'Added Mini Command Bar (Ctrl+Space) - Quick command input for fast navigation',
+      'Added Light Mode theme support - Toggle between dark and light themes',
+      'Added Comma key (,) shortcut for Settings - Quick access to preferences',
+      'Added keyboard shortcut for Global Search (3 key)',
+      'Updated version badge to v4.0',
+      'Enhanced productivity workflow with FAB + command bar combo'
+    ]},
     { version: '3.9', date: '2026-03-13', changes: [
       'Added Global Search (3 key) - Search across all hooks, ideas, headlines, and references',
       'Added Settings Modal (comma key) - Customize daily goals, sprint duration, notifications, theme, and auto-save',
@@ -4505,6 +4514,9 @@ function App() {
   const [showGlobalSearch, setShowGlobalSearch] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showDataManagement, setShowDataManagement] = useState(false)
+  const [fabOpen, setFabOpen] = useState(false)
+  const [miniBarVisible, setMiniBarVisible] = useState(false)
+  
   const [appSettings, setAppSettings] = useState(() => {
     const saved = localStorage.getItem('renzo-app-settings')
     return saved ? JSON.parse(saved) : {
@@ -4672,7 +4684,11 @@ function App() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        // Allow Escape in input to close mini bar
+        if (e.key === 'Escape') setMiniBarVisible(false)
+        return
+      }
       
       // Command palette
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -4681,8 +4697,24 @@ function App() {
         return
       }
       
+      // Mini command bar - Ctrl+Space
+      if ((e.metaKey || e.ctrlKey) && e.key === ' ') {
+        e.preventDefault()
+        setMiniBarVisible(true)
+        return
+      }
+      
+      // Comma key - Settings
+      if (e.key === ',') {
+        e.preventDefault()
+        setShowSettings(true)
+        return
+      }
+      
       const key = e.key.toUpperCase()
-      if (key === 'N') setShowPrompt(true)
+      
+      // Number keys for quick access
+      if (key === '3') setShowGlobalSearch(true)
       if (key === 'P') setShowPrompt(true)
       if (key === 'T') setShowTemplates(true)
       if (key === 'K') setShowCTATemplates(true)
@@ -5127,7 +5159,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v3.9</span>
+          <span className="logo-badge">v4.0</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -5686,6 +5718,69 @@ function App() {
             <span>🔥 {metrics.currentStreak} day streak</span>
           </div>
         </section>
+
+        {/* Floating Action Button (FAB) */}
+        <div className="fab-container">
+          <div className={`fab-actions ${fabOpen ? 'open' : ''}`}>
+            <button className="fab-action" onClick={() => { setShowQuickDraft(true); setFabOpen(false) }}>
+              <span>📝</span>
+              <span>Quick Draft</span>
+              <kbd>D</kbd>
+            </button>
+            <button className="fab-action" onClick={() => { setShowFocusMode(true); setFabOpen(false) }}>
+              <span>🎯</span>
+              <span>Focus Mode</span>
+              <kbd>M</kbd>
+            </button>
+            <button className="fab-action" onClick={() => { setShowWordSprint(true); setFabOpen(false) }}>
+              <span>⚡</span>
+              <span>Word Sprint</span>
+              <kbd>S</kbd>
+            </button>
+            <button className="fab-action" onClick={() => { setShowHeadlineGen(true); setFabOpen(false) }}>
+              <span>📰</span>
+              <span>Headlines</span>
+              <kbd>H</kbd>
+            </button>
+            <button className="fab-action" onClick={() => { setShowIdeasBank(true); setFabOpen(false) }}>
+              <span>💡</span>
+              <span>Ideas</span>
+              <kbd>A</kbd>
+            </button>
+          </div>
+          <button 
+            className={`fab-main ${fabOpen ? 'active' : ''}`}
+            onClick={() => setFabOpen(!fabOpen)}
+            title="Quick Actions"
+          >
+            {fabOpen ? '✕' : '+'}
+          </button>
+        </div>
+
+        {/* Mini Command Bar (Ctrl+Space) */}
+        <div className={`mini-command-bar ${miniBarVisible ? 'visible' : ''}`}>
+          <span>⌘</span>
+          <input 
+            type="text" 
+            placeholder="Quick command..." 
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setMiniBarVisible(false)
+              if (e.key === 'Enter' && e.target.value) {
+                const cmd = e.target.value.toLowerCase()
+                if (cmd.includes('draft')) setShowQuickDraft(true)
+                else if (cmd.includes('focus')) setShowFocusMode(true)
+                else if (cmd.includes('sprint')) setShowWordSprint(true)
+                else if (cmd.includes('headline')) setShowHeadlineGen(true)
+                else if (cmd.includes('idea')) setShowIdeasBank(true)
+                else if (cmd.includes('search') || cmd.includes('3')) setShowGlobalSearch(true)
+                else if (cmd.includes('setting') || cmd.includes(',')) setShowSettings(true)
+                setMiniBarVisible(false)
+              }
+            }}
+            onBlur={() => setTimeout(() => setMiniBarVisible(false), 200)}
+          />
+          <kbd>Esc</kbd>
+        </div>
       </main>
 
       <footer className="footer">

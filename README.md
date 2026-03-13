@@ -1,4 +1,4 @@
-# RENZO — Content Writing Interface (v3.9)
+# RENZO — Content Writing Interface (v4.0)
 
 A comprehensive web-based writing and content management interface for fitness article creation, built with React + Vite.
 
@@ -31,14 +31,17 @@ A comprehensive web-based writing and content management interface for fitness a
 - **Writing Streak Calendar** — Visual 28-day activity tracker
 - **Performance Dashboard** — Track metrics over time
 
-### Data Management (NEW v3.9)
+### Data Management (NEW v4.0)
+- **Floating Action Button (FAB)** — Quick access to 5 core actions from anywhere
+- **Mini Command Bar** (Ctrl+Space) — Fast command input for navigation
 - **Global Search** (3) — Search across all hooks, ideas, headlines, and references
 - **Settings Modal** (,) — Customize daily goals, notifications, theme, auto-save
-- **Data Management** (4) — Export/import all data as JSON for backup and transfer
+- **Data Management** (4) — Export/import all data as JSON for backup
 
 ### Keyboard Shortcuts
 ```
 ⌘K              Command Palette
+Ctrl+Space      Mini Command Bar
 3               Global Search
 ,               Settings
 4               Data Management
@@ -102,16 +105,17 @@ npm run preview
 - Mobile-responsive design
 - Accessibility-first approach
 
-## What's New in v3.9
+## What's New in v4.0
 
-✅ **Global Search** — Find any saved content instantly
-✅ **Settings Panel** — Fully customizable preferences
-✅ **Data Export/Import** — Backup and restore all data
-✅ **Improved Keyboard Shortcuts** — Better organization and documentation
-✅ **Enhanced UI Polish** — Better visual hierarchy and spacing
+✅ **Floating Action Button (FAB)** — Quick access to 5 core actions (Draft, Focus, Sprint, Headlines, Ideas)
+✅ **Mini Command Bar** — Press Ctrl+Space for lightning-fast command input
+✅ **Light Mode Theme** — Toggle between dark and light themes in Settings
+✅ **Enhanced Keyboard Shortcuts** — Comma (,) for settings, 3 for search
+✅ **Improved Workflow** — FAB + command bar = maximum productivity
 
 ## Previous Versions
 
+- **v3.9** — Global Search, Settings Modal, Data Management
 - **v3.8** — Quick Tweet Generator with tone selection
 - **v3.7** — Article Series and Pipeline Tracker
 - **v3.6** — SEO Score and Brief Generator
