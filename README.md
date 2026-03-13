@@ -1,16 +1,110 @@
-# React + Vite
+# Renzo | Content Engine
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A powerful writing dashboard for AI-powered fitness content creation. Built with React + Vite.
 
-Currently, two official plugins are available:
+![Version](https://img.shields.io/badge/version-3.0-blue)
+![Status](https://img.shields.io/badge/status-active-green)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+### Writing Tools
+- **Quick Draft** - Fast article drafting with templates
+- **Focus Mode** - Distraction-free full-screen writing (M)
+- **Word Sprint** - 15-minute timed writing sessions (S)
+- **Quick Write** - Rapid content generation (W)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Content Management
+- **Research Queue** - Track topics needing research (O)
+- **Saved Hooks** - Collect your best opening lines (U)
+- **Article Series** - Group related articles (Z)
+- **Drafts** - LocalStorage-backed draft storage
 
-## Expanding the ESLint configuration
+### Writing Assistance
+- **Command Palette** - Cmd/Ctrl+K for quick actions
+- **Hot Take Generator** - Generate controversial angles (Y)
+- **Virality Calculator** - Score your content (V)
+- **Topic Generator** - Get fresh content ideas (G)
+- **Formula Reference** - Headline & hook formulas (F)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Utilities
+- **Templates** - Pre-built article structures (T)
+- **Clipboard History** - Recent copied text (C)
+- **Brainstorm Mode** - Free-form idea generation (B)
+- **Export** - Download drafts as Markdown/JSON (E)
+- **Changelog** - Version history (L)
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| N / P | New Prompt |
+| M | Focus Mode |
+| S | Word Sprint |
+| W | Quick Write |
+| D | Quick Draft |
+| Y | Hot Take |
+| V | Virality |
+| F | Formula |
+| G | Topic Generator |
+| C | Clipboard |
+| B | Brainstorm |
+| T | Templates |
+| E | Export |
+| L | Changelog |
+| R | Reference Panel |
+| O | Research Queue |
+| U | Saved Hooks |
+| Z | Article Series |
+| H | Shortcuts |
+| / | Search |
+| Cmd+K | Command Palette |
+| Esc | Close Modal |
+
+## Tech Stack
+
+- React 18 + Vite
+- CSS (custom styles)
+- LocalStorage for persistence
+- ESLint + Prettier
+
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Project Structure
+
+```
+src/
+├── App.jsx       # Main application
+├── App.css       # Styles
+├── index.css     # Base styles
+└── main.jsx      # Entry point
+```
+
+## Version History
+
+- **v3.0** (2026-03-12) - Word Sprint, Research Queue, Saved Hooks, Article Series
+- **v2.9** (2026-03-12) - Focus Mode, Writing Streak, Reference Panel
+- **v2.8** (2026-03-12) - Export, Reading Time, Word Goals
+- **v2.7** (2026-03-07) - Brainstorm, Topic Generator, Clipboard, Pomodoro
+- **v2.6** (2026-03-05) - Command Palette, Hot Take, Virality Calculator
+
+## Author
+
+Renzo - AI Content Engine for Workout Flow
+
+## License
+
+MIT

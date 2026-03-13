@@ -358,11 +358,28 @@ const tips = [
   "If bores you, it bores them. Cut it.",
   "The best headlines answer a question the reader didn't know they had",
   "Always challenge assumptions — that's where the clicks live",
+  "Use Staccato Punch: short sentences hit harder",
+  "The Brake: slow down for emphasis, speed up for energy",
+  "Pivot Sentence: acknowledge counterpoint before crushing it",
+  "Callback Echo: tie your ending back to your opening",
+  "Accelerator: build momentum with parallel structure",
+  "Every paragraph needs ONE job. If it does two, split it.",
+  "Credibility comes from specifics, not superlatives",
+  "Don't say 'research shows' — name the study",
+  "Vary sentence length. 1-sentence paragraphs = punch. 3-line paragraphs = nuance.",
+  "Your reader's time is more valuable than your prose",
+  "If you can cut it and still make the point — cut it",
 ]
 
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '3.1', date: '2026-03-13', changes: [
+      'Added Citation Manager (I) - Store and organize sources',
+      'Added 10 new writing tips',
+      'Updated README with documentation',
+      'Improved keyboard shortcut hints'
+    ]},
     { version: '3.0', date: '2026-03-12', changes: [
       'Added Word Sprint - Quick 15-min timed writing sessions',
       'Added Research Queue - Track topics needing research',
@@ -711,6 +728,164 @@ function ArticleTemplates({ isOpen, onClose, onSelect }) {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== CITATION MANAGER ==========
+function CitationManager({ isOpen, onClose, onInsert }) {
+  const [citations, setCitations] = useState(() => {
+    const saved = localStorage.getItem('renzo-citations')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [newCitation, setNewCitation] = useState({ 
+    author: '', 
+    title: '', 
+    year: '', 
+    journal: '', 
+    url: '',
+    keyPoint: ''
+  })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedType, setSelectedType] = useState('all')
+  
+  const types = ['all', 'study', 'review', 'meta-analysis', 'book', 'other']
+  
+  const addCitation = () => {
+    if (newCitation.title && newCitation.author) {
+      const updated = [...citations, { 
+        ...newCitation, 
+        id: Date.now(), 
+        type: selectedType === 'all' ? 'study' : selectedType,
+        date: new Date().toISOString() 
+      }]
+      setCitations(updated)
+      localStorage.setItem('renzo-citations', JSON.stringify(updated))
+      setNewCitation({ author: '', title: '', year: '', journal: '', url: '', keyPoint: '' })
+    }
+  }
+  
+  const deleteCitation = (id) => {
+    const updated = citations.filter(c => c.id !== id)
+    setCitations(updated)
+    localStorage.setItem('renzo-citations', JSON.stringify(updated))
+  }
+  
+  const copyAPA = (c) => {
+    const apa = `${c.author} (${c.year}). ${c.title}. ${c.journal}.`
+    navigator.clipboard.writeText(apa)
+  }
+  
+  const copyMarkdown = (c) => {
+    const md = `[${c.title}](${c.url}) - ${c.author} (${c.year})`
+    navigator.clipboard.writeText(md)
+  }
+  
+  const filteredCitations = citations.filter(c => {
+    const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.author.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesType = selectedType === 'all' || c.type === selectedType
+    return matchesSearch && matchesType
+  })
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content citation-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📚 Citation Manager</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="citation-search-bar">
+          <input
+            type="text"
+            placeholder="Search citations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
+            {types.map(t => (
+              <option key={t} value={t}>{t === 'all' ? 'All Types' : t.charAt(0).toUpperCase() + t.slice(1)}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="citation-add-form">
+          <div className="citation-form-row">
+            <input
+              type="text"
+              placeholder="Author(s)"
+              value={newCitation.author}
+              onChange={(e) => setNewCitation({...newCitation, author: e.target.value})}
+            />
+            <input
+              type="text"
+              placeholder="Year"
+              value={newCitation.year}
+              onChange={(e) => setNewCitation({...newCitation, year: e.target.value})}
+              style={{ maxWidth: '80px' }}
+            />
+          </div>
+          <input
+            type="text"
+            placeholder="Title"
+            value={newCitation.title}
+            onChange={(e) => setNewCitation({...newCitation, title: e.target.value})}
+          />
+          <input
+            type="text"
+            placeholder="Journal / Source"
+            value={newCitation.journal}
+            onChange={(e) => setNewCitation({...newCitation, journal: e.target.value})}
+          />
+          <input
+            type="url"
+            placeholder="URL (optional)"
+            value={newCitation.url}
+            onChange={(e) => setNewCitation({...newCitation, url: e.target.value})}
+          />
+          <input
+            type="text"
+            placeholder="Key finding / takeaway"
+            value={newCitation.keyPoint}
+            onChange={(e) => setNewCitation({...newCitation, keyPoint: e.target.value})}
+          />
+          <button className="citation-add-btn" onClick={addCitation}>Add Citation</button>
+        </div>
+        
+        <div className="citation-list">
+          {filteredCitations.length === 0 ? (
+            <div className="citation-empty">
+              <span>📚</span>
+              <p>No citations yet. Add studies, articles, and sources to build your library.</p>
+            </div>
+          ) : (
+            filteredCitations.map(c => (
+              <div key={c.id} className="citation-item">
+                <div className="citation-type">{c.type}</div>
+                <div className="citation-content">
+                  <div className="citation-title">{c.title}</div>
+                  <div className="citation-meta">
+                    {c.author} ({c.year}) • {c.journal}
+                  </div>
+                  {c.keyPoint && <div className="citation-keypoint">💡 {c.keyPoint}</div>}
+                </div>
+                <div className="citation-actions">
+                  <button onClick={() => copyAPA(c)} title="Copy APA">APA</button>
+                  <button onClick={() => copyMarkdown(c)} title="Copy Markdown">MD</button>
+                  <button className="citation-delete" onClick={() => deleteCitation(c.id)}>🗑️</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        
+        <div className="citation-stats">
+          <span>{citations.length} citation{citations.length !== 1 ? 's' : ''} in library</span>
         </div>
       </div>
     </div>
@@ -2542,6 +2717,7 @@ function App() {
   const [showSavedHooks, setShowSavedHooks] = useState(false)
   const [showWordSprint, setShowWordSprint] = useState(false)
   const [showArticleSeries, setShowArticleSeries] = useState(false)
+  const [showCitationManager, setShowCitationManager] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -2682,6 +2858,7 @@ function App() {
       if (key === 'U') setShowSavedHooks(true)
       if (key === 'S' && !e.metaKey && !e.ctrlKey) setShowWordSprint(true)
       if (key === 'Z') setShowArticleSeries(true)
+      if (key === 'I') setShowCitationManager(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -2703,6 +2880,7 @@ function App() {
         setShowSavedHooks(false)
         setShowWordSprint(false)
         setShowArticleSeries(false)
+        setShowCitationManager(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -2908,6 +3086,10 @@ function App() {
         isOpen={showArticleSeries} 
         onClose={() => setShowArticleSeries(false)}
       />
+      <CitationManager
+        isOpen={showCitationManager}
+        onClose={() => setShowCitationManager(false)}
+      />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
@@ -3056,6 +3238,11 @@ function App() {
             <span>📚</span>
             <span>Series</span>
             <span className="feature-hint">Z</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowCitationManager(true)}>
+            <span>📖</span>
+            <span>Citations</span>
+            <span className="feature-hint">I</span>
           </button>
         </section>
 

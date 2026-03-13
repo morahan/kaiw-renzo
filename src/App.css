@@ -1608,6 +1608,166 @@ button, .feature-btn, .brainstorm-item, .shortcut-item {
   opacity: 1;
 }
 
+/* Citation Manager Modal */
+.citation-modal .modal-content {
+  max-width: 600px;
+}
+
+.citation-search-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.citation-search-bar input {
+  flex: 1;
+}
+
+.citation-search-bar select {
+  padding: 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+}
+
+.citation-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--bg-card);
+  border-radius: 8px;
+}
+
+.citation-form-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.citation-add-form input {
+  padding: 0.5rem;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.citation-add-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.citation-add-btn {
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.citation-add-btn:hover {
+  opacity: 0.9;
+}
+
+.citation-list {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.citation-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.citation-empty span {
+  font-size: 2rem;
+}
+
+.citation-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border-radius: 8px;
+}
+
+.citation-type {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  background: var(--accent);
+  color: white;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.citation-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.citation-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.citation-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.citation-keypoint {
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-top: 0.25rem;
+}
+
+.citation-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.citation-actions button {
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.citation-actions button:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.citation-delete {
+  background: var(--danger) !important;
+  border-color: var(--danger) !important;
+}
+
+.citation-stats {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
 /* ========== v3.0 NEW STYLES ========== */
 
 /* Research Queue Modal */
