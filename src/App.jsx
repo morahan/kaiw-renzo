@@ -3,6 +3,129 @@ import './App.css'
 
 // ========== NEW FEATURES v3.0 ==========
 
+// Quick Capture - Quick idea capture (press Q)
+function QuickCapture({ isOpen, onClose, onSave }) {
+  const [note, setNote] = useState('')
+  const [category, setCategory] = useState('Idea')
+  const textareaRef = useRef(null)
+
+  useEffect(() => {
+    if (isOpen && textareaRef.current) {
+      textareaRef.current.focus()
+    }
+  }, [isOpen])
+
+  const handleSave = () => {
+    if (note.trim()) {
+      onSave?.({ note: note.trim(), category, date: new Date().toISOString() })
+      setNote('')
+      onClose()
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content capture-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>⚡ Quick Capture</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="capture-form">
+          <div className="capture-field">
+            <label>Category</label>
+            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="Idea">💡 Idea</option>
+              <option value="Hook">🪝 Hook</option>
+              <option value="Headline">📰 Headline</option>
+              <option value="Research">🔬 Research</option>
+              <option value="Note">📝 Note</option>
+            </select>
+          </div>
+          <div className="capture-field">
+            <label>Quick Note</label>
+            <textarea
+              ref={textareaRef}
+              placeholder="Jot down your idea quickly..."
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={4}
+            />
+          </div>
+        </div>
+        <div className="capture-actions">
+          <button className="capture-cancel" onClick={onClose}>Cancel</button>
+          <button className="capture-save" onClick={handleSave} disabled={!note.trim()}>
+            Save Note
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Session Stats - Today's writing session summary
+function SessionStats() {
+  const [stats, setStats] = useState(() => ({
+    sessions: parseInt(localStorage.getItem('renzo-timer-sessions') || '0'),
+    words: parseInt(localStorage.getItem('renzo-today-words') || '0'),
+    startTime: localStorage.getItem('renzo-session-start') || new Date().toISOString()
+  }))
+
+  const [elapsed, setElapsed] = useState(0)
+
+  useEffect(() => {
+    const start = new Date(stats.startTime)
+    const now = new Date()
+    setElapsed(Math.floor((now - start) / 60000))
+
+    const timer = setInterval(() => {
+      const start = new Date(stats.startTime)
+      const now = new Date()
+      setElapsed(Math.floor((now - start) / 60000))
+    }, 60000)
+
+    return () => clearInterval(timer)
+  }, [stats.startTime])
+
+  const formatTime = (mins) => {
+    const hours = Math.floor(mins / 60)
+    const m = mins % 60
+    if (hours > 0) return `${hours}h ${m}m`
+    return `${m}m`
+  }
+
+  return (
+    <div className="session-stats">
+      <div className="session-header">
+        <span className="session-icon">📈</span>
+        <span className="session-title">Today's Session</span>
+      </div>
+      <div className="session-grid">
+        <div className="session-stat">
+          <span className="session-stat-value">{stats.sessions}</span>
+          <span className="session-stat-label">🍅 Pomodoros</span>
+        </div>
+        <div className="session-stat">
+          <span className="session-stat-value">{stats.words.toLocaleString()}</span>
+          <span className="session-stat-label">📝 Words</span>
+        </div>
+        <div className="session-stat">
+          <span className="session-stat-value">{formatTime(elapsed)}</span>
+          <span className="session-stat-label">⏱️ Active Time</span>
+        </div>
+        <div className="session-stat">
+          <span className="session-stat-value">
+            {stats.sessions > 0 ? Math.round(stats.words / stats.sessions) : 0}
+          </span>
+          <span className="session-stat-label">📊 Avg/Session</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Research Queue - topics waiting to be written
 function ResearchQueue({ isOpen, onClose, onSelect }) {
   const [queue, setQueue] = useState(() => {
@@ -2436,6 +2559,234 @@ function ExportDraftsModal({ drafts, onClose }) {
   )
 }
 
+// Article Pipeline Tracker - Track articles through stages
+function ArticlePipelineTracker({ isOpen, onClose }) {
+  const [articles, setArticles] = useState(() => {
+    const saved = localStorage.getItem('renzo-pipeline')
+    return saved ? JSON.parse(saved) : [
+      { id: 1, title: "Muscle Memory After 30", stage: "published", date: "2026-03-10", words: 1200 },
+      { id: 2, title: "Sleep & Growth Hormone", stage: "review", date: "2026-03-11", words: 950 },
+      { id: 3, title: "HIIT vs Steady State", stage: "drafting", date: "2026-03-12", words: 400 },
+      { id: 4, title: "Protein Timing Myths", stage: "idea", date: "2026-03-12", words: 0 },
+    ]
+  })
+  const [draggedId, setDraggedId] = useState(null)
+  
+  const stages = [
+    { id: 'idea', label: '💡 Ideas', color: '#f97316' },
+    { id: 'drafting', label: '✍️ Drafting', color: '#3b82f6' },
+    { id: 'review', label: '👀 In Review', color: '#a855f7' },
+    { id: 'published', label: '✅ Published', color: '#22c55e' },
+  ]
+  
+  const moveArticle = (id, newStage) => {
+    const updated = articles.map(a => a.id === id ? { ...a, stage: newStage, date: new Date().toISOString() } : a)
+    setArticles(updated)
+    localStorage.setItem('renzo-pipeline', JSON.stringify(updated))
+  }
+  
+  const deleteArticle = (id) => {
+    const updated = articles.filter(a => a.id !== id)
+    setArticles(updated)
+    localStorage.setItem('renzo-pipeline', JSON.stringify(updated))
+  }
+  
+  const addArticle = (title) => {
+    if (!title.trim()) return
+    const newArticle = { 
+      id: Date.now(), 
+      title: title.trim(), 
+      stage: 'idea', 
+      date: new Date().toISOString(),
+      words: 0 
+    }
+    const updated = [newArticle, ...articles]
+    setArticles(updated)
+    localStorage.setItem('renzo-pipeline', JSON.stringify(updated))
+  }
+  
+  const handleDragStart = (e, id) => {
+    setDraggedId(id)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+  
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+  
+  const handleDrop = (e, stage) => {
+    e.preventDefault()
+    if (draggedId) {
+      moveArticle(draggedId, stage)
+      setDraggedId(null)
+    }
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content pipeline-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📊 Article Pipeline</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="pipeline-add">
+          <input 
+            type="text" 
+            placeholder="New article title..."
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') addArticle(e.target.value); e.target.value = ''
+            }}
+          />
+          <button onClick={(e) => {
+            const input = e.target.previousSibling
+            addArticle(input.value)
+            input.value = ''
+          }}>+ Add</button>
+        </div>
+        
+        <div className="pipeline-board">
+          {stages.map(stage => (
+            <div 
+              key={stage.id} 
+              className="pipeline-column"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, stage.id)}
+            >
+              <div className="pipeline-column-header" style={{ borderColor: stage.color }}>
+                {stage.label}
+                <span className="pipeline-count">
+                  {articles.filter(a => a.stage === stage.id).length}
+                </span>
+              </div>
+              <div className="pipeline-cards">
+                {articles.filter(a => a.stage === stage.id).map(article => (
+                  <div 
+                    key={article.id}
+                    className="pipeline-card"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, article.id)}
+                  >
+                    <div className="pipeline-card-title">{article.title}</div>
+                    <div className="pipeline-card-meta">
+                      <span>{article.words} words</span>
+                      <button 
+                        className="pipeline-delete" 
+                        onClick={() => deleteArticle(article.id)}
+                      >×</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Thread Generator - Convert articles to X/Twitter threads
+function ThreadGenerator({ isOpen, onClose, article }) {
+  const [content, setContent] = useState(article?.hook || article?.title || '')
+  const [thread, setThread] = useState([])
+  const [generated, setGenerated] = useState(false)
+  
+  const generateThread = () => {
+    if (!content.trim()) return
+    
+    // Split content into thread-friendly chunks
+    const paragraphs = content.split('\n\n').filter(p => p.trim())
+    const tweets = []
+    let counter = 1
+    
+    paragraphs.forEach((para, idx) => {
+      const words = para.split(/\s+/)
+      let chunk = ''
+      
+      words.forEach(word => {
+        if ((chunk + ' ' + word).length <= 280) {
+          chunk += (chunk ? ' ' : '') + word
+        } else {
+          if (chunk) {
+            tweets.push(`${counter}/🧵 ${chunk}`)
+            counter++
+            chunk = word
+          }
+        }
+      })
+      
+      if (chunk) {
+        tweets.push(`${counter}/🧵 ${chunk}`)
+        counter++
+      }
+    })
+    
+    // Add CTA tweet
+    tweets.push(`${counter}/🧵 👇 Follow for more evidence-based fitness insights.`)
+    
+    setThread(tweets)
+    setGenerated(true)
+  }
+  
+  const copyThread = () => {
+    navigator.clipboard.writeText(thread.join('\n\n'))
+    alert('Thread copied to clipboard!')
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content thread-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🐦 Thread Generator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="thread-input">
+          <label>Paste your article, hook, or key points:</label>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Paste your article content here..."
+            rows={6}
+          />
+        </div>
+        
+        <button 
+          className="thread-generate-btn"
+          onClick={generateThread}
+          disabled={!content.trim()}
+        >
+          🚀 Generate Thread
+        </button>
+        
+        {generated && (
+          <div className="thread-output">
+            <div className="thread-header">
+              <span>{thread.length} tweets</span>
+              <button onClick={copyThread}>📋 Copy All</button>
+            </div>
+            <div className="thread-tweets">
+              {thread.map((tweet, idx) => (
+                <div key={idx} className="thread-tweet">
+                  <span className="tweet-number">{idx + 1}</span>
+                  <p>{tweet}</p>
+                  <span className="tweet-length">{tweet.length}/280</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Theme Toggle Component
 function ThemeToggle({ isDark, onToggle }) {
   return (
@@ -2539,9 +2890,16 @@ function App() {
   const [showFocusMode, setShowFocusMode] = useState(false)
   const [showReferencePanel, setShowReferencePanel] = useState(false)
   const [showResearchQueue, setShowResearchQueue] = useState(false)
+  const [showQuickCapture, setShowQuickCapture] = useState(false)
+  const [quickNotes, setQuickNotes] = useState(() => {
+    const saved = localStorage.getItem('renzo-quick-notes')
+    return saved ? JSON.parse(saved) : []
+  })
   const [showSavedHooks, setShowSavedHooks] = useState(false)
   const [showWordSprint, setShowWordSprint] = useState(false)
   const [showArticleSeries, setShowArticleSeries] = useState(false)
+  const [showPipeline, setShowPipeline] = useState(false)
+  const [showThread, setShowThread] = useState(false)
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('renzo-activities')
     if (saved) {
@@ -2606,6 +2964,15 @@ function App() {
     setTodaysFocus(focus)
     localStorage.setItem('renzo-focus', focus)
     addToast('Focus updated!', 'success')
+  }
+
+  // Save quick note
+  const saveQuickNote = (note) => {
+    const newNotes = [note, ...quickNotes].slice(0, 20)
+    setQuickNotes(newNotes)
+    localStorage.setItem('renzo-quick-notes', JSON.stringify(newNotes))
+    addActivity('prompt', `Captured: ${note.category} - "${note.note.slice(0, 30)}..."`)
+    addToast('Note captured!', 'success')
   }
 
   // Toggle theme
@@ -2674,6 +3041,7 @@ function App() {
       if (key === 'G') setShowTopicGenerator(true)
       if (key === 'C' && !e.metaKey && !e.ctrlKey) setShowClipboard(true)
       if (key === 'B') setShowBrainstorm(true)
+      if (key === 'Q') setShowQuickCapture(true)
       if (key === 'E') setShowExportDrafts(true)
       if (key === 'L') setShowChangelog(true)
       if (key === 'M') setShowFocusMode(true)
@@ -2682,6 +3050,8 @@ function App() {
       if (key === 'U') setShowSavedHooks(true)
       if (key === 'S' && !e.metaKey && !e.ctrlKey) setShowWordSprint(true)
       if (key === 'Z') setShowArticleSeries(true)
+      if (key === 'P' && !e.metaKey && !e.ctrlKey) setShowPipeline(true)
+      if (key === 'X') setShowThread(true)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -2695,6 +3065,7 @@ function App() {
         setShowTopicGenerator(false)
         setShowClipboard(false)
         setShowBrainstorm(false)
+        setShowQuickCapture(false)
         setShowChangelog(false)
         setShowTemplates(false)
         setShowFocusMode(false)
@@ -2703,6 +3074,8 @@ function App() {
         setShowSavedHooks(false)
         setShowWordSprint(false)
         setShowArticleSeries(false)
+        setShowPipeline(false)
+        setShowThread(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -2908,10 +3281,23 @@ function App() {
         isOpen={showArticleSeries} 
         onClose={() => setShowArticleSeries(false)}
       />
+      <ArticlePipelineTracker
+        isOpen={showPipeline}
+        onClose={() => setShowPipeline(false)}
+      />
+      <ThreadGenerator
+        isOpen={showThread}
+        onClose={() => setShowThread(false)}
+      />
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
       <BrainstormMode isOpen={showBrainstorm} onClose={() => setShowBrainstorm(false)} />
+      <QuickCapture 
+        isOpen={showQuickCapture} 
+        onClose={() => setShowQuickCapture(false)}
+        onSave={saveQuickNote}
+      />
       <CommandPalette 
         isOpen={showCommandPalette} 
         onClose={() => setShowCommandPalette(false)}
@@ -3056,6 +3442,16 @@ function App() {
             <span>📚</span>
             <span>Series</span>
             <span className="feature-hint">Z</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowPipeline(true)}>
+            <span>📊</span>
+            <span>Pipeline</span>
+            <span className="feature-hint">P</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowThread(true)}>
+            <span>🐦</span>
+            <span>Thread</span>
+            <span className="feature-hint">X</span>
           </button>
         </section>
 
