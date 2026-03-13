@@ -1,5 +1,24 @@
 
 
+/* ========== DARK MODE (DEFAULT) ========== */
+body {
+  --bg-primary: #0a0a0b;
+  --bg-secondary: #111113;
+  --bg-card: #18181b;
+  --bg-card-hover: #1f1f23;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --border: #27272a;
+  --border-hover: #3f3f46;
+  --accent: #dc2626;
+  --accent-glow: rgba(220, 38, 38, 0.4);
+  --accent-green: #22c55e;
+  --accent-purple: #a855f7;
+  --accent-blue: #3b82f6;
+  --accent-orange: #f97316;
+}
+
 /* ========== THEME TOGGLE ========== */
 .theme-toggle {
   background: var(--bg-card);
@@ -1031,6 +1050,73 @@ button, .feature-btn, .brainstorm-item, .shortcut-item {
   max-width: 520px;
   max-height: 70vh;
   overflow-y: auto;
+}
+
+/* Daily Writing Prompt Modal */
+.daily-prompt-modal .modal-content {
+  max-width: 500px;
+  text-align: center;
+}
+
+.daily-prompt-content {
+  padding: 2rem;
+}
+
+.prompt-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.prompt-text {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prompt-text p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.prompt-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.copy-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  border-color: var(--accent);
+}
+
+.copy-btn.copied {
+  background: var(--accent-green);
+  color: white;
+  border-color: var(--accent-green);
 }
 
 .changelog-list {

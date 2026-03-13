@@ -1540,6 +1540,7 @@ function KeyboardShortcuts({ isOpen, onClose }) {
     { key: 'M', action: 'Focus Mode' },
     { key: 'F', action: 'Content Formula' },
     { key: 'Y', action: 'Hot Take Generator' },
+    { key: 'Q', action: 'Daily Writing Prompt' },
     { key: 'V', action: 'Virality Calculator' },
     { key: 'G', action: 'Topic Generator' },
     { key: 'T', action: 'Templates' },
@@ -2305,6 +2306,79 @@ function HotTakeGenerator({ onClose }) {
   )
 }
 
+// Daily Writing Prompt Component
+function DailyPrompt({ onClose }) {
+  const [prompt, setPrompt] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  const writingPrompts = [
+    "Write about a common fitness myth that refuses to die — and why people still believe it",
+    "What if everything you knew about protein timing was wrong?",
+    "The uncomfortable truth about why most people quit their fitness journey",
+    "Write a hook that makes someone stop mid-scroll about Zone 2 training",
+    "Explain HIIT to someone who thinks cardio is the only way to lose weight",
+    "What's the one fitness advice that's actually harmful?",
+    "Write about the psychology of workout consistency — why showing up matters more than the workout itself",
+    "Debunk this: 'You need to eat every 2-3 hours to boost metabolism'",
+    "The real reason your progress stalled — it's not what you think",
+    "Write about sleep as the most underrated performance enhancer",
+    "What fitness influencers won't tell you about supplement efficacy",
+    "Explain muscle protein synthesis in a way a 5-year-old would understand",
+    "The hidden cost of chasing the 'perfect' workout routine",
+    "Write about why rest days are where the gains actually happen",
+    "What would you tell your younger self about fitness?",
+    "Debunk: 'Lifting heavy makes women bulky'",
+    "The connection between stress hormones and fat loss",
+    "Write about the moment that changed your relationship with fitness forever",
+    "What does the latest research say about creatine that people miss?",
+    "The truth about calorie deficits and why most fail"
+  ]
+
+  const generatePrompt = () => {
+    const randomPrompt = writingPrompts[Math.floor(Math.random() * writingPrompts.length)]
+    setPrompt(randomPrompt)
+    setCopied(false)
+  }
+
+  // Auto-generate on mount
+  useEffect(() => {
+    generatePrompt()
+  }, [])
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(prompt)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content daily-prompt-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>💡 Daily Writing Prompt</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="daily-prompt-content">
+          <div className="prompt-icon">✍️</div>
+          {prompt && (
+            <div className="prompt-text">
+              <p>{prompt}</p>
+            </div>
+          )}
+          <div className="prompt-actions">
+            <button className="generate-btn" onClick={generatePrompt}>
+              🔄 New Prompt
+            </button>
+            <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={copyToClipboard}>
+              {copied ? '✓ Copied!' : '📋 Copy'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Command Palette Component
 function CommandPalette({ isOpen, onClose, onAction }) {
   const [query, setQuery] = useState('')
@@ -2315,6 +2389,7 @@ function CommandPalette({ isOpen, onClose, onAction }) {
     { id: 'new', label: 'New Draft', icon: '📝', shortcut: 'D', category: 'Create' },
     { id: 'prompt', label: 'Random Prompt', icon: '💡', shortcut: 'P', category: 'Create' },
     { id: 'hottake', label: 'Hot Take Generator', icon: '🔥', shortcut: 'H', category: 'Create' },
+    { id: 'dailyprompt', label: 'Daily Writing Prompt', icon: '💡', shortcut: 'Q', category: 'Create' },
     { id: 'trends', label: 'View Trends', icon: '🔥', shortcut: 'X', category: 'Research' },
     { id: 'readability', label: 'Readability Analyzer', icon: '📊', shortcut: 'A', category: 'Tools' },
     { id: 'calendar', label: 'Content Calendar', icon: '📅', shortcut: 'K', category: 'View' },
@@ -3033,6 +3108,7 @@ function App() {
   const [showBrainstorm, setShowBrainstorm] = useState(false)
   const [showExportDrafts, setShowExportDrafts] = useState(false)
   const [showChangelog, setShowChangelog] = useState(false)
+  const [showDailyPrompt, setShowDailyPrompt] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
   const [showFocusMode, setShowFocusMode] = useState(false)
   const [showReferencePanel, setShowReferencePanel] = useState(false)
@@ -3179,6 +3255,7 @@ function App() {
       if (key === 'B') setShowBrainstorm(true)
       if (key === 'E') setShowExportDrafts(true)
       if (key === 'L') setShowChangelog(true)
+      if (key === 'Q') setShowDailyPrompt(true)
       if (key === 'M') setShowFocusMode(true)
       if (key === 'R') setShowReferencePanel(true)
       if (key === 'O') setShowResearchQueue(true)
@@ -3204,6 +3281,7 @@ function App() {
         setShowClipboard(false)
         setShowBrainstorm(false)
         setShowChangelog(false)
+        setShowDailyPrompt(false)
         setShowTemplates(false)
         setShowFocusMode(false)
         setShowReferencePanel(false)
@@ -3386,6 +3464,11 @@ function App() {
         <ChangelogModal 
           isOpen={showChangelog} 
           onClose={() => setShowChangelog(false)} 
+        />
+      )}
+      {showDailyPrompt && (
+        <DailyPrompt 
+          onClose={() => setShowDailyPrompt(false)} 
         />
       )}
       {showTemplates && (
@@ -3626,6 +3709,7 @@ function App() {
                   else if (action.action === 'templates') setShowTemplates(true)
                   else if (action.action === 'prompt') setShowPrompt(true)
                   else if (action.action === 'hottake') setShowHotTake(true)
+                  else if (action.action === 'dailyprompt') setShowDailyPrompt(true)
                   else if (action.action === 'trends') document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth' })
                   else if (action.action === 'shortcuts') setShowShortcuts(true)
                   else if (action.action === 'changelog') setShowChangelog(true)

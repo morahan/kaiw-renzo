@@ -43,6 +43,7 @@ A powerful writing dashboard for AI-powered fitness content creation. Built with
 | W | Quick Write |
 | S | Word Sprint |
 | M | Focus Mode |
+| Q | Daily Writing Prompt |
 | F | Content Formula |
 | Y | Hot Take |
 | V | Virality |
@@ -99,6 +100,7 @@ src/
 
 ## Version History
 
+- **v3.2** (2026-03-13) - Daily Writing Prompt, Dark mode CSS variables fix
 - **v3.1** (2026-03-13) - Readability Analyzer, Content Calendar, Weekly Goals, Trending Topics
 - **v3.0** (2026-03-12) - Word Sprint, Research Queue, Saved Hooks, Article Series
 - **v2.9** (2026-03-12) - Focus Mode, Writing Streak, Reference Panel
