@@ -913,6 +913,109 @@ function QuickStatGenerator() {
   )
 }
 
+// Content Calendar - Upcoming deadlines
+function ContentCalendar() {
+  const [events, setEvents] = useState(() => {
+    const saved = localStorage.getItem('renzo-content-calendar')
+    return saved ? JSON.parse(saved) : [
+      { id: 1, title: 'Weekly article', date: '2026-03-14', type: 'deadline', color: '#ef4444' },
+      { id: 2, title: 'X thread', date: '2026-03-15', type: 'schedule', color: '#3b82f6' },
+      { id: 3, title: 'Newsletter', date: '2026-03-18', type: 'deadline', color: '#ef4444' },
+    ]
+  })
+  const [showAddEvent, setShowAddEvent] = useState(false)
+  const [newEvent, setNewEvent] = useState({ title: '', date: '', type: 'deadline' })
+  
+  const getDaysUntil = (dateStr) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const eventDate = new Date(dateStr)
+    eventDate.setHours(0, 0, 0, 0)
+    const diff = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24))
+    if (diff === 0) return 'Today'
+    if (diff === 1) return 'Tomorrow'
+    if (diff < 0) return 'Overdue'
+    return `${diff}d`
+  }
+  
+  const getEventColor = (type) => {
+    if (type === 'deadline') return '#ef4444'
+    if (type === 'schedule') return '#3b82f6'
+    return '#22c55e'
+  }
+  
+  const addEvent = () => {
+    if (newEvent.title && newEvent.date) {
+      const updated = [...events, { ...newEvent, id: Date.now(), color: getEventColor(newEvent.type) }]
+      setEvents(updated)
+      localStorage.setItem('renzo-content-calendar', JSON.stringify(updated))
+      setNewEvent({ title: '', date: '', type: 'deadline' })
+      setShowAddEvent(false)
+    }
+  }
+  
+  const removeEvent = (id) => {
+    const updated = events.filter(e => e.id !== id)
+    setEvents(updated)
+    localStorage.setItem('renzo-content-calendar', JSON.stringify(updated))
+  }
+  
+  const sortedEvents = [...events].sort((a, b) => new Date(a.date) - new Date(b.date))
+  const upcomingEvents = sortedEvents.slice(0, 3)
+  
+  return (
+    <div className="content-calendar">
+      <div className="calendar-header">
+        <span className="calendar-icon">📅</span>
+        <span className="calendar-label">Content Calendar</span>
+        <button className="calendar-add-btn" onClick={() => setShowAddEvent(!showAddEvent)}>+</button>
+      </div>
+      
+      {showAddEvent && (
+        <div className="calendar-add-form">
+          <input
+            type="text"
+            placeholder="Event title..."
+            value={newEvent.title}
+            onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+          />
+          <input
+            type="date"
+            value={newEvent.date}
+            onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+          />
+          <select
+            value={newEvent.type}
+            onChange={(e) => setNewEvent({...newEvent, type: e.target.value})}
+          >
+            <option value="deadline">Deadline</option>
+            <option value="schedule">Schedule</option>
+            <option value="milestone">Milestone</option>
+          </select>
+          <button onClick={addEvent}>Add</button>
+        </div>
+      )}
+      
+      <div className="calendar-events">
+        {upcomingEvents.length === 0 ? (
+          <p className="calendar-empty">No upcoming events</p>
+        ) : (
+          upcomingEvents.map(event => (
+            <div key={event.id} className="calendar-event">
+              <div className="event-indicator" style={{ background: event.color }} />
+              <div className="event-content">
+                <span className="event-title">{event.title}</span>
+                <span className="event-days">{getDaysUntil(event.date)}</span>
+              </div>
+              <button className="event-remove" onClick={() => removeEvent(event.id)}>×</button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Content Formula Reference
 function ContentFormulaRef({ isOpen, onClose }) {
   const formula = [
@@ -2279,6 +2382,25 @@ function ExportDraftsModal({ drafts, onClose }) {
     URL.revokeObjectURL(url)
   }
   
+  const copyAllToClipboard = async () => {
+    let text = ''
+    drafts.forEach((draft, i) => {
+      text += `${draft.title || `Draft ${i + 1}`}\n`
+      text += `Category: ${draft.category || 'Uncategorized'}\n`
+      text += `Date: ${new Date(draft.date).toLocaleDateString()}\n`
+      if (draft.hook) text += `Hook: ${draft.hook}\n`
+      text += '\n---\n\n'
+    })
+    
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch (err) {
+      console.error('Failed to copy:', err)
+      return false
+    }
+  }
+  
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content export-modal" onClick={e => e.stopPropagation()}>
@@ -2300,15 +2422,89 @@ function ExportDraftsModal({ drafts, onClose }) {
           <button className="export-btn" onClick={exportContent}>
             📥 Download
           </button>
+          <button className="export-btn copy" onClick={async () => {
+            const success = await copyAllToClipboard()
+            if (success) {
+              alert('All drafts copied to clipboard!')
+            }
+          }}>
+            📋 Copy All
+          </button>
         </div>
       </div>
     </div>
   )
 }
 
+// Theme Toggle Component
+function ThemeToggle({ isDark, onToggle }) {
+  return (
+    <button 
+      className="theme-toggle" 
+      onClick={onToggle}
+      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {isDark ? '☀️' : '🌙'}
+    </button>
+  )
+}
+
+// Enhanced Animated Counter with direction
+function AnimatedCounterWithDirection({ end, duration = 1500, suffix = '', showDirection = false }) {
+  const [count, setCount] = useState(0)
+  const [prevCount, setPrevCount] = useState(end)
+  const ref = useRef(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          setPrevCount(0)
+        }
+      },
+      { threshold: 0.5 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isVisible) return
+    let start = 0
+    const increment = end / (duration / 16)
+    const timer = setInterval(() => {
+      start += increment
+      if (start >= end) {
+        setCount(end)
+        clearInterval(timer)
+      } else {
+        setCount(Math.floor(start))
+      }
+    }, 16)
+    return () => clearInterval(timer)
+  }, [end, duration, isVisible])
+
+  const direction = count > prevCount ? 'up' : count < prevCount ? 'down' : 'neutral'
+
+  return (
+    <span ref={ref} className={`counter-${direction}`}>
+      {count.toLocaleString()}{suffix}
+      {showDirection && direction !== 'neutral' && (
+        <span className={`counter-arrow ${direction}`}>{direction === 'up' ? '↑' : '↓'}</span>
+      )}
+    </span>
+  )
+}
+
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('renzo-theme')
+    return saved ? saved === 'dark' : true
+  })
   const [activeTip, setActiveTip] = useState(0)
   const [writingPulse, setWritingPulse] = useState(false)
   const [viewMode, setViewMode] = useState('dashboard')
@@ -2411,6 +2607,20 @@ function App() {
     localStorage.setItem('renzo-focus', focus)
     addToast('Focus updated!', 'success')
   }
+
+  // Toggle theme
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode
+    setIsDarkMode(newTheme)
+    localStorage.setItem('renzo-theme', newTheme ? 'dark' : 'light')
+    document.body.classList.toggle('light-mode', !newTheme)
+    addToast(newTheme ? '🌙 Dark mode enabled' : '☀️ Light mode enabled', 'info')
+  }
+
+  // Apply theme on mount
+  useEffect(() => {
+    document.body.classList.toggle('light-mode', !isDarkMode)
+  }, [])
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -2726,9 +2936,10 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v2.9</span>
+          <span className="logo-badge">v3.0</span>
         </div>
         <div className="header-right">
+          <ThemeToggle isDark={isDarkMode} onToggle={toggleTheme} />
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
           <button 
             className="sound-toggle" 
@@ -2785,6 +2996,7 @@ function App() {
           <DailyQuote />
           <StudySpotlight />
           <QuickStatGenerator />
+          <ContentCalendar />
           <WritingTimer onComplete={() => addToast('Session complete! Take a break ☕', 'success')} />
           <WritingStreakCalendar streak={metrics.currentStreak} articles={recentArticles} />
         </section>

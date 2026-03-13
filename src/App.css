@@ -1,5 +1,359 @@
 
 
+/* ========== THEME TOGGLE ========== */
+.theme-toggle {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.theme-toggle:hover {
+  transform: rotate(15deg) scale(1.1);
+  border-color: var(--accent);
+}
+
+/* Light Mode Overrides */
+body.light-mode {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --border-hover: #cbd5e1;
+}
+
+body.light-mode .app {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+body.light-mode .header {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-mode .hero {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+}
+
+body.light-mode .hero-title {
+  color: #0f172a;
+}
+
+body.light-mode .hero-subtitle {
+  color: #475569;
+}
+
+body.light-mode .accent {
+  color: #dc2626;
+}
+
+body.light-mode .article-card,
+body.light-mode .metric-card,
+body.light-mode .goal-card,
+body.light-mode .draft-card,
+body.light-mode .trending-item {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+body.light-mode .article-card:hover,
+body.light-mode .metric-card:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .article-title,
+body.light-mode .metric-label,
+body.light-mode .goal-label,
+body.light-mode .section-title {
+  color: #0f172a;
+}
+
+body.light-mode .article-meta,
+body.light-mode .trending-topic {
+  color: #64748b;
+}
+
+body.light-mode .search-input,
+body.light-mode input,
+body.light-mode textarea,
+body.light-mode select {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+
+body.light-mode .filter-pill {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+body.light-mode .filter-pill.active {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+body.light-mode .feature-btn {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+body.light-mode .feature-btn:hover {
+  background: #f1f5f9;
+  border-color: #dc2626;
+}
+
+body.light-mode .quick-actions,
+body.light-mode .goals-section,
+body.light-mode .trending-section,
+body.light-mode .category-section,
+body.light-mode .activity-section,
+body.light-mode .drafts-section {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+body.light-mode .modal-content {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+body.light-mode .modal-header,
+body.light-mode .command-group-label {
+  color: #475569;
+}
+
+body.light-mode .command-item:hover,
+body.light-mode .command-item.selected {
+  background: #f1f5f9;
+}
+
+body.light-mode .toast {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+body.light-mode .status-bar {
+  background: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+}
+
+body.light-mode .footer {
+  color: #64748b;
+}
+
+body.light-mode .insight-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  border-color: #e2e8f0;
+}
+
+body.light-mode .writing-timer,
+body.light-mode .daily-quote,
+body.light-mode .study-spotlight,
+body.light-mode .quick-stat {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+/* ========== ENHANCED ANIMATIONS ========== */
+
+/* Smooth page load animation */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px var(--accent); }
+  50% { box-shadow: 0 0 20px var(--accent), 0 0 30px var(--accent); }
+}
+
+.app {
+  animation: fadeSlideIn 0.6s ease-out;
+}
+
+.metric-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.metric-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(220, 38, 38, 0.15);
+}
+
+.metric-card.primary:hover {
+  box-shadow: 0 8px 30px rgba(220, 38, 38, 0.25);
+}
+
+.article-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.article-card:hover {
+  transform: translateX(4px);
+}
+
+.article-card.expanded {
+  animation: fadeSlideIn 0.3s ease-out;
+}
+
+.trending-item {
+  transition: all 0.2s ease;
+}
+
+.trending-item:hover {
+  transform: translateX(8px);
+  background: var(--bg-card-hover);
+}
+
+.action-btn {
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  transform: scale(1.05);
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+}
+
+.feature-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-btn:hover {
+  animation: float 0.5s ease;
+}
+
+/* Counter animations */
+.counter-up {
+  color: var(--accent-green);
+}
+
+.counter-down {
+  color: var(--accent-red);
+}
+
+.counter-arrow {
+  font-size: 0.7em;
+  margin-left: 2px;
+}
+
+.counter-arrow.up {
+  animation: bounceUp 0.3s ease;
+}
+
+.counter-arrow.down {
+  animation: bounceDown 0.3s ease;
+}
+
+@keyframes bounceUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes bounceDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+/* Gradient orb animation */
+.gradient-orb {
+  transition: all 0.3s ease-out;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+
+.gradient-orb.secondary {
+  animation-delay: -4s;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(10px, -10px); }
+  50% { transform: translate(-5px, 15px); }
+  75% { transform: translate(-15px, -5px); }
+}
+
+/* Toast animations */
+.toast {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Writing pulse glow */
+.writing-indicator.active .writing-dot {
+  animation: glow 1.5s ease-in-out infinite;
+}
+
+/* New badge animation */
+@keyframes newBadge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.logo-badge {
+  animation: newBadge 2s ease-in-out infinite;
+}
+
+/* Staggered animations for lists */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+
+/* Focus mode animation */
+.focus-mode-overlay {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Productivity score ring animation */
+.score-circle .score-fill-circle {
+  transition: stroke-dashoffset 1.5s ease-out;
+}
+
 /* ========== NEW v2.6 STYLES ========== */
 
 /* Writing Timer */
@@ -1713,4 +2067,136 @@ button, .feature-btn, .brainstorm-item, .shortcut-item {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== CONTENT CALENDAR ========== */
+.content-calendar {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  min-width: 200px;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.calendar-icon {
+  font-size: 1rem;
+}
+
+.calendar-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.calendar-add-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.calendar-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.calendar-add-form input,
+.calendar-add-form select {
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.calendar-add-form button {
+  padding: 0.4rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.calendar-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.calendar-empty {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.calendar-event {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+}
+
+.event-indicator {
+  width: 4px;
+  height: 24px;
+  border-radius: 2px;
+}
+
+.event-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-title {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-days {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.event-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  line-height: 1;
+}
+
+.event-remove:hover {
+  color: #ef4444;
 }
