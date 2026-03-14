@@ -1,3 +1,18 @@
+## [6.8.0] — March 14, 2026 (3:30 PM) [TINKER SESSION]
+
+### Added
+- **Weekly Progress Widget (v6.8)**
+  - New weekly word count tracker in header
+  - Shows progress toward weekly writing goal (default 5000 words)
+  - Visual progress bar with gradient fill
+  - Persists across sessions, resets each week
+
+### Changed
+- Updated version badge to v6.8 in header, footer, and index.html
+- Version consistency across all UI elements
+
+---
+
 ## [6.7.0] — March 14, 2026 (2:33 PM) [TINKER SESSION]
 
 ### Added

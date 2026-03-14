@@ -47,6 +47,60 @@
   text-align: right;
 }
 
+/* ========== WEEKLY PROGRESS WIDGET (v6.8) ========== */
+.weekly-progress-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.weekly-progress-widget:hover {
+  border-color: var(--accent-purple);
+}
+
+.weekly-icon {
+  font-size: 1rem;
+}
+
+.weekly-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.weekly-value {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.weekly-label {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
+.weekly-bar {
+  width: 40px;
+  height: 4px;
+  background: var(--bg-hover);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.weekly-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-purple) 0%, var(--accent-blue) 100%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
 /* ========== DAILY CHALLENGE WIDGET & MODAL ========== */
 .daily-challenge-widget {
   display: flex;

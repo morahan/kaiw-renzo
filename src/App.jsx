@@ -8984,6 +8984,35 @@ function App() {
   const [dailyWordGoal, setDailyWordGoal] = useState(() => {
     return parseInt(localStorage.getItem('renzo-daily-word-goal')) || 1000
   })
+  // Weekly progress tracking (NEW v6.8)
+  const [weeklyWords, setWeeklyWords] = useState(() => {
+    const saved = localStorage.getItem('renzo-weekly-words')
+    const savedWeek = localStorage.getItem('renzo-weekly-words-week')
+    const currentWeek = getWeekNumber(new Date())
+    if (saved && savedWeek === currentWeek.toString()) {
+      return parseInt(saved) || 0
+    }
+    return 0
+  })
+  const [weeklyGoal, setWeeklyGoal] = useState(() => {
+    return parseInt(localStorage.getItem('renzo-weekly-goal')) || 5000
+  })
+  
+  // Helper to get week number
+  function getWeekNumber(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+    const dayNum = d.getUTCDay() || 7
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+  }
+  
+  // Save weekly words to localStorage
+  useEffect(() => {
+    localStorage.setItem('renzo-weekly-words', weeklyWords.toString())
+    localStorage.setItem('renzo-weekly-words-week', getWeekNumber(new Date()).toString())
+  }, [weeklyWords])
+  
   const [soundEnabled, setSoundEnabled] = useState(() => {
     return localStorage.getItem('renzo-sound') !== 'false'
   })
@@ -9150,6 +9179,7 @@ function App() {
     setDrafts(newDrafts)
     localStorage.setItem('renzo-drafts', JSON.stringify(newDrafts))
     setWords(prev => prev + data.words)
+    setWeeklyWords(prev => prev + data.words)  // Track weekly progress (v6.8)
     addActivity('draft', `Wrote ${data.words} words: "${data.title.slice(0, 30)}..."`)
     addToast(`Saved ${data.words} words!`, 'success')
   }
@@ -10049,7 +10079,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v6.7</span>
+          <span className="logo-badge">v6.8</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -10083,6 +10113,21 @@ function App() {
                 : <span>{wordsWritten}/{dailyWordGoal}</span>
               }
             </span>
+          </div>
+          
+          {/* Weekly Progress Widget (NEW v6.8) */}
+          <div className="weekly-progress-widget" title="This week's writing progress">
+            <span className="weekly-icon">📅</span>
+            <div className="weekly-info">
+              <span className="weekly-value">{weeklyWords}</span>
+              <span className="weekly-label">/ {weeklyGoal} this week</span>
+            </div>
+            <div className="weekly-bar">
+              <div 
+                className="weekly-bar-fill" 
+                style={{ width: `${Math.min((weeklyWords / weeklyGoal) * 100, 100)}%` }}
+              />
+            </div>
           </div>
           
           {/* Daily Challenge Widget */}
@@ -11046,7 +11091,7 @@ function App() {
       <KeyboardShortcutsFooter onShowShortcuts={() => setShowShortcuts(true)} />
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v5.11 • Press ⌘K for commands, ? for all shortcuts • 💡 Prompts & 📋 Outline</p>
+        <p className="footer-version">v6.8 • Press ⌘K for commands, ? for all shortcuts • 💡 Prompts & 📋 Outline</p>
       </footer>
     </div>
   )
