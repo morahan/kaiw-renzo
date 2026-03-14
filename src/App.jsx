@@ -2347,6 +2347,15 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '6.6', date: '2026-03-14', changes: [
+      '🎉 New Release: v6.6',
+      'Enhanced CSS animations — New slideInRight and scaleIn keyframes for smoother transitions',
+      'Improved visual polish with refined animation timing and easing functions',
+      'Better keyboard shortcut feedback with enhanced visual transitions',
+      'Optimized animation performance across all modals and components',
+      'Updated core animation library for faster, more responsive UI',
+      'Version badge now displays v6.6 with latest design system'
+    ]},
     { version: '6.4', date: '2026-03-14', changes: [
       '🎉 New Release: v6.4',
       'Added Quick Tweet Button — One-click X/Twitter post from header',
