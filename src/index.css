@@ -2362,3 +2362,278 @@ textarea:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
+
+/* ========== V5.7 NEW: WRITING TIME INSIGHTS ========== */
+.writing-insights {
+  background: var(--gradient-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.insights-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.insights-icon {
+  font-size: 1.5rem;
+}
+
+.insights-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.insight-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.insight-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.insight-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.insight-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.insight-detail {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.day-breakdown {
+  margin-bottom: 1.5rem;
+}
+
+.breakdown-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+.day-bars {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.75rem;
+}
+
+.day-bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.day-bar-container {
+  width: 100%;
+  height: 80px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.day-bar-fill {
+  width: 60%;
+  background: linear-gradient(180deg, var(--accent), var(--accent-purple));
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+  transition: all var(--transition-fast);
+}
+
+.day-bar-item:hover .day-bar-fill {
+  background: linear-gradient(180deg, var(--accent-hover), var(--accent));
+  width: 80%;
+}
+
+.day-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.day-sessions {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.time-recommendation {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.rec-emoji {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.rec-text {
+  line-height: 1.5;
+}
+
+.rec-text strong {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+/* ========== V5.7 ENHANCED: EXPORT DRAFTS ========== */
+.export-format-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.format-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.format-option:hover {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.format-option.selected {
+  border-color: var(--accent);
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.format-option input[type="radio"] {
+  margin-top: 4px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.option-label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.option-desc {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.export-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.export-btn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.export-btn:hover {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.export-btn.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-color: var(--accent);
+  color: white;
+}
+
+.export-btn.primary:hover {
+  filter: brightness(1.1);
+}
+
+@media (max-width: 768px) {
+  .day-bars {
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  }
+
+  .insights-highlights {
+    grid-template-columns: 1fr;
+  }
+
+  .export-actions {
+    flex-direction: column;
+  }
+
+  .export-btn {
+    width: 100%;
+  }
+}
+
+/* ========== INSIGHTS MODAL STYLING ========== */
+.insights-modal {
+  max-width: 600px;
+}
+
+.insights-modal .modal-header {
+  margin-bottom: 1.5rem;
+}
+
+.insights-modal .insights-highlights {
+  margin-bottom: 1.5rem;
+}
+
+.insights-modal .day-breakdown {
+  margin-bottom: 1.5rem;
+}
+
+.insights-modal .time-recommendation {
+  margin-top: 1.5rem;
+}

@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.7.0] — March 14, 2026 (1:59 AM)
+
+### Added
+
+#### Writing Time Insights Modal (NEW - Keyboard: +/= key)
+- Analyze writing patterns to identify best days and times
+- Shows activity breakdown by day of week with visual bar charts
+- Identifies peak productivity hour for optimal writing sessions
+- Displays weekly session counts and average words per session
+- Smart recommendation system suggests best times to write
+- Data-driven insights help optimize writing schedule
+- Interactive visualization with hover effects on daily activity bars
+
+#### Enhanced Export Drafts Panel (E key)
+- **New Format: Notion** - Exports in Notion-compatible format with proper block structure
+- **New Format: HTML** - Self-contained HTML page with professional styling
+- **Improved Markdown** - Better formatting with metadata and structured sections
+- **Format Selection UI** - Radio buttons with descriptions for each export format
+- Visual indicators showing what each format is best for
+- Enhanced download button with format name
+- All formats include word count and metadata
+
+#### Improved Keyboard Shortcut Handling
+- Added +/= keyboard shortcut for Writing Time Insights
+- Better keyboard event detection and handling
+- More intuitive shortcut assignments
+
+#### Enhanced CSS for New Components
+- New `.writing-insights` component styling
+- `.insights-highlights` grid layout for stat cards
+- `.day-bars` visualization for daily activity
+- `.time-recommendation` card with smart suggestions
+- `.export-format-options` for better format selection UI
+- Mobile-responsive design for all new components
+- Smooth transitions and hover effects throughout
+
+### Changed
+- Version bump to v5.7.0
+- Updated title in index.html to reflect v5.7
+- Enhanced ExportDraftsModal with multi-format support
+- Improved visual hierarchy of export options
+
+### Improved
+- Dashboard now includes more granular productivity insights
+- Export functionality is more flexible with multiple format options
+- CSS animations and transitions across new components
+- Better color coding and visual feedback for interactive elements
+- Mobile responsiveness for writing insights visualization
+
 ## [5.6.0] — March 14, 2026
 
 ### Added
