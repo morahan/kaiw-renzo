@@ -2344,6 +2344,244 @@ const tips = [
   "Always challenge assumptions — that's where the clicks live",
 ]
 
+// ========== WRITING WARMUP MODAL (NEW v7.2) ==========
+function WarmupModal({ isOpen, onClose }) {
+  const [currentExercise, setCurrentExercise] = useState(null)
+  const [completed, setCompleted] = useState(() => {
+    const saved = localStorage.getItem('renzo-warmup-completed')
+    return saved ? JSON.parse(saved) : []
+  })
+  
+  const exercises = [
+    {
+      id: 1,
+      title: '⚡ 5-Minute Speed Write',
+      description: 'Write continuously for 5 minutes without stopping. No editing, no judging. Just write.',
+      prompt: 'Write about: Your favorite fitness topic right now. Go.',
+      time: '5 min'
+    },
+    {
+      id: 2,
+      title: '🔄 Sentence Remix',
+      description: 'Take a simple sentence and rewrite it 5 different ways.',
+      prompt: 'Start with: "Exercise is good for you."\nRewrite it 5 times with different tones.',
+      time: '3 min'
+    },
+    {
+      id: 3,
+      title: '🎯 The Opposite View',
+      description: 'Write a paragraph arguing the opposite of what you believe.',
+      prompt: 'If you think cardio is king, write about why strength training wins. Fight your beliefs.',
+      time: '5 min'
+    },
+    {
+      id: 4,
+      title: '📝 The Lede First',
+      description: 'Write the opening hook first — everything else comes after.',
+      prompt: 'Craft the most attention-grabbing first sentence you can for an article about protein timing.',
+      time: '3 min'
+    },
+    {
+      id: 5,
+      title: '📊 Data Dive',
+      description: 'Write a paragraph using only numbers and statistics.',
+      prompt: 'Write about sleep recovery using at least 5 specific numbers/percentages.',
+      time: '4 min'
+    },
+    {
+      id: 6,
+      title: '🎭 Role Play',
+      description: 'Write as if you were a different person with a different opinion.',
+      prompt: 'Write from the perspective of a skeptical scientist reviewing the latest fitness trend.',
+      time: '5 min'
+    },
+  ]
+  
+  const startExercise = (ex) => {
+    setCurrentExercise(ex)
+    const startTime = Date.now()
+    setCompleted(prev => {
+      const updated = [...prev.filter(c => c.id !== ex.id), { ...ex, startedAt: startTime }]
+      localStorage.setItem('renzo-warmup-completed', JSON.stringify(updated))
+      return updated
+    })
+  }
+  
+  const completeExercise = (ex) => {
+    setCompleted(prev => {
+      const updated = prev.map(c => c.id === ex.id ? { ...c, completedAt: Date.now() } : c)
+      localStorage.setItem('renzo-warmup-completed', JSON.stringify(updated))
+      return updated
+    })
+    setCurrentExercise(null)
+    addToast(`✅ Completed: ${ex.title}`, 'success')
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content warmup-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🔥 Writing Warmup</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        {!currentExercise ? (
+          <>
+            <p className="warmup-intro">Get your creative juices flowing before you write. Pick an exercise:</p>
+            <div className="warmup-grid">
+              {exercises.map(ex => (
+                <div 
+                  key={ex.id} 
+                  className={`warmup-card ${completed.find(c => c.id === ex.id && c.completedAt) ? 'completed' : ''}`}
+                  onClick={() => startExercise(ex)}
+                >
+                  <div className="warmup-card-header">
+                    <span className="warmup-title">{ex.title}</span>
+                    <span className="warmup-time">{ex.time}</span>
+                  </div>
+                  <p className="warmup-desc">{ex.description}</p>
+                  {completed.find(c => c.id === ex.id && c.completedAt) && (
+                    <span className="warmup-check">✅ Done</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="warmup-active">
+            <button className="warmup-back" onClick={() => setCurrentExercise(null)}>← Back to exercises</button>
+            <h4>{currentExercise.title}</h4>
+            <p className="warmup-prompt">{currentExercise.prompt}</p>
+            <button className="btn-primary warmup-complete" onClick={() => completeExercise(currentExercise)}>
+              Mark Complete ✓
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ========== SENTENCE STARTERS MODAL (NEW v7.2) ==========
+function SentenceStartersModal({ isOpen, onClose, onSelect }) {
+  const [category, setCategory] = useState('all')
+  const [copied, setCopied] = useState(null)
+  
+  const starters = {
+    'Hook - Stat': [
+      'What if I told you that [X]% of people are doing [topic] completely wrong?',
+      'New research reveals: [surprising statistic] about [topic].',
+      'Only [X]% of people know this about [topic] — and it changes everything.',
+      'Here\'s the number that\'s shaking up the fitness industry: [stat].',
+      '[X] studies now confirm what elite athletes have known for years.',
+    ],
+    'Hook - Question': [
+      'What if everything you knew about [topic] was wrong?',
+      'Have you been making this one mistake with [topic]?',
+      'Why do [X]% of people fail at [topic]? The answer might surprise you.',
+      'What\'s the one thing more important than [topic]?',
+      'Can [specific approach] really transform your [goal]?',
+    ],
+    'Hook - Bold': [
+      'Stop doing [X]. Here\'s what actually works.',
+      'The fitness industry doesn\'t want you to know this.',
+      'The uncomfortable truth about [topic]? [Contrarian take].',
+      'I used to believe [X] — until the data changed my mind.',
+      'Here\'s why 90% of [topic] advice is garbage.',
+    ],
+    'Hook - Story': [
+      'I watched [X] destroy a client\'s progress. Here\'s what went wrong.',
+      'The best fitness advice I ever received took 30 seconds to explain.',
+      'After 10 years in fitness, one thing still surprises me: [insight].',
+      'The moment I realized [topic] mattered more than [topic]...',
+      'I tried [X] for 30 days. Here\'s what happened.',
+    ],
+    'Problem': [
+      'The problem? [X] is holding you back from [goal].',
+      'Here\'s why [common approach] fails most people:',
+      'The gap between what you\'re doing and what works? It\'s narrower than you think.',
+      'Most people quit [topic] because they\'re missing this one thing.',
+      'The real obstacle to [goal] isn\'t what you think it is.',
+    ],
+    'Solution': [
+      'Here\'s the fix: [actionable step].',
+      'The solution is simpler than you\'d expect: [X].',
+      'What works instead: [specific approach].',
+      'The better way? [contrarian solution].',
+      'Try this instead: [practical advice].',
+    ],
+    'CTA': [
+      'Ready to [action]? Start with [specific first step].',
+      'Your turn: [question for reader].',
+      'Pick one thing from this article and apply it today.',
+      'The best time to start? Right now.',
+      'Now go forth and [action].',
+    ],
+  }
+  
+  const categories = Object.keys(starters)
+  
+  const copyStarter = (text) => {
+    navigator.clipboard.writeText(text)
+    setCopied(text)
+    setTimeout(() => setCopied(null), 1500)
+  }
+  
+  const useStarter = (text) => {
+    if (onSelect) onSelect(text)
+    onClose()
+  }
+  
+  const filteredStarters = category === 'all' 
+    ? Object.entries(starters).flatMap(([cat, items]) => items.map(t => ({ ...t, category: cat })))
+    : starters[category]?.map(t => ({ text: t, category })) || []
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content starters-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>✍️ Sentence Starters</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="starters-categories">
+          <button className={`cat-btn ${category === 'all' ? 'active' : ''}`} onClick={() => setCategory('all')}>All</button>
+          {categories.map(cat => (
+            <button 
+              key={cat} 
+              className={`cat-btn ${category === cat ? 'active' : ''}`}
+              onClick={() => setCategory(cat)}
+            >
+              {cat.replace('Hook -', '')}
+            </button>
+          ))}
+        </div>
+        
+        <div className="starters-list">
+          {filteredStarters.map((item, i) => (
+            <div key={i} className="starter-item">
+              <span className="starter-cat">{item.category}</span>
+              <p className="starter-text" onClick={() => useStarter(item.text || item)}>
+                {item.text || item}
+              </p>
+              <div className="starter-actions">
+                <button onClick={() => copyStarter(item.text || item)}>
+                  {copied === (item.text || item) ? '✓' : '📋'}
+                </button>
+                <button onClick={() => useStarter(item.text || item)}>→ Use</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
@@ -9344,6 +9582,10 @@ function App() {
   // NEW v5.11 features - Writing Prompts
   const [showWritingPrompts, setShowWritingPrompts] = useState(false)
   
+  // NEW v7.2 features - Writing Tools
+  const [showWarmup, setShowWarmup] = useState(false)
+  const [showSentenceStarters, setShowSentenceStarters] = useState(false)
+  
   // NEW v7.0 features
   const [showQuickShip, setShowQuickShip] = useState(false)
   const [pinnedArticles, setPinnedArticles] = useState(() => {
@@ -9724,6 +9966,10 @@ function App() {
       // NEW v5.10 shortcuts
       if (key === '{') setShowOutlineGenerator(true)  // Shift+[ for Outline Generator (📋)
       if (key === '}') setShowWritingPrompts(true)  // Shift+] for Writing Prompts (💡)
+      
+      // NEW v7.2 shortcuts - Writing Tools
+      if (e.shiftKey && key === 'W') setShowWarmup(true)  // Shift+W for Writing Warmup
+      if (e.shiftKey && key === 'E') setShowSentenceStarters(true)  // Shift+E for Sentence Starters
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       
       // Session Timer shortcuts (v5.5.1+)
@@ -10189,6 +10435,18 @@ function App() {
         isOpen={showWritingPrompts}
         onClose={() => setShowWritingPrompts(false)}
       />
+      <WarmupModal
+        isOpen={showWarmup}
+        onClose={() => setShowWarmup(false)}
+      />
+      <SentenceStartersModal
+        isOpen={showSentenceStarters}
+        onClose={() => setShowSentenceStarters(false)}
+        onSelect={(text) => {
+          // Add selected text to quick notes or scratchpad
+          addToast('Sentence starter copied!', 'info')
+        }}
+      />
       <PublishingPrepWorkflow
         isOpen={showPublishingPrep}
         onClose={() => setShowPublishingPrep(false)}
@@ -10332,7 +10590,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v7.1</span>
+          <span className="logo-badge">v7.2</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -10703,6 +10961,16 @@ function App() {
             <span>⚡</span>
             <span>Sprint</span>
             <span className="feature-hint">S</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowWarmup(true)}>
+            <span>🔥</span>
+            <span>Warmup</span>
+            <span className="feature-hint">⇧W</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowSentenceStarters(true)}>
+            <span>✍️</span>
+            <span>Starters</span>
+            <span className="feature-hint">⇧E</span>
           </button>
           <button className="feature-btn" onClick={() => setShowResearchQueue(true)}>
             <span>🔬</span>

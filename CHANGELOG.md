@@ -1,3 +1,27 @@
+## [7.2.0] — March 14, 2026 (5:32 PM) [TINKER SESSION]
+
+### Added
+- **Writing Warmup Modal (v7.2)**
+  - 6 quick warmup exercises to get creative juices flowing
+  - Speed Write, Sentence Remix, The Opposite View, The Lede First, Data Dive, Role Play
+  - Track completion status across sessions
+  - Keyboard shortcut: Shift+W
+
+- **Sentence Starters Library (v7.2)**
+  - Curated opening sentences for hooks, problems, solutions, and CTAs
+  - Categories: Stat Hooks, Question Hooks, Bold Hooks, Story Hooks, Problem, Solution, CTA
+  - Copy to clipboard or use directly
+  - Keyboard shortcut: Shift+E
+
+- **New toolbar buttons**
+  - Warmup button (🔥) with Shift+W shortcut
+  - Starters button (✍️) with Shift+E shortcut
+
+### Changed
+- Updated version badge to v7.2 in header, footer, and index.html
+
+---
+
 ## [7.1.0] — March 14, 2026 (5:00 PM) [TINKER SESSION]
 
 ### Added
