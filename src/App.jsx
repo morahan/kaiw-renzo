@@ -6846,6 +6846,43 @@ function DraftCollections({ isOpen, onClose, drafts, onMoveToDraft }) {
   )
 }
 
+// ========== CONTENT TIPS WIDGET (NEW v5.3) ==========
+function ContentTipsWidget() {
+  const [currentTip, setCurrentTip] = useState(0)
+  const tips = [
+    { icon: '📊', title: 'Stats Punch', tip: 'Lead with surprising numbers: "[Stat]% of people..." converts 10x better.' },
+    { icon: '🤔', title: 'Paradox Open', tip: 'Start with a contradiction: "Everyone thinks X is good. Here\'s why they\'re wrong."' },
+    { icon: '🚀', title: 'Specificity Wins', tip: 'Avoid generic advice. "Sleep 8 hours" flops. "90-min sleep cycles" pops.' },
+    { icon: '⚡', title: 'Hook First', tip: 'Your first sentence must work as a standalone tweet.' },
+    { icon: '🔗', title: 'Mechanism Matters', tip: 'Explain WHY something works, not just that it works.' },
+    { icon: '📝', title: 'Kill Your Darlings', tip: 'Cut every adjective twice. Boring writing hides weak claims.' },
+    { icon: '🎯', title: 'One CTA', tip: 'Your call-to-action should tie directly back to your hook.' },
+    { icon: '✓', title: 'Proof First', tip: 'Never ask for belief. Always show the evidence.' },
+  ]
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTip((prev) => (prev + 1) % tips.length)
+    }, 15000) // Change every 15 seconds
+    return () => clearInterval(timer)
+  }, [tips.length])
+
+  const tip = tips[currentTip]
+
+  return (
+    <div className="content-tips-widget">
+      <div className="tips-icon">{tip.icon}</div>
+      <div className="tips-content">
+        <div className="tips-title">{tip.title}</div>
+        <div className="tips-text">{tip.tip}</div>
+      </div>
+      <div className="tips-nav">
+        <span className="tips-counter">{currentTip + 1}/{tips.length}</span>
+      </div>
+    </div>
+  )
+}
+
 // ========== PERFORMANCE ANALYTICS (NEW v5.3) ==========
 function PerformanceAnalytics({ isOpen, onClose, articles }) {
   const [timeRange, setTimeRange] = useState('month')
@@ -8070,6 +8107,11 @@ function App() {
               <span className="writing-text">Ready to create</span>
             </div>
           </div>
+        </section>
+
+        {/* Tips and Insights Row */}
+        <section className="tips-section">
+          <ContentTipsWidget />
         </section>
 
         {/* New Feature Cards Row */}

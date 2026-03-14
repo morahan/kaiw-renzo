@@ -2606,3 +2606,84 @@ button:hover::after { opacity: 1; }
     grid-template-columns: 1fr;
   }
 }
+
+/* ========== CONTENT TIPS WIDGET (NEW v5.3) ========== */
+.content-tips-widget {
+  display: grid;
+  grid-template-columns: 60px 1fr 80px;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--bg-secondary)), color-mix(in srgb, var(--accent-green) 10%, var(--bg-secondary)));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tips-icon {
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.tips-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tips-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.tips-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.tips-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tips-counter {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .content-tips-widget {
+    grid-template-columns: 50px 1fr;
+  }
+
+  .tips-nav {
+    display: none;
+  }
+
+  .tips-icon {
+    font-size: 2rem;
+  }
+}
+
+/* Tips Section */
+.tips-section {
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
