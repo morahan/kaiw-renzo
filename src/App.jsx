@@ -1168,6 +1168,242 @@ function ContentRepurposer({ isOpen, onClose }) {
   )
 }
 
+// ========== QUICK FLOW - One button from topic to draft ==========
+function QuickFlow({ isOpen, onClose, onStartFlow }) {
+  const [step, setStep] = useState('topic')
+  const [topic, setTopic] = useState('')
+  const [brief, setBrief] = useState(null)
+  const [generating, setGenerating] = useState(false)
+  
+  const quickTopics = [
+    { topic: "Muscle protein synthesis", category: "Science", hook: "Most people don't eat enough protein to maximize muscle growth. Here's the exact amount." },
+    { topic: "Sleep tracking accuracy", category: "Metrics", hook: "Your sleep tracker is lying to you. Here's what actually matters." },
+    { topic: "Zone 2 training", category: "Training", hook: "Zone 2 is overrated. Here's what actually works for fat loss." },
+    { topic: "Creatine timing", category: "Science", hook: "When you take creatine matters less than you think. Here's why." },
+    { topic: "Sarcopenia prevention", category: "Longevity", hook: "You're losing muscle right now. Here's how to stop it." },
+    { topic: "HRV optimization", category: "Metrics", hook: "HRV is the most underrated fitness metric. Here's how to use it." },
+  ]
+  
+  const generateFlow = () => {
+    if (!topic.trim()) return
+    
+    setGenerating(true)
+    setTimeout(() => {
+      const selectedTopic = quickTopics.find(t => t.topic.toLowerCase().includes(topic.toLowerCase())) || {
+        topic: topic,
+        category: 'Science',
+        hook: `The truth about ${topic} that nobody talks about`
+      }
+      
+      const newBrief = {
+        topic: selectedTopic.topic,
+        category: selectedTopic.category,
+        hook: selectedTopic.hook,
+        problem: `Most people get ${selectedTopic.topic} completely wrong`,
+        mechanism: `Research shows that understanding ${selectedTopic.topic} involves cellular-level changes`,
+        solution: `Here's the evidence-based approach to ${selectedTopic.topic}`,
+        cta: `Try this tonight and track your results. Your body will thank you.`,
+        targetWords: 1000,
+        created: new Date().toISOString()
+      }
+      
+      setBrief(newBrief)
+      setGenerating(false)
+    }, 800)
+  }
+  
+  const startWriting = () => {
+    onStartFlow?.({
+      title: brief.topic,
+      category: brief.category,
+      hook: brief.hook,
+      content: `${brief.hook}\n\n${brief.problem}\n\n${brief.mechanism}\n\n${brief.solution}\n\n${brief.cta}`,
+      words: brief.targetWords,
+      date: new Date().toISOString()
+    })
+    onClose()
+  }
+  
+  const useRandomTopic = () => {
+    const random = quickTopics[Math.floor(Math.random() * quickTopics.length)]
+    setTopic(random.topic)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content quickflow-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>⚡ Quick Flow</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="quickflow-steps">
+          <div className={`quickflow-step ${step === 'topic' ? 'active' : ''} ${brief ? 'complete' : ''}`}>
+            <span className="step-num">1</span>
+            <span className="step-label">Topic</span>
+          </div>
+          <div className="quickflow-step-line" />
+          <div className={`quickflow-step ${step === 'brief' ? 'active' : ''} ${brief ? 'complete' : ''}`}>
+            <span className="step-num">2</span>
+            <span className="step-label">Brief</span>
+          </div>
+          <div className="quickflow-step-line" />
+          <div className={`quickflow-step ${step === 'writing' ? 'active' : ''}`}>
+            <span className="step-num">3</span>
+            <span className="step-label">Write</span>
+          </div>
+        </div>
+        
+        {!brief ? (
+          <div className="quickflow-topic-input">
+            <label>What do you want to write about?</label>
+            <input
+              type="text"
+              placeholder="e.g., creatine, sleep optimization, muscle growth..."
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && generateFlow()}
+              autoFocus
+            />
+            <div className="quickflow-suggestions">
+              <span className="suggestions-label">Or try:</span>
+              {quickTopics.slice(0, 3).map((t, i) => (
+                <button 
+                  key={i} 
+                  className="suggestion-chip"
+                  onClick={() => setTopic(t.topic)}
+                >
+                  {t.topic}
+                </button>
+              ))}
+              <button className="suggestion-chip random" onClick={useRandomTopic}>
+                🎲 Random
+              </button>
+            </div>
+            <button 
+              className="quickflow-generate-btn"
+              onClick={generateFlow}
+              disabled={!topic.trim() || generating}
+            >
+              {generating ? 'Generating brief...' : '⚡ Generate & Start'}
+            </button>
+          </div>
+        ) : (
+          <div className="quickflow-brief-preview">
+            <div className="brief-preview-header">
+              <span className="brief-category">{brief.category}</span>
+              <span className="brief-target">{brief.targetWords} words</span>
+            </div>
+            <div className="brief-preview-title">{brief.topic}</div>
+            <div className="brief-preview-section">
+              <span className="section-label">🪝 Hook</span>
+              <p>{brief.hook}</p>
+            </div>
+            <div className="brief-preview-section">
+              <span className="section-label">⚠️ Problem</span>
+              <p>{brief.problem}</p>
+            </div>
+            <div className="brief-preview-section">
+              <span className="section-label">✅ Solution</span>
+              <p>{brief.solution}</p>
+            </div>
+            <div className="brief-preview-section">
+              <span className="section-label">📣 CTA</span>
+              <p>{brief.cta}</p>
+            </div>
+            <button className="quickflow-write-btn" onClick={startWriting}>
+              🚀 Start Writing in Focus Mode
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ========== PRODUCTIVE HOURS - Best times to write ==========
+function ProductiveHours() {
+  const [currentHour, setCurrentHour] = useState(new Date().getHours())
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentHour(new Date().getHours())
+    }, 60000)
+    return () => clearInterval(timer)
+  }, [])
+  
+  const productivityData = [
+    { hour: 5, label: '5AM', score: 45 },
+    { hour: 6, label: '6AM', score: 55 },
+    { hour: 7, label: '7AM', score: 65 },
+    { hour: 8, label: '8AM', score: 75 },
+    { hour: 9, label: '9AM', score: 85 },
+    { hour: 10, label: '10AM', score: 92 },
+    { hour: 11, label: '11AM', score: 88 },
+    { hour: 12, label: '12PM', score: 70 },
+    { hour: 13, label: '1PM', score: 65 },
+    { hour: 14, label: '2PM', score: 75 },
+    { hour: 15, label: '3PM', score: 82 },
+    { hour: 16, label: '4PM', score: 90 },
+    { hour: 17, label: '5PM', score: 78 },
+    { hour: 18, label: '6PM', score: 65 },
+    { hour: 19, label: '7PM', score: 55 },
+    { hour: 20, label: '8PM', score: 45 },
+    { hour: 21, label: '9PM', score: 35 },
+    { hour: 22, label: '10PM', score: 25 },
+  ]
+  
+  const getCurrentScore = () => {
+    const hourData = productivityData.find(h => h.hour === currentHour)
+    return hourData?.score || 50
+  }
+  
+  const getScoreColor = (score) => {
+    if (score >= 80) return '#22c55e'
+    if (score >= 60) return '#f97316'
+    return '#ef4444'
+  }
+  
+  const getScoreLabel = (score) => {
+    if (score >= 80) return 'Peak Zone'
+    if (score >= 60) return 'Good Zone'
+    return 'Rest Zone'
+  }
+  
+  const score = getCurrentScore()
+  
+  return (
+    <div className="productive-hours">
+      <div className="productive-header">
+        <span className="productive-icon">⏰</span>
+        <span className="productive-label">Productive Hours</span>
+      </div>
+      <div className="productive-current">
+        <span className="current-score" style={{ color: getScoreColor(score) }}>{score}%</span>
+        <span className="current-label" style={{ color: getScoreColor(score) }}>{getScoreLabel(score)}</span>
+      </div>
+      <div className="productive-bar">
+        {productivityData.map((h, i) => (
+          <div 
+            key={i}
+            className={`hour-segment ${currentHour === h.hour ? 'current' : ''}`}
+            style={{ 
+              opacity: h.score / 100,
+              background: h.score >= 80 ? '#22c55e' : h.score >= 60 ? '#f97316' : '#ef4444'
+            }}
+            title={`${h.label}: ${h.score}%`}
+          />
+        ))}
+      </div>
+      <div className="productive-times">
+        <span>Best: 10AM, 4PM</span>
+      </div>
+    </div>
+  )
+}
+
 // ========== QUICK THREAD FORMAT GENERATOR ==========
 function QuickThreadFormat({ isOpen, onClose }) {
   const [topic, setTopic] = useState('')
@@ -7183,6 +7419,7 @@ function App() {
   const [showPipeline, setShowPipeline] = useState(false)
   const [showThread, setShowThread] = useState(false)
   const [showQuickTweet, setShowQuickTweet] = useState(false)
+  const [showQuickFlow, setShowQuickFlow] = useState(false)
   const [showHeadlineGen, setShowHeadlineGen] = useState(false)
   const [showBriefGen, setShowBriefGen] = useState(false)
   const [showMoodTracker, setShowMoodTracker] = useState(false)
@@ -7464,6 +7701,7 @@ function App() {
       
       // Number keys for quick access
       if (key === '3') setShowGlobalSearch(true)
+      if (key === 'N') setShowQuickFlow(true)
       if (key === 'P') setShowPrompt(true)
       if (key === 'T') setShowTemplates(true)
       if (key === 'K') setShowCTATemplates(true)
@@ -7803,6 +8041,18 @@ function App() {
         isOpen={showQuickTweet}
         onClose={() => setShowQuickTweet(false)}
       />
+      <QuickFlow
+        isOpen={showQuickFlow}
+        onClose={() => setShowQuickFlow(false)}
+        onStartFlow={(draftData) => {
+          const newDrafts = [draftData, ...drafts]
+          setDrafts(newDrafts)
+          localStorage.setItem('renzo-drafts', JSON.stringify(newDrafts))
+          setShowFocusMode(true)
+          addActivity('draft', `Quick Flow: "${draftData.title.slice(0, 30)}..."`)
+          addToast('Draft created! Starting Focus Mode...', 'success')
+        }}
+      />
       <HeadlineGenerator
         isOpen={showHeadlineGen}
         onClose={() => setShowHeadlineGen(false)}
@@ -8128,6 +8378,7 @@ function App() {
           <WritingHeatmap />
           <WeeklyStatsDashboard articles={recentArticles} />
           <ArticlePublishingTimer articles={recentArticles} />
+          <ProductiveHours />
         </section>
         
         <section className="feature-buttons-row">
