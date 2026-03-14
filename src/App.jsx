@@ -4137,22 +4137,36 @@ function DailyChallenge({ onComplete }) {
 // Study Spotlight Component
 function StudySpotlight() {
   const studies = [
-    { title: "Muscle Protein Synthesis", finding: "Leucine threshold of ~2.5g triggers maximum MPS", source: "JISSN 2013" },
-    { title: "Sleep & Recovery", finding: "8+ hours sleep doubles testosterone recovery", source: "Sleep 2011" },
-    { title: "HIIT vs Steady State", finding: "HIIT burns 25% more fat in half the time", source: "JAP 2009" },
-    { title: "Protein Pacing", finding: "4 meals/day optimizes muscle protein synthesis", source: "AJCN 2009" },
-    { title: "Strength Training & Bone", finding: "Resistance training increases bone density 1-3%", source: "Osteoporosis Int 2007" },
-    { title: "Creatine & Brain", finding: "Creatine improves cognitive performance under stress", source: "Nutritional Neuroscience 2020" },
-    { title: "Sarcopenia Prevention", finding: "Adults lose 3-8% muscle mass per decade after 30", source: "JAMA 2004" },
-    { title: "Cortisol & Training", finding: "Morning cortisol peaks can impair evening workouts", source: "Endocrine 2015" },
+    { title: "Muscle Protein Synthesis", finding: "Leucine threshold of ~2.5g triggers maximum MPS", source: "JISSN 2013", pmid: "23780383" },
+    { title: "Sleep & Recovery", finding: "8+ hours sleep doubles testosterone recovery", source: "Sleep 2011", pmid: "21250361" },
+    { title: "HIIT vs Steady State", finding: "HIIT burns 25% more fat in half the time", source: "JAP 2009", pmid: "18710271" },
+    { title: "Protein Pacing", finding: "4 meals/day optimizes muscle protein synthesis", source: "AJCN 2009", pmid: "19553497" },
+    { title: "Strength Training & Bone", finding: "Resistance training increases bone density 1-3%", source: "Osteoporosis Int 2007", pmid: "17106784" },
+    { title: "Creatine & Brain", finding: "Creatine improves cognitive performance under stress", source: "Nutritional Neuroscience 2020", pmid: "31850822" },
+    { title: "Sarcopenia Prevention", finding: "Adults lose 3-8% muscle mass per decade after 30", source: "JAMA 2004", pmid: "15026638" },
+    { title: "Cortisol & Training", finding: "Morning cortisol peaks can impair evening workouts", source: "Endocrine 2015", pmid: "25421584" },
+    { title: "Protein & Muscle Loss", finding: "1.6-2.2g/kg protein daily maximizes lean mass", source: "ISSN 2017", pmid: "28698222" },
+    { title: "Resistance Training Frequency", finding: "Training each muscle 2x/week outperforms 1x/week", source: "Sports Med 2016", pmid: "26666743" },
   ]
   const [study, setStudy] = useState(() => studies[Math.floor(Math.random() * studies.length)])
   const [expanded, setExpanded] = useState(false)
+  const [copied, setCopied] = useState(false)
   
   const refreshStudy = () => {
     const newStudy = studies[Math.floor(Math.random() * studies.length)]
     setStudy(newStudy)
     setExpanded(false)
+  }
+
+  const getPubMedUrl = () => {
+    return `https://pubmed.ncbi.nlm.nih.gov/${study.pmid}/`
+  }
+
+  const copyToClipboard = (e) => {
+    e.stopPropagation()
+    navigator.clipboard.writeText(`${study.title}: ${study.finding} (${study.source})`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
   
   return (
@@ -4160,13 +4174,21 @@ function StudySpotlight() {
       <div className="study-header">
         <span className="study-icon">🔬</span>
         <span className="study-label">Study Spotlight</span>
-        <button className="study-refresh" onClick={(e) => { e.stopPropagation(); refreshStudy() }}>↻</button>
+        <button className="study-refresh" onClick={(e) => { e.stopPropagation(); refreshStudy() }} title="Load another study">↻</button>
       </div>
       <div className="study-title">{study.title}</div>
       {expanded && (
         <div className="study-expanded">
           <p className="study-finding">{study.finding}</p>
-          <span className="study-source">{study.source}</span>
+          <div className="study-source-row">
+            <span className="study-source">{study.source}</span>
+            <a href={getPubMedUrl()} target="_blank" rel="noopener noreferrer" className="study-link" title="Open on PubMed">
+              🔗 PubMed
+            </a>
+            <button className="study-copy" onClick={copyToClipboard} title="Copy study info">
+              {copied ? '✓' : '📋'}
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -4195,10 +4217,12 @@ function QuickStatGenerator() {
   const [stat, setStat] = useState(stats[Math.floor(Math.random() * stats.length)])
   const [animating, setAnimating] = useState(false)
   const [showSource, setShowSource] = useState(false)
+  const [copied, setCopied] = useState(false)
   
   const generateStat = () => {
     setAnimating(true)
     setShowSource(false)
+    setCopied(false)
     setTimeout(() => {
       let newStat
       do {
@@ -4208,15 +4232,27 @@ function QuickStatGenerator() {
       setAnimating(false)
     }, 200)
   }
+
+  const copyStat = (e) => {
+    e.stopPropagation()
+    navigator.clipboard.writeText(`${stat.text} (${stat.source})`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
   
   return (
     <div className="quick-stat">
       <div className="quick-stat-header">
         <span className="stat-icon">📊</span>
         <span className="stat-label">Quick Stat</span>
-        <button className="source-toggle" onClick={() => setShowSource(!showSource)} title="Show source">
-          {showSource ? '🔗' : '📖'}
-        </button>
+        <div className="stat-actions">
+          <button className="source-toggle" onClick={() => setShowSource(!showSource)} title="Show source">
+            {showSource ? '🔗' : '📖'}
+          </button>
+          <button className="stat-copy-btn" onClick={copyStat} title="Copy stat">
+            {copied ? '✓' : '📋'}
+          </button>
+        </div>
       </div>
       <p className={`quick-stat-text ${animating ? 'animating' : ''}`}>{stat.text}</p>
       {showSource && (
@@ -5593,6 +5629,66 @@ function ContentOverview({ drafts }) {
           <span className="stat-label">This Week</span>
         </div>
       </div>
+    </div>
+  )
+}
+
+// Recent Ideas Widget - Shows top 3 unsaved ideas
+function RecentIdeas({ ideas = [], onViewAll }) {
+  const topIdeas = ideas.slice(0, 3)
+  
+  const getCategoryEmoji = (category) => {
+    const emojis = {
+      'Trending': '🔥',
+      'Research': '🔬',
+      'Longevity': '⏳',
+      'Training': '💪',
+      'Recovery': '😴',
+      'Nutrition': '🥗',
+      'Metrics': '📊',
+      'Idea': '💡',
+    }
+    return emojis[category] || '💡'
+  }
+
+  if (!topIdeas || topIdeas.length === 0) {
+    return (
+      <div className="recent-ideas">
+        <div className="ideas-header">
+          <span className="ideas-icon">💡</span>
+          <span className="ideas-title">Recent Ideas</span>
+        </div>
+        <div className="ideas-empty">
+          <p>No ideas yet. Start brainstorming!</p>
+          <button className="ideas-action-btn" onClick={onViewAll}>Create One</button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="recent-ideas">
+      <div className="ideas-header">
+        <span className="ideas-icon">💡</span>
+        <span className="ideas-title">Recent Ideas</span>
+        {ideas.length > 3 && <span className="ideas-count">+{ideas.length - 3}</span>}
+      </div>
+      <div className="ideas-list">
+        {topIdeas.map((idea, i) => (
+          <div key={i} className="idea-item">
+            <span className="idea-emoji">{getCategoryEmoji(idea.category)}</span>
+            <div className="idea-content">
+              <div className="idea-title">{idea.title}</div>
+              <div className="idea-angle">{idea.angle.slice(0, 50)}{idea.angle.length > 50 ? '...' : ''}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {ideas.length > 3 && (
+        <button className="ideas-view-all" onClick={onViewAll}>
+          View All Ideas →
+        </button>
+      )}
     </div>
   )
 }
@@ -8903,7 +8999,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v5.5</span>
+          <span className="logo-badge">v5.6</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -9042,6 +9138,7 @@ function App() {
           <DailyChallenge onComplete={() => addToast('🎉 Daily challenge completed!', 'success')} />
           <StudySpotlight />
           <QuickStatGenerator />
+          <RecentIdeas ideas={contentIdeas} onViewAll={() => setShowIdeasBank(true)} />
           <TrendingHashtags />
           <TrendingTopics />
           <ContentCalendar />
@@ -9731,7 +9828,7 @@ function App() {
       <KeyboardShortcutsFooter onShowShortcuts={() => setShowShortcuts(true)} />
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v5.5 • Press ⌘K for commands, ? for all shortcuts</p>
+        <p className="footer-version">v5.6 • Press ⌘K for commands, ? for all shortcuts</p>
       </footer>
     </div>
   )

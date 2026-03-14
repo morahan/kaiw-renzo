@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.6.0] — March 14, 2026
+
+### Added
+
+#### Enhanced Study Spotlight Widget
+- Now includes PubMed PMID references for direct access to studies
+- Added "Open on PubMed" link for each study
+- Added copy-to-clipboard button for easy study information sharing
+- Expanded studies list with new research articles
+- Improved visual feedback with hover states
+
+#### Recent Ideas Widget (NEW)
+- Quick access to top 3 recent content ideas
+- Shows idea title and angle preview
+- Category emoji indicators for quick scanning
+- "View All Ideas" button to access complete ideas bank
+- Empty state with helpful CTA if no ideas exist
+- Hover effects for better interactivity
+
+#### Quick Stat Generator Improvements
+- Added copy-to-clipboard button for stats
+- Visual feedback on copy action (checkmark animation)
+- Better source link styling and accessibility
+- Improved button layout with icon grouping
+- Stat source toggles independently
+
+### Changed
+- Version bump to v5.6
+- Enhanced CSS styling for dashboard widgets with better transitions
+- Improved visual hierarchy for Recent Ideas widget
+- Added 2 new studies to Study Spotlight list
+- All buttons now have consistent hover states and transitions
+
+### Improved
+- Copy button visual feedback across widgets (Study Spotlight, Quick Stat, etc.)
+- Dashboard widget spacing and alignment
+- Accessibility of external links (PubMed, stat sources)
+- CSS animations for stat generation
+- Overall dashboard visual polish
+
 ## [5.5.0] — March 13, 2026
 
 ### Added

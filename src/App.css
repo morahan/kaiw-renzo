@@ -1776,6 +1776,276 @@ button:hover::after { opacity: 1; }
   color: var(--accent-blue);
 }
 
+.study-source-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+}
+
+.study-link {
+  color: var(--accent-blue);
+  text-decoration: none;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  transition: all var(--transition-fast);
+}
+
+.study-link:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent);
+}
+
+.study-copy {
+  padding: 0.2rem 0.4rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  transition: all var(--transition-fast);
+}
+
+.study-copy:hover {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+/* Recent Ideas Widget */
+.recent-ideas {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  transition: all var(--transition-fast);
+}
+
+.recent-ideas:hover {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.1);
+}
+
+.ideas-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ideas-icon {
+  font-size: 1rem;
+}
+
+.ideas-title {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  flex: 1;
+  font-weight: 600;
+}
+
+.ideas-count {
+  font-size: 0.65rem;
+  color: var(--accent-purple);
+  background: rgba(168, 85, 247, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+}
+
+.ideas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.idea-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg-hover);
+  border-radius: 6px;
+  transition: all var(--transition-fast);
+}
+
+.idea-item:hover {
+  background: var(--bg-elevated);
+  border-left: 2px solid var(--accent-purple);
+  padding-left: calc(0.5rem - 2px);
+}
+
+.idea-emoji {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.idea-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.idea-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.idea-angle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.3;
+  margin-top: 0.2rem;
+}
+
+.ideas-empty {
+  text-align: center;
+  padding: 1rem;
+  color: var(--text-muted);
+}
+
+.ideas-empty p {
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.ideas-action-btn {
+  padding: 0.4rem 0.8rem;
+  background: var(--accent-purple);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all var(--transition-fast);
+}
+
+.ideas-action-btn:hover {
+  background: #9333ea;
+  transform: translateY(-1px);
+}
+
+.ideas-view-all {
+  width: 100%;
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--accent-purple);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all var(--transition-fast);
+}
+
+.ideas-view-all:hover {
+  background: rgba(168, 85, 247, 0.05);
+  border-color: var(--accent-purple);
+}
+
+/* Quick Stat Generator Improvements */
+.quick-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  transition: all var(--transition-fast);
+}
+
+.quick-stat:hover {
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.1);
+}
+
+.quick-stat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.stat-icon {
+  font-size: 1rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  flex: 1;
+  font-weight: 600;
+}
+
+.stat-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.source-toggle,
+.stat-copy-btn {
+  padding: 0.2rem 0.4rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  transition: all var(--transition-fast);
+}
+
+.source-toggle:hover,
+.stat-copy-btn:hover {
+  color: var(--accent-orange);
+  border-color: var(--accent-orange);
+}
+
+.quick-stat-text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  margin: 0.5rem 0;
+  transition: opacity var(--transition-fast);
+}
+
+.quick-stat-text.animating {
+  opacity: 0.5;
+}
+
+.stat-source {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--accent-blue);
+  text-decoration: none;
+  margin: 0.5rem 0;
+  padding: 0.4rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 4px;
+  transition: all var(--transition-fast);
+}
+
+.stat-source:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.stat-generate-btn {
+  width: 100%;
+  padding: 0.6rem;
+  background: var(--accent-orange);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.stat-generate-btn:hover {
+  background: #ea580c;
+  transform: translateY(-1px);
+}
+
 /* Trending hashtags improvements */
 .trending-hashtags {
   background: var(--bg-card);
