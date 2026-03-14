@@ -1,3 +1,19 @@
+## [5.9.1] — March 14, 2026 (5:45 AM) [TINKER SESSION]
+
+### Added
+- **Enhanced Daily Goal Ring Widget** - Visual circular progress indicator in header
+  - Ring fills based on daily word goal progress  
+  - Color-coded: 🟠 <50%, 🔴 50-99%, 🟢 100%+ (complete)
+  - Shows percentage in center of ring
+  - Shows green checkmark when goal exceeded
+- Updated version badge to v5.9.1 in index.html
+
+### Improved
+- CSS polish for modal backdrops (better blur effect)
+- Added shortcut badge styling for consistent keyboard shortcut hints
+- Added card glow hover effects
+- Goal widget shows green "✓" when exceeded
+
 
 ## [5.9.0] — March 14, 2026 (4:45 AM)
 
