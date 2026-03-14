@@ -2347,6 +2347,16 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '6.9', date: '2026-03-14', changes: [
+      '🎉 New Release: v6.9',
+      'Added Floating Help Button — Quick access to shortcuts from anywhere (bottom-left)',
+      'Added Quick Shortcuts Tooltip — Shows common keyboard shortcuts on click',
+      'Enhanced version badge with animated gradient glow effect',
+      'New feature notification dot with pulse animation',
+      'Improved header visual polish with gradient borders',
+      'Better mobile responsiveness for floating elements',
+      'Updated version badge to v6.9'
+    ]},
     { version: '6.6', date: '2026-03-14', changes: [
       '🎉 New Release: v6.6',
       'Enhanced CSS animations — New slideInRight and scaleIn keyframes for smoother transitions',
@@ -9084,6 +9094,7 @@ function App() {
   const [showScratchpad, setShowScratchpad] = useState(false)
   const [showQuickWebResearch, setShowQuickWebResearch] = useState(false)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
+  const [showFloatingHelp, setShowFloatingHelp] = useState(false)
   
   // NEW v5.9 features - Quote Collection & Topic Analyzer
   const [showQuoteCollection, setShowQuoteCollection] = useState(false)
@@ -10079,7 +10090,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v6.8</span>
+          <span className="logo-badge">v6.9</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -11053,6 +11064,53 @@ function App() {
             {fabOpen ? '✕' : '+'}
           </button>
         </div>
+
+        {/* Floating Help Button (NEW v6.9) */}
+        <div 
+          className="floating-help-btn"
+          onClick={() => setShowFloatingHelp(!showFloatingHelp)}
+          title="Need help? Quick shortcuts"
+        />
+        
+        {/* Floating Help Tooltip */}
+        {showFloatingHelp && (
+          <div className="shortcuts-tooltip">
+            <button className="close-tooltip" onClick={() => setShowFloatingHelp(false)}>×</button>
+            <h4>⚡ Quick Shortcuts</h4>
+            <div className="shortcut-row">
+              <span>Quick Draft</span>
+              <span className="shortcut-key">D</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Focus Mode</span>
+              <span className="shortcut-key">M</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Word Sprint</span>
+              <span className="shortcut-key">S</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Headlines</span>
+              <span className="shortcut-key">H</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Ideas Bank</span>
+              <span className="shortcut-key">A</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Search</span>
+              <span className="shortcut-key">3</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Settings</span>
+              <span className="shortcut-key">,</span>
+            </div>
+            <div className="shortcut-row">
+              <span>All Shortcuts</span>
+              <span className="shortcut-key">?</span>
+            </div>
+          </div>
+        )}
 
         {/* Mini Command Bar (Ctrl+Space) */}
         <div className={`mini-command-bar ${miniBarVisible ? 'visible' : ''}`}>
