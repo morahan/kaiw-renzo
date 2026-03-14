@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.2.0] — March 13, 2026
+
+### Added
+
+#### CLI Command Runner (Key: \)
+- Run renzo CLI commands directly from the UI
+- 7 available commands:
+  - `brief` - Generate research brief for a topic
+  - `quickbrief` - Instant 5-second writing plan (no API)
+  - `status` - Show pipeline health dashboard
+  - `thread` - Convert article to X thread
+  - `check` - Run quality analysis on article
+  - `sync` - Sync Notion ↔ X metrics
+  - `tools` - List all available tools
+- Command history with quick re-run
+- Mock output for demonstration (would connect to real CLI in production)
+
+### Changed
+- Version bump to v5.2
+- Updated keyboard shortcut documentation
+
 ## [5.0.0] — March 13, 2026
 
 ### Added
