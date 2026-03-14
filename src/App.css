@@ -5252,3 +5252,242 @@ button:hover::after { opacity: 1; }
   left: 100%;
 }
 
+/* ========== MOBILE RESPONSIVENESS IMPROVEMENTS (v6.1) ========== */
+@media (max-width: 1200px) {
+  .header-right {
+    gap: 0.5rem;
+  }
+  
+  .tip-banner {
+    max-width: 200px;
+  }
+  
+  .quick-session-btn span:last-child {
+    display: none;
+  }
+}
+
+@media (max-width: 992px) {
+  .pinned-bar {
+    padding: 0.5rem 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .pinned-item {
+    flex-shrink: 0;
+  }
+  
+  .hero-status {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  .header-right {
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 100%;
+  }
+  
+  .logo-badge {
+    display: none;
+  }
+  
+  .tip-banner {
+    display: none;
+  }
+  
+  .score-widget,
+  .daily-goal-widget,
+  .daily-challenge-widget,
+  .streak-protection-widget,
+  .quick-session-btn,
+  .mood-indicator {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .streak-protection-widget .streak-need {
+    display: none;
+  }
+  
+  .quick-actions-dropdown {
+    display: none;
+  }
+  
+  .feature-buttons-row {
+    justify-content: center;
+    padding: 0.75rem;
+  }
+  
+  .feature-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  
+  .feature-hint {
+    display: none;
+  }
+  
+  .hero {
+    padding: 2rem 1rem;
+  }
+  
+  .hero-title {
+    font-size: 1.75rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  
+  .main {
+    padding-bottom: 5rem;
+  }
+  
+  .fab-container {
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .fab-main {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+  
+  .shortcuts-footer {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-right {
+    gap: 0.35rem;
+  }
+  
+  .score-widget .score-info,
+  .streak-protection-widget .streak-info {
+    display: none;
+  }
+  
+  .goal-ring-container {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .goal-ring-text {
+    font-size: 0.5rem;
+  }
+  
+  button.export-all-btn,
+  button.sound-toggle,
+  .cmd-hint {
+    padding: 0.35rem 0.5rem;
+  }
+  
+  .cmd-hint span:last-child {
+    display: none;
+  }
+  
+  .pinned-bar {
+    display: none;
+  }
+}
+
+/* ========== ENHANCED CARD STYLES (v6.1) ========== */
+.card {
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-purple), var(--accent-blue));
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+/* ========== IMPROVED FOCUS STATES (v6.1) ========== */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ========== BADGE VARIANTS (v6.1) ========== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-success {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--accent-green);
+}
+
+.badge-warning {
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--accent-orange);
+}
+
+.badge-error {
+  background: rgba(220, 38, 38, 0.15);
+  color: var(--accent);
+}
+
+.badge-info {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent-blue);
+}
+
+.badge-purple {
+  background: rgba(168, 85, 247, 0.15);
+  color: var(--accent-purple);
+}
+
+/* ========== SMOOTH SCROLL (v6.1) ========== */
+html {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+

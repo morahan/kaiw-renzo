@@ -1,3 +1,29 @@
+## [6.1.0] — March 14, 2026 (8:15 AM) [TINKER SESSION]
+
+### Added
+- **Mobile Responsiveness Improvements**
+  - Better breakpoints for tablet (992px), mobile (768px), and small mobile (480px)
+  - Hidden elements that don't fit on smaller screens
+  - Improved touch targets and spacing
+  - Collapsible pinned bar on mobile
+  - Hidden footer shortcuts on mobile for cleaner view
+
+- **Enhanced Card Styling**
+  - New gradient top border on hover for all cards
+  - Improved focus states for accessibility
+  - Better visual hierarchy
+
+- **UI Polish**
+  - Badge variants (success, warning, error, info, purple)
+  - Smooth scroll behavior
+  - Improved scrollbar styling
+  - Better toast positioning on mobile
+
+### Changed
+- Updated version badge to v6.1 in index.html
+
+---
+
 ## [5.11.0] — March 14, 2026 (7:15 AM) [TINKER SESSION]
 
 ### Added
