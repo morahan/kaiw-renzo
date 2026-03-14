@@ -943,6 +943,231 @@ function HeadlineGenerator({ isOpen, onClose }) {
   )
 }
 
+// ========== CONTENT REPURPOSER (NEW v5.1) ==========
+// Convert article content to different formats: thread, newsletter, email, blog post, etc.
+function ContentRepurposer({ isOpen, onClose }) {
+  const [articleContent, setArticleContent] = useState('')
+  const [title, setTitle] = useState('')
+  const [selectedFormat, setSelectedFormat] = useState('thread')
+  const [output, setOutput] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  const formats = {
+    thread: {
+      name: 'Twitter/X Thread',
+      emoji: '🧵',
+      desc: 'Convert to engaging tweet thread',
+      transform: (content, title) => {
+        const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10)
+        let thread = `1/ 🧵 ${title || 'Thread Title'}:\n\n`
+        thread += `${sentences[0]?.trim() || 'Hook goes here...'}.\n\n`
+        
+        let tweetNum = 2
+        for (let i = 1; i < Math.min(sentences.length, 8); i++) {
+          thread += `${tweetNum}/ ${sentences[i].trim()}.\n\n`
+          tweetNum++
+        }
+        
+        thread += `${tweetNum}/ 🎯 The bottom line:\n`
+        thread += `${sentences[sentences.length - 1]?.trim() || 'Key takeaway here'}.\n\n`
+        thread += `${tweetNum + 1}/ Save this 🧵 if useful.\nFollow for more →`
+        
+        return thread
+      }
+    },
+    newsletter: {
+      name: 'Newsletter',
+      emoji: '📧',
+      desc: 'Convert to email newsletter format',
+      transform: (content, title) => {
+        const paragraphs = content.split('\n\n').filter(p => p.trim())
+        let newsletter = `📬 WEEKLY DIGEST\n\n`
+        newsletter += `**${title || 'Your Article Title'}**\n\n`
+        newsletter += `━━━━━━━━━━━━━━━━━━━━\n\n`
+        
+        paragraphs.slice(0, 5).forEach((p, i) => {
+          newsletter += `${p.trim()}\n\n`
+        })
+        
+        newsletter += `━━━━━━━━━━━━━━━━━━━━\n\n`
+        newsletter += `📣 Until next time,\n— Renzo\n\n`
+        newsletter += `P.S. Share this with someone who'd find it useful!`
+        
+        return newsletter
+      }
+    },
+    linkedin: {
+      name: 'LinkedIn Post',
+      emoji: '💼',
+      desc: 'Convert to professional LinkedIn post',
+      transform: (content, title) => {
+        const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10)
+        let post = `🚀 ${title || 'Post Title'}\n\n`
+        post += `${sentences[0]?.trim() || 'Hook'}.\n\n`
+        post += `Here's what the research shows:\n\n`
+        
+        sentences.slice(1, 4).forEach((s, i) => {
+          post += `▸ ${s.trim()}\n`
+        })
+        
+        post += `\n👇 What's your experience? Drop a comment below.\n\n`
+        post += `#Fitness #Science #Health #Content`
+        
+        return post
+      }
+    },
+    short: {
+      name: 'Short Summary',
+      emoji: '📝',
+      desc: 'Generate 280-char summary',
+      transform: (content, title) => {
+        const firstPart = content.slice(0, 200)
+        return `🧵 ${title || 'Topic'}:\n\n${firstPart}... (link in bio)`
+      }
+    },
+    blog: {
+      name: 'Blog Post Outline',
+      emoji: '📄',
+      desc: 'Convert to blog post structure',
+      transform: (content, title) => {
+        const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10)
+        let blog = `# ${title || 'Blog Post Title'}\n\n`
+        blog += `## Introduction\n\n`
+        blog += `${sentences[0]?.trim() || 'Hook'}.\n\n`
+        
+        blog += `## The Problem\n\n`
+        blog += `${sentences[1]?.trim() || 'Explain the issue'}.\n\n`
+        
+        blog += `## The Science\n\n`
+        blog += `${sentences[2]?.trim() || 'Present the research'}.\n\n`
+        
+        blog += `## The Solution\n\n`
+        blog += `${sentences[3]?.trim() || 'Provide actionable advice'}.\n\n`
+        
+        blog += `## Key Takeaways\n\n`
+        blog += `• ${sentences[4]?.trim() || 'Point 1'}\n`
+        blog += `• ${sentences[5]?.trim() || 'Point 2'}\n`
+        blog += `• ${sentences[6]?.trim() || 'Point 3'}\n\n`
+        
+        blog += `## Call to Action\n\n`
+        blog += `${sentences[sentences.length - 1]?.trim() || 'Encourage reader action'}.`
+        
+        return blog
+      }
+    },
+    carrd: {
+      name: 'Carrd/One-Page',
+      emoji: '🃏',
+      desc: 'Convert to single-page site format',
+      transform: (content, title) => {
+        const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10)
+        let carrd = `🏷️ ${title || 'Page Title'}\n\n`
+        carrd += `━━━━━━━━━━━━━━━━━━━━\n\n`
+        carrd += `📍 HERO SECTION\n`
+        carrd += `${sentences[0]?.trim() || 'Compelling headline'}\n\n`
+        
+        carrd += `📍 ABOUT\n`
+        carrd += `${sentences[1]?.trim() || 'Brief intro'}\n\n`
+        
+        carrd += `📍 KEY POINTS\n`
+        sentences.slice(2, 5).forEach((s, i) => {
+          carrd += `${i + 1}. ${s.trim()}\n`
+        })
+        
+        carrd += `\n📍 CTA SECTION\n`
+        carrd += `${sentences[sentences.length - 1]?.trim() || 'Final call to action'}`
+        
+        return carrd
+      }
+    }
+  }
+
+  const handleTransform = () => {
+    if (!articleContent.trim()) return
+    const transformed = formats[selectedFormat].transform(articleContent, title)
+    setOutput(transformed)
+  }
+
+  const copyOutput = () => {
+    navigator.clipboard.writeText(output)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content repurposer-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>♻️ Content Repurposer</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="repurpose-input-section">
+          <label>Article Title (optional)</label>
+          <input
+            type="text"
+            placeholder="Enter article title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+
+        <div className="repurpose-content-section">
+          <label>Article Content</label>
+          <textarea
+            placeholder="Paste your article content here to repurpose..."
+            value={articleContent}
+            onChange={(e) => setArticleContent(e.target.value)}
+            rows={6}
+          />
+        </div>
+
+        <div className="repurpose-format-section">
+          <label>Output Format</label>
+          <div className="repurpose-formats">
+            {Object.entries(formats).map(([key, f]) => (
+              <button
+                key={key}
+                className={`repurpose-format-btn ${selectedFormat === key ? 'active' : ''}`}
+                onClick={() => setSelectedFormat(key)}
+              >
+                <span className="format-emoji">{f.emoji}</span>
+                <span className="format-name">{f.name}</span>
+                <span className="format-desc">{f.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button 
+          className="repurpose-transform-btn"
+          onClick={handleTransform}
+          disabled={!articleContent.trim()}
+        >
+          ♻️ Repurpose Content
+        </button>
+
+        {output && (
+          <div className="repurpose-output-section">
+            <label>Converted Content:</label>
+            <div className="repurpose-output">
+              <pre>{output}</pre>
+            </div>
+            <button 
+              className={`repurpose-copy-btn ${copied ? 'copied' : ''}`}
+              onClick={copyOutput}
+            >
+              {copied ? '✓ Copied!' : '📋 Copy to Clipboard'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ========== QUICK THREAD FORMAT GENERATOR ==========
 function QuickThreadFormat({ isOpen, onClose }) {
   const [topic, setTopic] = useState('')
@@ -6455,6 +6680,7 @@ function App() {
   })
   const [showFormula, setShowFormula] = useState(false)
   const [showThreadFormat, setShowThreadFormat] = useState(false)
+  const [showContentRepurposer, setShowContentRepurposer] = useState(false)
   const [showTopicGenerator, setShowTopicGenerator] = useState(false)
   const [showClipboard, setShowClipboard] = useState(false)
   const [showBrainstorm, setShowBrainstorm] = useState(false)
@@ -7000,6 +7226,7 @@ function App() {
       {showHotTake && <HotTakeGenerator onClose={() => setShowHotTake(false)} />}
       {showFormula && <ContentFormulaRef isOpen={showFormula} onClose={() => setShowFormula(false)} />}
       {showThreadFormat && <QuickThreadFormat isOpen={showThreadFormat} onClose={() => setShowThreadFormat(false)} />}
+      {showContentRepurposer && <ContentRepurposer isOpen={showContentRepurposer} onClose={() => setShowContentRepurposer(false)} />}
       {showQuickDraft && (
         <QuickDraftModal 
           onClose={() => setShowQuickDraft(false)} 
@@ -7411,6 +7638,11 @@ function App() {
             <span>🧵</span>
             <span>Thread</span>
             <span className="feature-hint">W</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowContentRepurposer(true)}>
+            <span>♻️</span>
+            <span>Repurpose</span>
+            <span className="feature-hint">R</span>
           </button>
           <button className="feature-btn" onClick={() => setShowTemplates(true)}>
             <span>📋</span>

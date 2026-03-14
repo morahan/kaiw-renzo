@@ -2101,3 +2101,172 @@ button:hover::after { opacity: 1; }
   font-size: 0.8rem;
   color: var(--text-secondary);
 }
+
+/* ========== CONTENT REPURPOSER (NEW v5.1) ========== */
+.repurpose-modal {
+  max-width: 600px;
+  width: 90%;
+}
+
+.repurpose-input-section,
+.repurpose-content-section,
+.repurpose-format-section {
+  padding: 1rem 1.25rem;
+}
+
+.repurpose-input-section label,
+.repurpose-content-section label,
+.repurpose-output-section label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.repurpose-input-section input,
+.repurpose-content-section textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.repurpose-input-section input:focus,
+.repurpose-content-section textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.repurpose-content-section textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.repurpose-formats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.repurpose-format-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.repurpose-format-btn:hover {
+  border-color: var(--accent-purple);
+  background: var(--bg-hover);
+}
+
+.repurpose-format-btn.active {
+  border-color: var(--accent);
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.format-emoji {
+  font-size: 1.25rem;
+}
+
+.format-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.format-desc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.repurpose-transform-btn {
+  width: calc(100% - 2.5rem);
+  margin: 0 1.25rem 1rem;
+  padding: 0.875rem;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent));
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.repurpose-transform-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+}
+
+.repurpose-transform-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.repurpose-output-section {
+  padding: 0 1.25rem 1.25rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.repurpose-output {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.repurpose-output pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.repurpose-copy-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.repurpose-copy-btn:hover {
+  border-color: var(--accent-green);
+}
+
+.repurpose-copy-btn.copied {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: white;
+}
+
+/* Responsive for repurposer */
+@media (max-width: 600px) {
+  .repurpose-formats {
+    grid-template-columns: 1fr;
+  }
+}
