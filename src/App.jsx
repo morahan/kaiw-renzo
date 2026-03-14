@@ -8700,6 +8700,160 @@ function QuickShare({ isOpen, onClose }) {
   )
 }
 
+// ========== WRITING PROMPTS GENERATOR (NEW v5.11) ==========
+function WritingPromptsModal({ isOpen, onClose, onSelectPrompt }) {
+  const [category, setCategory] = useState('all')
+  const [currentPrompt, setCurrentPrompt] = useState(null)
+  const [promptHistory, setPromptHistory] = useState([])
+  
+  const promptCategories = {
+    'Myth-Bust': [
+      'The truth about [common belief] — science says otherwise',
+      'Why [popular practice] doesn\'t work as well as you think',
+      'Everyone thinks [X], but research shows [Y]',
+      'The [fitness myth] that won\'t die: debunked',
+      'What if everything you knew about [topic] was wrong?',
+      'The supplement that actually works vs. the one you\'re wasting money on',
+      'Why "eat less, move more" is terrible advice',
+      'The training method pros use that amateurs ignore',
+    ],
+    'How-To': [
+      'How to [desired outcome] in [timeframe] — backed by research',
+      'The step-by-step guide to [popular fitness goal]',
+      'What elite athletes do differently for [skill]',
+      'How to fix [common problem] without leaving home',
+      'The science of [process] explained in simple terms',
+      'A beginner\'s guide to [training method]',
+      'How to optimize [specific aspect] for maximum results',
+    ],
+    'Comparison': [
+      '[Method A] vs [Method B]: Which one actually works?',
+      'The surprising winner in [controversial debate]',
+      'What happened when I tried [approach] for 30 days',
+      '[Supplement A] vs [Supplement B]: The data speaks',
+      'Traditional vs. modern: which [training style] wins?',
+      'The real difference between [similar concepts]',
+    ],
+    'Listicle': [
+      '[Number] things you\'re doing wrong at the gym',
+      'The [Number] most underrated exercises',
+      '[Number] myths that are holding back your progress',
+      'Signs you need to change your [aspect] ASAP',
+      'The [Number] best [category] for [goal]',
+      '[Number] mistakes that are sabotaging your gains',
+    ],
+    'Hot-Take': [
+      'The fitness industry doesn\'t want you to know this',
+      'Why [popular trend] is actually harmful',
+      'The uncomfortable truth about [common practice]',
+      'Stop doing [X] — here\'s what actually works',
+      'Why your gym routine is a waste of time',
+      'The one thing more important than your workout',
+      'What trainers won\'t tell you about [topic]',
+    ],
+    'Science': [
+      'New study reveals [surprising finding] about [topic]',
+      'The mechanism behind [popular effect] explained',
+      'What [number] years of research tells us about [topic]',
+      'The gene expression reason [X] works',
+      'Why [compound] is the most underrated nutrient',
+      'The circadian rhythm factor in [process]',
+    ],
+    'Longevity': [
+      'The biomarkers that predict healthy aging',
+      'How to add [number] years to your life expectancy',
+      'The exercise type that reverses biological age',
+      'What centenarians have in common',
+      'The muscle preservation strategy for lifelong strength',
+      'How your mitochondria affect your healthspan',
+    ],
+  }
+  
+  const allPrompts = Object.values(promptCategories).flat()
+  
+  const generatePrompt = (cat = category) => {
+    let pool = cat === 'all' ? allPrompts : promptCategories[cat] || allPrompts
+    const prompt = pool[Math.floor(Math.random() * pool.length)]
+    setCurrentPrompt(prompt)
+    setPromptHistory(prev => [prompt, ...prev.slice(0, 9)])
+  }
+  
+  const copyPrompt = (text) => {
+    navigator.clipboard.writeText(text)
+  }
+  
+  const usePrompt = (prompt) => {
+    if (onSelectPrompt) {
+      onSelectPrompt(prompt)
+    }
+    onClose()
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content prompts-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>💡 Writing Prompts</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="prompts-categories">
+          <button 
+            className={`prompt-cat-btn ${category === 'all' ? 'active' : ''}`}
+            onClick={() => { setCategory('all'); generatePrompt('all'); }}
+          >
+            All
+          </button>
+          {Object.keys(promptCategories).map(cat => (
+            <button 
+              key={cat}
+              className={`prompt-cat-btn ${category === cat ? 'active' : ''}`}
+              onClick={() => { setCategory(cat); generatePrompt(cat); }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+        
+        <div className="prompts-display">
+          {currentPrompt ? (
+            <div className="prompt-card">
+              <p className="prompt-text">{currentPrompt}</p>
+              <div className="prompt-actions">
+                <button onClick={() => generatePrompt()}>🔄 New Prompt</button>
+                <button onClick={() => copyPrompt(currentPrompt)}>📋 Copy</button>
+                <button className="prompt-use" onClick={() => usePrompt(currentPrompt)}>✍️ Use This</button>
+              </div>
+            </div>
+          ) : (
+            <div className="prompt-placeholder">
+              <p>Click a category or "New Prompt" to get started!</p>
+              <button className="prompt-generate-btn" onClick={() => generatePrompt()}>
+                🎲 Generate Random Prompt
+              </button>
+            </div>
+          )}
+        </div>
+        
+        {promptHistory.length > 0 && (
+          <div className="prompt-history">
+            <h4>Recent Prompts</h4>
+            <div className="history-list">
+              {promptHistory.slice(0, 5).map((p, i) => (
+                <button key={i} className="history-item" onClick={() => setCurrentPrompt(p)}>
+                  {p.slice(0, 60)}...
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
@@ -8841,6 +8995,9 @@ function App() {
   const [showFormatPreview, setShowFormatPreview] = useState(false)
   const [showPomodoro, setShowPomodoro] = useState(false)
   const [showQuickShare, setShowQuickShare] = useState(false)
+  
+  // NEW v5.11 features - Writing Prompts
+  const [showWritingPrompts, setShowWritingPrompts] = useState(false)
   
   const [appSettings, setAppSettings] = useState(() => {
     const saved = localStorage.getItem('renzo-app-settings')
@@ -9175,6 +9332,7 @@ function App() {
       
       // NEW v5.10 shortcuts
       if (key === '{') setShowOutlineGenerator(true)  // Shift+[ for Outline Generator (📋)
+      if (key === '}') setShowWritingPrompts(true)  // Shift+] for Writing Prompts (💡)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -9585,6 +9743,10 @@ function App() {
       <QuickShare
         isOpen={showQuickShare}
         onClose={() => setShowQuickShare(false)}
+      />
+      <WritingPromptsModal
+        isOpen={showWritingPrompts}
+        onClose={() => setShowWritingPrompts(false)}
       />
       <PublishingPrepWorkflow
         isOpen={showPublishingPrep}
@@ -10595,6 +10757,11 @@ function App() {
               <span>Outline</span>
               <kbd>[</kbd>
             </button>
+            <button className="fab-action" onClick={() => { setShowWritingPrompts(true); setFabOpen(false) }}>
+              <span>💡</span>
+              <span>Prompts</span>
+              <kbd>Shift+]</kbd>
+            </button>
           </div>
           <button 
             className={`fab-main ${fabOpen ? 'active' : ''}`}
@@ -10642,7 +10809,7 @@ function App() {
       <KeyboardShortcutsFooter onShowShortcuts={() => setShowShortcuts(true)} />
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v5.10 • Press ⌘K for commands, ? for all shortcuts • ⏲️ Pomodoro & 📋 Outline Generator</p>
+        <p className="footer-version">v5.11 • Press ⌘K for commands, ? for all shortcuts • 💡 Prompts & 📋 Outline</p>
       </footer>
     </div>
   )

@@ -2519,6 +2519,132 @@ button:hover::after { opacity: 1; }
   background: var(--bg-hover);
 }
 
+/* ========== WRITING PROMPTS MODAL (NEW v5.11) ========== */
+.prompts-modal {
+  max-width: 600px;
+  width: 90%;
+}
+
+.prompts-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.prompt-cat-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.prompt-cat-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.prompt-cat-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.prompts-display {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prompt-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  width: 100%;
+  text-align: center;
+}
+
+.prompt-text {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+.prompt-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.prompt-actions button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.prompt-use {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.prompt-use:hover {
+  background: var(--accent-hover) !important;
+}
+
+.prompt-placeholder {
+  text-align: center;
+  padding: 2rem;
+}
+
+.prompt-placeholder p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.prompt-generate-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent-purple)) !important;
+  border: none !important;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.prompt-generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.prompt-history {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.prompt-history h4 {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.history-list .history-item {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+}
+
 .history-prompt {
   font-size: 0.8rem;
   color: var(--text-secondary);
