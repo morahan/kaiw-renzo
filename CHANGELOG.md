@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.5.0] — March 13, 2026
+
+### Added
+
+#### Content Overview Widget (NEW)
+- At-a-glance stats showing total articles, drafts, published, and this week's count
+- Shows in the new-features-row for quick reference
+- Real-time updates as drafts are created/updated
+
+#### Enhanced Keyboard Shortcuts Modal
+- Added all missing keyboard shortcuts from v5.3 and v5.4
+- Added Cmd/Ctrl+K for command palette
+- Added number keys (0-9) for quick access
+- Added special characters: `(`, `)`, `+`, `-`, `=`, `\`, `` ` ``
+
+#### Enhanced Category Colors
+- Added colors for additional categories: Longevity, Training, Recovery, Metrics, Nutrition
+- Improved visual differentiation for content ideas
+
+### Changed
+- Version bump to v5.5
+- Updated version badge in header and footer
+- Updated index.html title to v5.5
+- Updated package.json to 5.5.0
+
 ## [5.4.0] — March 13, 2026
 
 ### Added

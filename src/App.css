@@ -3694,3 +3694,80 @@ button:hover::after { opacity: 1; }
     min-height: 44px;
   }
 }
+
+/* ========== CONTENT OVERVIEW WIDGET (NEW v5.5) ========== */
+.content-overview {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  animation: fadeInUp 0.4s ease;
+}
+
+.overview-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.overview-icon {
+  font-size: 1.1rem;
+}
+
+.overview-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.overview-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.overview-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.overview-stat .stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.overview-stat .stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.overview-stat.draft .stat-value {
+  color: var(--accent-orange);
+}
+
+.overview-stat.published .stat-value {
+  color: var(--accent-green);
+}
+
+.overview-stat.week .stat-value {
+  color: var(--accent-purple);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

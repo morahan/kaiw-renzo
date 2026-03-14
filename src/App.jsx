@@ -4714,7 +4714,8 @@ function ContentFormulaRef({ isOpen, onClose }) {
 // Keyboard Shortcuts Reference
 function KeyboardShortcuts({ isOpen, onClose }) {
   const shortcuts = [
-    { key: 'N', action: 'New Article' },
+    { key: '⌘K', action: 'Command Palette' },
+    { key: 'N', action: 'Quick Flow' },
     { key: 'D', action: 'Quick Draft' },
     { key: 'T', action: 'Article Templates' },
     { key: 'K', action: 'CTA Templates' },
@@ -4736,13 +4737,27 @@ function KeyboardShortcuts({ isOpen, onClose }) {
     { key: 'U', action: 'Saved Hooks' },
     { key: 'S', action: 'Word Sprint' },
     { key: 'Z', action: 'Article Series' },
-    { key: 'P', action: 'Pipeline Tracker' },
-    { key: 'X', action: 'Thread Generator' },
-    { key: 'A', action: 'Quick Tweet' },
+    { key: 'X', action: 'Thread Format' },
+    { key: 'A', action: 'Ideas Bank' },
     { key: 'E', action: 'Export Drafts' },
     { key: 'L', action: 'Changelog' },
-    { key: '/', action: 'Search Articles' },
-    { key: ']', action: 'Quick Export All' },
+    { key: '3', action: 'Global Search' },
+    { key: ',', action: 'Settings' },
+    { key: '!', action: 'Performance Analytics' },
+    { key: '@', action: 'Writing Goals' },
+    { key: '*', action: 'Draft Analyzer' },
+    { key: '(', action: 'Format Preview' },
+    { key: ')', action: 'Pomodoro Timer' },
+    { key: '+', action: 'Quick Share' },
+    { key: '6', action: 'Publishing Prep' },
+    { key: '7', action: 'Performance Tracker' },
+    { key: '8', action: 'Draft Collections' },
+    { key: '9', action: 'Inspiration Board' },
+    { key: '0', action: 'Reading List' },
+    { key: '`', action: 'AI Prompt' },
+    { key: '-', action: 'Tone Adjuster' },
+    { key: '=', action: 'SEO Checklist' },
+    { key: '\\', action: 'CLI Runner' },
     { key: 'Esc', action: 'Close Modal' },
   ]
   
@@ -5521,6 +5536,63 @@ function WeeklyGoals() {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+// Content Overview Widget (NEW v5.5) - At-a-glance content stats
+function ContentOverview({ drafts }) {
+  const [stats, setStats] = useState({
+    total: 0,
+    drafts: 0,
+    published: 0,
+    thisWeek: 0
+  })
+
+  useEffect(() => {
+    if (drafts && drafts.length > 0) {
+      const now = new Date()
+      const weekAgo = new Date(now)
+      weekAgo.setDate(weekAgo.getDate() - 7)
+
+      const thisWeekCount = drafts.filter(d => {
+        const draftDate = new Date(d.date)
+        return draftDate >= weekAgo && draftDate <= now
+      }).length
+
+      setStats({
+        total: drafts.length,
+        drafts: drafts.filter(d => d.status !== 'published').length,
+        published: drafts.filter(d => d.status === 'published').length,
+        thisWeek: thisWeekCount
+      })
+    }
+  }, [drafts])
+
+  return (
+    <div className="content-overview">
+      <div className="overview-header">
+        <span className="overview-icon">📊</span>
+        <span className="overview-title">Content Overview</span>
+      </div>
+      <div className="overview-stats">
+        <div className="overview-stat">
+          <span className="stat-value">{stats.total}</span>
+          <span className="stat-label">Total</span>
+        </div>
+        <div className="overview-stat draft">
+          <span className="stat-value">{stats.drafts}</span>
+          <span className="stat-label">Drafts</span>
+        </div>
+        <div className="overview-stat published">
+          <span className="stat-value">{stats.published}</span>
+          <span className="stat-label">Published</span>
+        </div>
+        <div className="overview-stat week">
+          <span className="stat-value">+{stats.thisWeek}</span>
+          <span className="stat-label">This Week</span>
+        </div>
+      </div>
     </div>
   )
 }
@@ -8187,7 +8259,18 @@ function App() {
   }
 
   const getIdeaCategoryColor = (cat) => {
-    const colors = { 'Trending': '#f97316', 'Myth-bust': '#dc2626', 'How-to': '#22c55e', 'Science': '#3b82f6', 'Listicle': '#a855f7' }
+    const colors = { 
+      'Trending': '#f97316', 
+      'Myth-bust': '#dc2626', 
+      'How-to': '#22c55e', 
+      'Science': '#3b82f6', 
+      'Listicle': '#a855f7',
+      'Longevity': '#06b6d4',
+      'Training': '#f97316',
+      'Recovery': '#8b5cf6',
+      'Metrics': '#ec4899',
+      'Nutrition': '#84cc16'
+    }
     return colors[cat] || '#a1a1aa'
   }
 
@@ -8820,7 +8903,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v5.4</span>
+          <span className="logo-badge">v5.5</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -8955,6 +9038,7 @@ function App() {
         {/* New Feature Cards Row */}
         <section className="new-features-row">
           <DailyQuote />
+          <ContentOverview drafts={drafts} />
           <DailyChallenge onComplete={() => addToast('🎉 Daily challenge completed!', 'success')} />
           <StudySpotlight />
           <QuickStatGenerator />
@@ -9647,7 +9731,7 @@ function App() {
       <KeyboardShortcutsFooter onShowShortcuts={() => setShowShortcuts(true)} />
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v5.4 • Press ⌘K for commands, ? for all shortcuts</p>
+        <p className="footer-version">v5.5 • Press ⌘K for commands, ? for all shortcuts</p>
       </footer>
     </div>
   )
