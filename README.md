@@ -5,6 +5,7 @@ A comprehensive web-based writing and content management interface for fitness a
 ## Features
 
 ### Writing Tools
+- **Session Timer** — Click in header to start/stop writing session tracking (NEW v5.5.1)
 - **Quick Capture** (Q) — Quick idea capture with categories
 - **Focus Mode** (M) — Full-screen distraction-free writing environment
 - **Word Sprint** (S) — Pomodoro-style timed writing sessions (15 min default)
