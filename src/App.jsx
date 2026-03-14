@@ -9531,16 +9531,28 @@ function App() {
             </div>
           </div>
           
-          {/* Daily Word Goal Progress */}
-          <div className="daily-goal-widget" title="Daily word goal">
-            <span className="goal-icon">🎯</span>
-            <div className="goal-progress">
-              <div 
-                className="goal-fill" 
-                style={{ width: `${Math.min((wordsWritten / dailyWordGoal) * 100, 100)}%` }}
-              />
+          {/* Daily Word Goal Progress - Ring Version */}
+          <div className="daily-goal-widget ring-mode" title="Daily word goal - click to edit">
+            <div className="goal-ring-container">
+              <svg className="goal-ring-svg" viewBox="0 0 36 36">
+                <circle className="goal-ring-bg" cx="18" cy="18" r="15.5" />
+                <circle 
+                  className={`goal-ring-fill ${wordsWritten >= dailyWordGoal ? 'complete' : (wordsWritten / dailyWordGoal) > 0.5 ? 'under-50' : 'under-100'}`}
+                  cx="18" cy="18" r="15.5"
+                  strokeDasharray={`${Math.min((wordsWritten / dailyWordGoal) * 100, 100)} 100`}
+                  strokeDashoffset="25"
+                />
+              </svg>
+              <div className="goal-ring-text">
+                {wordsWritten >= dailyWordGoal ? '✓' : `${Math.round((wordsWritten / dailyWordGoal) * 100)}%`}
+              </div>
             </div>
-            <span className="goal-count">{wordsWritten}/{dailyWordGoal}</span>
+            <span className="goal-count">
+              {wordsWritten >= dailyWordGoal 
+                ? <span className="goal-exceeded">{wordsWritten} ✓</span>
+                : <span>{wordsWritten}/{dailyWordGoal}</span>
+              }
+            </span>
           </div>
           
           {/* Daily Challenge Widget */}

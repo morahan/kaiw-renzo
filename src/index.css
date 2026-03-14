@@ -357,6 +357,52 @@ input, textarea, select {
   transition: all var(--transition-fast);
 }
 
+/* Enhanced daily goal with ring visualization */
+.daily-goal-widget.ring-mode {
+  padding: 0.35rem 0.5rem;
+  gap: 0.6rem;
+}
+
+.goal-ring-container {
+  position: relative;
+  width: 36px;
+  height: 36px;
+}
+
+.goal-ring-svg {
+  transform: rotate(-90deg);
+  width: 36px;
+  height: 36px;
+}
+
+.goal-ring-bg {
+  fill: none;
+  stroke: var(--bg-hover);
+  stroke-width: 3;
+}
+
+.goal-ring-fill {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.goal-ring-fill.under-50 { stroke: var(--accent-orange); }
+.goal-ring-fill.under-100 { stroke: var(--accent); }
+.goal-ring-fill.complete { stroke: var(--accent-green); }
+
+.goal-ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
 .daily-goal-widget:hover {
   border-color: var(--accent);
   background: var(--bg-card);
@@ -387,6 +433,11 @@ input, textarea, select {
   font-size: 0.75rem;
   min-width: 40px;
   text-align: right;
+}
+
+.daily-goal-widget .goal-count .goal-exceeded {
+  color: var(--accent-green);
+  font-weight: 700;
 }
 
 .theme-toggle {
@@ -2617,7 +2668,156 @@ textarea:focus {
   }
 }
 
-/* ========== INSIGHTS MODAL STYLING ========== */
+/* ========== DAILY PROGRESS RING WIDGET (v5.9.1) ========== */
+.daily-progress-ring {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.daily-progress-ring:hover {
+  border-color: var(--accent);
+  background: var(--bg-card);
+  transform: translateY(-1px);
+}
+
+.progress-ring-container {
+  position: relative;
+  width: 44px;
+  height: 44px;
+}
+
+.progress-ring-svg {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-bg {
+  fill: none;
+  stroke: var(--bg-hover);
+  stroke-width: 4;
+}
+
+.progress-ring-fill {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.progress-ring-fill.under {
+  stroke: var(--accent-orange);
+}
+
+.progress-ring-fill.over {
+  stroke: var(--accent-green);
+}
+
+.progress-ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.progress-ring-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.progress-ring-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.progress-ring-stats {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+.progress-ring-stats .goal {
+  font-weight: 600;
+}
+
+.progress-ring-stats .remaining {
+  color: var(--accent-orange);
+}
+
+.progress-ring-stats .exceeded {
+  color: var(--accent-green);
+}
+
+/* ========== ENHANCED CARD GLOW (v5.9.1) ========== */
+.card-glow {
+  position: relative;
+}
+
+.card-glow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, transparent 40%, rgba(220, 38, 38, 0.3) 100%);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.card-glow:hover::after {
+  opacity: 1;
+}
+
+/* ========== BETTER MODAL BACKDROP (v5.9.1) ========== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-overlay:hover {
+  cursor: pointer;
+}
+
+/* ========== KEYBOARD SHORTCUT BADGES (v5.9.1) ========== */
+.shortcut-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.shortcut-badge.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
 .insights-modal {
   max-width: 600px;
 }
