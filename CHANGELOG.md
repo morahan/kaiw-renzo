@@ -30,6 +30,20 @@
 
 ---
 
+## [5.9.1] — March 14, 2026 (5:15 AM) [TINKER SESSION]
+
+### Added
+- **Daily Writing Score Widget** - Real-time productivity score (0-100) in header
+  - Calculates based on: word goal progress (60%), ideas bonus (10%), hooks bonus (10%), streak bonus (max 20%)
+  - Color-coded: 🔥 80+ (green), 💪 50-79 (orange), 🌱 <50 (red)
+- Updated version badge to v5.9
+
+### Improved
+- Added CSS for new score widget with hover effects
+- Mobile responsive styling
+
+---
+
 ## [5.8.0] — March 14, 2026 (4:15 AM)
 
 ### Added

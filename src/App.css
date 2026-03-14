@@ -4336,3 +4336,65 @@ button:hover::after { opacity: 1; }
   color: var(--text-muted);
   text-transform: uppercase;
 }
+
+/* ========== DAILY WRITING SCORE WIDGET (NEW v5.9.1) ========== */
+.score-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.score-widget:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.score-emoji {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.score-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.score-value {
+  font-size: 1rem;
+  font-weight: 700;
+  transition: color 0.3s ease;
+}
+
+.score-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Mobile responsive for score widget */
+@media (max-width: 768px) {
+  .score-widget {
+    padding: 0.3rem 0.5rem;
+  }
+  
+  .score-emoji {
+    font-size: 1rem;
+  }
+  
+  .score-value {
+    font-size: 0.85rem;
+  }
+  
+  .score-label {
+    font-size: 0.6rem;
+  }
+}

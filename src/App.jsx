@@ -9110,6 +9110,29 @@ function App() {
     return hours[maxIdx]
   }, [])
 
+  // Calculate daily writing score (0-100)
+  const dailyScore = useMemo(() => {
+    const goalProgress = Math.min((todayWordCount / dailyWordGoal) * 100, 100)
+    const ideasBonus = contentIdeas.length > 0 ? 10 : 0
+    const hooksBonus = hooks.length > 0 ? 10 : 0
+    const streakBonus = Math.min(writingStreak * 5, 20)
+    
+    const score = Math.min(Math.round(goalProgress * 0.6 + ideasBonus + hooksBonus + streakBonus), 100)
+    return score
+  }, [todayWordCount, dailyWordGoal, contentIdeas.length, hooks.length, writingStreak])
+
+  const getScoreColor = (score) => {
+    if (score >= 80) return '#22c55e' // green
+    if (score >= 50) return '#f97316' // orange
+    return '#ef4444' // red
+  }
+
+  const getScoreEmoji = (score) => {
+    if (score >= 80) return '🔥'
+    if (score >= 50) return '💪'
+    return '🌱'
+  }
+
   const hour = currentTime.getHours()
   const getGreeting = () => {
     if (hour < 12) return "Good morning"
@@ -9496,9 +9519,18 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v5.8</span>
+          <span className="logo-badge">v5.9</span>
         </div>
         <div className="header-right">
+          {/* Daily Writing Score Widget */}
+          <div className="score-widget" title="Today's Productivity Score">
+            <span className="score-emoji">{getScoreEmoji(dailyScore)}</span>
+            <div className="score-info">
+              <span className="score-value" style={{ color: getScoreColor(dailyScore) }}>{dailyScore}</span>
+              <span className="score-label">Score</span>
+            </div>
+          </div>
+          
           {/* Daily Word Goal Progress */}
           <div className="daily-goal-widget" title="Daily word goal">
             <span className="goal-icon">🎯</span>
