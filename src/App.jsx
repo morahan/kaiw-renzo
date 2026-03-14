@@ -7335,6 +7335,425 @@ function WritingGoalsWidget({ isOpen, onClose }) {
   )
 }
 
+// ========== SMART DRAFT ANALYZER (NEW v5.4) ==========
+function DraftAnalyzer({ isOpen, onClose, drafts }) {
+  const [selectedDraft, setSelectedDraft] = useState(null)
+  const [analysis, setAnalysis] = useState(null)
+  const [analyzing, setAnalyzing] = useState(false)
+
+  const analyzeDraft = (draft) => {
+    setAnalyzing(true)
+    setSelectedDraft(draft)
+
+    setTimeout(() => {
+      const content = draft.content || ''
+      const words = content.split(/\s+/).filter(w => w).length
+      const sentences = content.split(/[.!?]+/).filter(s => s.trim())
+      
+      const avgSentenceLength = words / Math.max(sentences.length, 1)
+      const uniqueWords = new Set(content.toLowerCase().split(/\s+/)).size
+      const wordVariety = (uniqueWords / words) * 100
+      const readabilityScore = Math.max(0, Math.min(100, 206.835 - 1.015 * avgSentenceLength - 84.6 * (content.split(/[aeiou]/i).length / words)))
+      
+      const positiveWords = ['great', 'amazing', 'excellent', 'good', 'best', 'love', 'awesome', 'perfect', 'better', 'improve']
+      const negativeWords = ['bad', 'worst', 'terrible', 'hate', 'fail', 'poor', 'wrong', 'mistake', 'problem']
+      const positive = positiveWords.filter(w => content.toLowerCase().includes(w)).length
+      const negative = negativeWords.filter(w => content.toLowerCase().includes(w)).length
+      const sentiment = positive + negative > 0 ? ((positive - negative) / (positive + negative) * 50 + 50) : 50
+
+      const hasHook = /^(what|why|how|if|the|this|these)/i.test(content.trim())
+      const hasCta = /(try|start|begin|share|save|follow|comment)/i.test(content.toLowerCase())
+      const hasSources = /(study|research|journal|pubmed|examine)/i.test(content.toLowerCase())
+      const structureScore = (hasHook ? 25 : 0) + (hasCta ? 25 : 0) + (hasSources ? 25 : 0) + (content.split('\n\n').length >= 3 ? 25 : 0)
+
+      const powerWords = ['shocking', 'surprising', 'secret', 'truth', 'myth', 'proven', 'backed', 'ultimate', 'essential']
+      const powerWordCount = powerWords.filter(w => content.toLowerCase().includes(w)).length
+
+      setAnalysis({
+        words, sentences: sentences.length, avgSentenceLength: Math.round(avgSentenceLength),
+        wordVariety: Math.round(wordVariety), readability: Math.round(readabilityScore),
+        sentiment: Math.round(sentiment), structureScore, powerWordCount, hasHook, hasCta, hasSources,
+        recommendations: [
+          ...(readabilityScore < 60 ? ['Simplify sentences for better readability'] : []),
+          ...(wordVariety < 40 ? ['Add more varied vocabulary'] : []),
+          ...(!hasHook ? ['Add a strong opening hook'] : []),
+          ...(!hasCta ? ['Include a clear call-to-action'] : []),
+          ...(!hasSources ? ['Add credible source citations'] : []),
+          ...(powerWordCount < 2 ? ['Use more power words for impact'] : []),
+        ]
+      })
+      setAnalyzing(false)
+    }, 1000)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content analyzer-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🧠 Smart Draft Analyzer</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="analyzer-drafts-list">
+          <label>Select a draft to analyze:</label>
+          <div className="analyzer-drafts">
+            {drafts.length === 0 ? (
+              <div className="analyzer-empty">No drafts available</div>
+            ) : (
+              drafts.slice(0, 10).map((draft, i) => (
+                <button
+                  key={i}
+                  className={`analyzer-draft-btn ${selectedDraft?.id === draft.id ? 'active' : ''}`}
+                  onClick={() => analyzeDraft(draft)}
+                >
+                  <span className="draft-title">{draft.title}</span>
+                  <span className="draft-meta">{draft.words || 0} words</span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
+        {analyzing && (
+          <div className="analyzer-loading">
+            <div className="analyzer-spinner"></div>
+            <span>Analyzing draft...</span>
+          </div>
+        )}
+
+        {analysis && !analyzing && (
+          <div className="analyzer-results">
+            <div className="analyzer-metrics">
+              <div className="analyzer-metric">
+                <span className="metric-label">Words</span>
+                <span className="metric-value">{analysis.words}</span>
+              </div>
+              <div className="analyzer-metric">
+                <span className="metric-label">Readability</span>
+                <span className="metric-value" style={{ color: analysis.readability >= 60 ? 'var(--accent-green)' : 'var(--accent-orange)' }}>
+                  {analysis.readability}/100
+                </span>
+              </div>
+              <div className="analyzer-metric">
+                <span className="metric-label">Word Variety</span>
+                <span className="metric-value">{analysis.wordVariety}%</span>
+              </div>
+              <div className="analyzer-metric">
+                <span className="metric-label">Sentiment</span>
+                <span className="metric-value">{analysis.sentiment > 55 ? '😊' : analysis.sentiment < 45 ? '😟' : '😐'}</span>
+              </div>
+            </div>
+
+            <div className="analyzer-checks">
+              <div className={`analyzer-check ${analysis.hasHook ? 'pass' : 'fail'}`}>
+                {analysis.hasHook ? '✓' : '✗'} Hook
+              </div>
+              <div className={`analyzer-check ${analysis.hasCta ? 'pass' : 'fail'}`}>
+                {analysis.hasCta ? '✓' : '✗'} CTA
+              </div>
+              <div className={`analyzer-check ${analysis.hasSources ? 'pass' : 'fail'}`}>
+                {analysis.hasSources ? '✓' : '✗'} Sources
+              </div>
+              <div className="analyzer-check">⚡ {analysis.powerWordCount}</div>
+            </div>
+
+            {analysis.recommendations.length > 0 && (
+              <div className="analyzer-recommendations">
+                <h4>Recommendations</h4>
+                <ul>
+                  {analysis.recommendations.map((rec, i) => (
+                    <li key={i}>{rec}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ========== CONTENT FORMAT PREVIEW (NEW v5.4) ==========
+function ContentFormatPreview({ isOpen, onClose }) {
+  const [content, setContent] = useState('')
+  const [title, setTitle] = useState('')
+  const [format, setFormat] = useState('notion')
+  const [copied, setCopied] = useState(false)
+
+  const formats = {
+    notion: {
+      name: 'Notion',
+      emoji: '📝',
+      preview: (t, c) => `📝 ${t || 'Untitled'}\n\n${c.split('\n\n').slice(0, 3).map(l => `— ${l}`).join('\n\n')}`
+    },
+    twitter: {
+      name: 'Twitter/X',
+      emoji: '🐦',
+      preview: (t, c) => `🧵 THREAD: ${t}\n\n1/ ${c.split(/[.!?]/)[0]}...\n\n2/ Continuing...\n\n🛡️ Save this`
+    },
+    linkedin: {
+      name: 'LinkedIn',
+      emoji: '💼',
+      preview: (t, c) => `🚀 ${t}\n\n${c.slice(0, 200)}...\n\n👇 Let's discuss`
+    },
+    newsletter: {
+      name: 'Newsletter',
+      emoji: '📧',
+      preview: (t, c) => `📬 DIGEST\n\n**${t}**\n\n${c.slice(0, 300)}...\n\n— Renzo`
+    },
+    blog: {
+      name: 'Blog Post',
+      emoji: '🌐',
+      preview: (t, c) => {
+        const sections = c.split('\n\n').filter(p => p.trim())
+        return `🏷️ ${t}\n\n📍 INTRO\n${sections[0] || ''}\n\n📍 CONCLUSION\n${sections[sections.length - 1] || ''}`
+      }
+    }
+  }
+
+  const preview = formats[format].preview(title, content)
+
+  const copyPreview = () => {
+    navigator.clipboard.writeText(preview)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content preview-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>👁️ Format Preview</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="preview-inputs">
+          <input
+            type="text"
+            placeholder="Article title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <textarea
+            placeholder="Paste content to preview..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={4}
+          />
+        </div>
+
+        <div className="preview-formats">
+          {Object.entries(formats).map(([key, f]) => (
+            <button
+              key={key}
+              className={`preview-format-btn ${format === key ? 'active' : ''}`}
+              onClick={() => setFormat(key)}
+            >
+              <span>{f.emoji}</span>
+              <span>{f.name}</span>
+            </button>
+          ))}
+        </div>
+
+        {content && (
+          <div className="preview-output">
+            <div className="preview-label">{formats[format].name} Preview:</div>
+            <pre className="preview-content">{preview}</pre>
+            <button 
+              className={`preview-copy-btn ${copied ? 'copied' : ''}`}
+              onClick={copyPreview}
+            >
+              {copied ? '✓ Copied!' : '📋 Copy'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ========== POMODORO TIMER (NEW v5.4) ==========
+function PomodoroTimer({ isOpen, onClose }) {
+  const [mode, setMode] = useState('work')
+  const [timeLeft, setTimeLeft] = useState(25 * 60)
+  const [isRunning, setIsRunning] = useState(false)
+  const [sessions, setSessions] = useState(0)
+
+  const modes = {
+    work: { label: 'Focus', minutes: 25 },
+    shortBreak: { label: 'Short Break', minutes: 5 },
+    longBreak: { label: 'Long Break', minutes: 15 }
+  }
+
+  useEffect(() => {
+    let interval
+    if (isRunning && timeLeft > 0) {
+      interval = setInterval(() => setTimeLeft(t => t - 1), 1000)
+    } else if (timeLeft === 0 && isRunning) {
+      setIsRunning(false)
+      if (mode === 'work') {
+        setSessions(s => s + 1)
+        setMode('shortBreak')
+        setTimeLeft(5 * 60)
+      } else {
+        setMode('work')
+        setTimeLeft(25 * 60)
+      }
+    }
+    return () => clearInterval(interval)
+  }, [isRunning, timeLeft, mode])
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  }
+
+  const progress = ((modes[mode].minutes * 60) - timeLeft) / (modes[mode].minutes * 60) * 100
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content pomodoro-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🍅 Pomodoro Timer</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="pomodoro-modes">
+          {Object.entries(modes).map(([key, m]) => (
+            <button
+              key={key}
+              className={`pomodoro-mode-btn ${mode === key ? 'active' : ''}`}
+              onClick={() => { setMode(key); setTimeLeft(m.minutes * 60); setIsRunning(false); }}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="pomodoro-display">
+          <div className="pomodoro-time">{formatTime(timeLeft)}</div>
+          <div className="pomodoro-label">{modes[mode].label}</div>
+        </div>
+
+        <div className="pomodoro-controls">
+          <button className="pomodoro-main-btn" onClick={() => setIsRunning(!isRunning)}>
+            {isRunning ? '⏸️ Pause' : '▶️ Start'}
+          </button>
+          <button className="pomodoro-secondary-btn" onClick={() => { setIsRunning(false); setTimeLeft(modes[mode].minutes * 60); }}>↻ Reset</button>
+          <button className="pomodoro-secondary-btn" onClick={() => { setIsRunning(false); setMode(mode === 'work' ? 'shortBreak' : 'work'); setTimeLeft(mode === 'work' ? 5 * 60 : 25 * 60); }}>⏭️ Skip</button>
+        </div>
+
+        <div className="pomodoro-stats">
+          <div className="pomodoro-stat">
+            <span className="stat-num">{sessions}</span>
+            <span className="stat-lbl">Sessions</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== QUICK SHARE (NEW v5.4) ==========
+function QuickShare({ isOpen, onClose }) {
+  const [content, setContent] = useState('')
+  const [title, setTitle] = useState('')
+  const [platform, setPlatform] = useState('clipboard')
+  const [copied, setCopied] = useState(false)
+
+  const platforms = [
+    { id: 'clipboard', name: 'Text', emoji: '📋' },
+    { id: 'markdown', name: 'Markdown', emoji: '📝' },
+    { id: 'html', name: 'HTML', emoji: '🌐' },
+    { id: 'json', name: 'JSON', emoji: '{}' },
+  ]
+
+  const transformContent = () => {
+    if (!content.trim()) return ''
+    switch (platform) {
+      case 'markdown':
+        return (title ? `# ${title}\n\n` : '') + content
+      case 'html':
+        return `<article>\n${title ? `<h1>${title}</h1>\n` : ''}${content.split('\n\n').map(p => `<p>${p}</p>`).join('\n')}\n</article>`
+      case 'json':
+        return JSON.stringify({ title, content, exported: new Date().toISOString() }, null, 2)
+      default:
+        return content
+    }
+  }
+
+  const copyContent = () => {
+    navigator.clipboard.writeText(transformContent())
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content share-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📤 Quick Share</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="share-inputs">
+          <input
+            type="text"
+            placeholder="Title (optional)"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <textarea
+            placeholder="Paste content..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={5}
+          />
+        </div>
+
+        <div className="share-platforms">
+          <label>Output Format:</label>
+          <div className="share-platform-grid">
+            {platforms.map(p => (
+              <button
+                key={p.id}
+                className={`share-platform-btn ${platform === p.id ? 'active' : ''}`}
+                onClick={() => setPlatform(p.id)}
+              >
+                <span>{p.emoji}</span>
+                <span>{p.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {content && (
+          <div className="share-preview-section">
+            <label>Preview:</label>
+            <pre className="share-preview">{transformContent().slice(0, 300)}</pre>
+            <button 
+              className={`share-copy-btn ${copied ? 'copied' : ''}`}
+              onClick={copyContent}
+            >
+              {copied ? '✓ Copied!' : '📋 Copy'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
@@ -7453,6 +7872,12 @@ function App() {
   // NEW v5.3 features
   const [showPerformanceAnalytics, setShowPerformanceAnalytics] = useState(false)
   const [showWritingGoals, setShowWritingGoals] = useState(false)
+  
+  // NEW v5.4 features
+  const [showDraftAnalyzer, setShowDraftAnalyzer] = useState(false)
+  const [showFormatPreview, setShowFormatPreview] = useState(false)
+  const [showPomodoro, setShowPomodoro] = useState(false)
+  const [showQuickShare, setShowQuickShare] = useState(false)
   
   const [appSettings, setAppSettings] = useState(() => {
     const saved = localStorage.getItem('renzo-app-settings')
@@ -7748,6 +8173,10 @@ function App() {
       if (key === '-') setShowToneAdjuster(true)  // - for Tone Adjuster
       if (key === '\\') setShowCLIRunner(true)  // \ for CLI Command Runner
       if (key === ']') handleQuickExportAll()  // ] for Quick Export All
+      if (key === '*') setShowDraftAnalyzer(true)  // * for Draft Analyzer
+      if (key === '(') setShowFormatPreview(true)  // ( for Format Preview
+      if (key === ')') setShowPomodoro(true)  // ) for Pomodoro Timer
+      if (key === '+') setShowQuickShare(true)  // + for Quick Share
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -8107,6 +8536,23 @@ function App() {
       <WritingGoalsWidget
         isOpen={showWritingGoals}
         onClose={() => setShowWritingGoals(false)}
+      />
+      <DraftAnalyzer
+        isOpen={showDraftAnalyzer}
+        onClose={() => setShowDraftAnalyzer(false)}
+        drafts={drafts}
+      />
+      <ContentFormatPreview
+        isOpen={showFormatPreview}
+        onClose={() => setShowFormatPreview(false)}
+      />
+      <PomodoroTimer
+        isOpen={showPomodoro}
+        onClose={() => setShowPomodoro(false)}
+      />
+      <QuickShare
+        isOpen={showQuickShare}
+        onClose={() => setShowQuickShare(false)}
       />
       <PublishingPrepWorkflow
         isOpen={showPublishingPrep}
@@ -8548,6 +8994,28 @@ function App() {
             <span>🎯</span>
             <span>Goals</span>
             <span className="feature-hint">@</span>
+          </button>
+          
+          {/* NEW v5.4 buttons */}
+          <button className="feature-btn" onClick={() => setShowDraftAnalyzer(true)}>
+            <span>🧠</span>
+            <span>Analyze</span>
+            <span className="feature-hint">*</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowFormatPreview(true)}>
+            <span>👁️</span>
+            <span>Preview</span>
+            <span className="feature-hint">(</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowPomodoro(true)}>
+            <span>🍅</span>
+            <span>Pomodoro</span>
+            <span className="feature-hint">)</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowQuickShare(true)}>
+            <span>📤</span>
+            <span>Share</span>
+            <span className="feature-hint">+</span>
           </button>
         </section>
 
@@ -9036,7 +9504,7 @@ function App() {
       <KeyboardShortcutsFooter onShowShortcuts={() => setShowShortcuts(true)} />
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v5.3 • Press ⌘K for commands, ? for all shortcuts</p>
+        <p className="footer-version">v5.4 • Press ⌘K for commands, ? for all shortcuts</p>
       </footer>
     </div>
   )

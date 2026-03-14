@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.4.0] — March 13, 2026
+
+### Added
+
+#### Smart Draft Analyzer (Key: *)
+- Analyze drafts for quality metrics
+- Metrics: words, readability score, word variety, sentiment analysis
+- Structure checks: hook, CTA, sources, power words
+- Personalized recommendations based on analysis
+
+#### Content Format Preview (Key: ()
+- Preview content in different platform formats
+- Supports: Notion, Twitter/X, LinkedIn, Newsletter, Blog
+- Copy formatted content to clipboard
+
+#### Pomodoro Timer (Key: ))
+- Classic 25/5/15 Pomodoro technique
+- Modes: Focus, Short Break, Long Break
+- Session tracking and auto-transitions
+
+#### Quick Share (Key: +)
+- Export content in multiple formats
+- Supports: Plain Text, Markdown, HTML, JSON
+- One-click copy to clipboard
+
+### Changed
+- Version bump to v5.4
+- Added 4 new feature buttons to toolbar
+
 ## [5.3.0] — March 13, 2026
 
 ### Added

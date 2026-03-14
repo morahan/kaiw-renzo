@@ -3275,3 +3275,76 @@ button:hover::after { opacity: 1; }
   color: var(--text-muted);
   text-align: center;
 }
+
+/* ========== v5.4 FEATURES ========== */
+/* Draft Analyzer */
+.analyzer-modal { width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
+.analyzer-drafts-list { padding: 1rem; border-bottom: 1px solid var(--border); }
+.analyzer-drafts { display: flex; flex-direction: column; gap: 0.5rem; max-height: 150px; overflow-y: auto; }
+.analyzer-draft-btn { padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; display: flex; justify-content: space-between; }
+.analyzer-draft-btn:hover { border-color: var(--accent); }
+.analyzer-draft-btn.active { border-color: var(--accent); background: var(--bg-hover); }
+.analyzer-loading { padding: 2rem; text-align: center; }
+.analyzer-spinner { width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+.analyzer-results { padding: 1rem; }
+.analyzer-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+.analyzer-metric { padding: 0.75rem; background: var(--bg-secondary); border-radius: 8px; }
+.analyzer-metric .metric-label { font-size: 0.75rem; color: var(--text-muted); }
+.analyzer-metric .metric-value { font-size: 1.1rem; font-weight: 600; }
+.analyzer-checks { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+.analyzer-check { padding: 0.5rem 0.75rem; background: var(--bg-secondary); border-radius: 6px; font-size: 0.85rem; }
+.analyzer-check.pass { color: var(--accent-green); }
+.analyzer-check.fail { color: var(--accent-orange); }
+.analyzer-recommendations { padding: 1rem; background: var(--bg-secondary); border-radius: 8px; }
+.analyzer-recommendations h4 { font-size: 0.9rem; color: var(--accent-orange); margin-bottom: 0.5rem; }
+.analyzer-recommendations li { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.3rem; }
+
+/* Preview Modal */
+.preview-modal { width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
+.preview-inputs { padding: 1rem; border-bottom: 1px solid var(--border); }
+.preview-inputs input, .preview-inputs textarea { width: 100%; padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); margin-bottom: 0.75rem; }
+.preview-inputs input:focus, .preview-inputs textarea:focus { outline: none; border-color: var(--accent); }
+.preview-formats { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.preview-format-btn { padding: 0.6rem 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; text-align: center; }
+.preview-format-btn:hover { border-color: var(--accent); }
+.preview-format-btn.active { border-color: var(--accent); background: var(--bg-hover); }
+.preview-output { padding: 1rem; }
+.preview-content { padding: 1rem; background: var(--bg-secondary); border-radius: 8px; font-size: 0.85rem; white-space: pre-wrap; max-height: 150px; overflow-y: auto; }
+.preview-copy-btn { width: 100%; padding: 0.75rem; background: var(--accent); border: none; border-radius: 8px; color: white; cursor: pointer; transition: background 0.15s; }
+.preview-copy-btn:hover { background: var(--accent-hover); }
+.preview-copy-btn.copied { background: var(--accent-green); }
+
+/* Pomodoro Modal */
+.pomodoro-modal { width: 90%; max-width: 400px; }
+.pomodoro-modes { display: flex; gap: 0.5rem; padding: 1rem; border-bottom: 1px solid var(--border); }
+.pomodoro-mode-btn { flex: 1; padding: 0.6rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.8rem; transition: all 0.15s; }
+.pomodoro-mode-btn.active { border-color: var(--accent); background: var(--bg-hover); }
+.pomodoro-display { padding: 2rem; text-align: center; }
+.pomodoro-time { font-size: 3rem; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.pomodoro-label { font-size: 0.9rem; color: var(--text-muted); }
+.pomodoro-controls { display: flex; gap: 0.75rem; padding: 0 1rem 1rem; justify-content: center; }
+.pomodoro-main-btn { padding: 0.75rem 1.5rem; background: var(--accent); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; }
+.pomodoro-main-btn:hover { opacity: 0.9; }
+.pomodoro-secondary-btn { padding: 0.75rem 1rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+.pomodoro-secondary-btn:hover { border-color: var(--accent); }
+.pomodoro-stats { display: flex; justify-content: center; gap: 2rem; padding: 1rem; border-top: 1px solid var(--border); }
+.pomodoro-stat { text-align: center; }
+.pomodoro-stat .stat-num { font-size: 1.5rem; font-weight: 700; }
+.pomodoro-stat .stat-lbl { font-size: 0.75rem; color: var(--text-muted); }
+
+/* Quick Share Modal */
+.share-modal { width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto; }
+.share-inputs { padding: 1rem; border-bottom: 1px solid var(--border); }
+.share-inputs input, .share-inputs textarea { width: 100%; padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); margin-bottom: 0.75rem; }
+.share-inputs input:focus, .share-inputs textarea:focus { outline: none; border-color: var(--accent); }
+.share-platforms { padding: 1rem; border-bottom: 1px solid var(--border); }
+.share-platforms label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
+.share-platform-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+.share-platform-btn { padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.15s; }
+.share-platform-btn:hover { border-color: var(--accent); }
+.share-platform-btn.active { border-color: var(--accent); background: var(--bg-hover); }
+.share-preview-section { padding: 1rem; }
+.share-preview { padding: 1rem; background: var(--bg-secondary); border-radius: 8px; font-size: 0.8rem; max-height: 150px; overflow-y: auto; }
+.share-copy-btn { width: 100%; padding: 0.75rem; background: var(--accent); border: none; border-radius: 8px; color: white; cursor: pointer; transition: background 0.15s; }
+.share-copy-btn:hover { background: var(--accent-hover); }
+.share-copy-btn.copied { background: var(--accent-green); }
