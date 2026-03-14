@@ -1,3 +1,25 @@
+## [6.5.0] — March 14, 2026 (11:46 AM) [TINKER SESSION]
+
+### Added
+- **Quick Actions Bar** — Floating toolbar with 6 one-click actions (Sprint, Brief, Hook Test, Thread Gen, Quick Note, Focus Mode)
+- **New CSS Animations (v6.5)**
+  - Shimmer effect for loading states
+  - Float animation for floating elements
+  - Glow pulse for emphasis
+  - Slide in right for panels
+  - Scale in for modals
+  - Border gradient animation
+  - Sparkle effect for highlights
+- **Enhanced Card Hover Effects** — Lift and glow on hover
+- **Glass Morphism Enhanced** — Improved translucency
+- **Gradient Text Enhanced** — Multi-color gradient text
+- **Noise Texture Overlay** — Subtle texture for depth
+
+### Changed
+- Updated version badge to v6.5 in index.html
+
+---
+
 ## [6.4.0] — March 14, 2026 (11:03 AM) [TINKER SESSION]
 
 ### Added

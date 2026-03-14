@@ -8085,6 +8085,53 @@ function ContentTipsWidget() {
   )
 }
 
+// ========== QUICK ACTIONS FLOATING BAR (NEW v6.5) ==========
+function QuickActionsBar({ isOpen, onClose, onAction }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  
+  const quickActions = [
+    { id: 'sprint', icon: '⚡', label: 'Word Sprint', color: '#f97316', shortcut: 'S' },
+    { id: 'brief', icon: '📋', label: 'Quick Brief', color: '#3b82f6', shortcut: 'B' },
+    { id: 'hook', icon: '🪝', label: 'Hook Test', color: '#a855f7', shortcut: 'H' },
+    { id: 'thread', icon: '🧵', label: 'Thread Gen', color: '#22c55e', shortcut: 'T' },
+    { id: 'capture', icon: '📝', label: 'Quick Note', color: '#ec4899', shortcut: 'N' },
+    { id: 'focus', icon: '🎯', label: 'Focus Mode', color: '#dc2626', shortcut: 'M' },
+  ]
+
+  const handleAction = (actionId) => {
+    onAction?.(actionId)
+    setIsExpanded(false)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="quick-actions-bar">
+      <div className="quick-actions-header">
+        <span className="quick-actions-title">⚡ Quick Actions</span>
+        <button className="quick-actions-close" onClick={onClose}>×</button>
+      </div>
+      <div className="quick-actions-grid">
+        {quickActions.map((action) => (
+          <button
+            key={action.id}
+            className="quick-action-btn"
+            style={{ '--action-color': action.color }}
+            onClick={() => handleAction(action.id)}
+          >
+            <span className="quick-action-icon">{action.icon}</span>
+            <span className="quick-action-label">{action.label}</span>
+            <span className="quick-action-shortcut">{action.shortcut}</span>
+          </button>
+        ))}
+      </div>
+      <div className="quick-actions-footer">
+        <span className="quick-hint">Press number keys 1-6 for instant access</span>
+      </div>
+    </div>
+  )
+}
+
 // ========== PERFORMANCE ANALYTICS (NEW v5.3) ==========
 function PerformanceAnalytics({ isOpen, onClose, articles }) {
   const [timeRange, setTimeRange] = useState('month')
@@ -9006,6 +9053,9 @@ function App() {
   // NEW v5.10 features - Outline Generator & Enhanced Productivity
   const [showOutlineGenerator, setShowOutlineGenerator] = useState(false)
   
+  // NEW v6.5 features
+  const [showQuickActionsBar, setShowQuickActionsBar] = useState(false)
+  
   // NEW v5.3 features
   const [showPerformanceAnalytics, setShowPerformanceAnalytics] = useState(false)
   const [showWritingGoals, setShowWritingGoals] = useState(false)
@@ -9200,6 +9250,33 @@ function App() {
     }
   }
 
+  // Quick Actions Bar handler
+  const handleQuickAction = (actionId) => {
+    setShowQuickActionsBar(false)
+    switch(actionId) {
+      case 'sprint':
+        setShowWordSprint(true)
+        break
+      case 'brief':
+        setShowBriefGen(true)
+        break
+      case 'hook':
+        setShowHookTester(true)
+        break
+      case 'thread':
+        setShowThreadFormat(true)
+        break
+      case 'capture':
+        setShowQuickCapture(true)
+        break
+      case 'focus':
+        setShowFocusMode(true)
+        break
+      default:
+        break
+    }
+  }
+
   const getIdeaCategoryColor = (cat) => {
     const colors = { 
       'Trending': '#f97316', 
@@ -9339,6 +9416,7 @@ function App() {
       if (key === '9') setShowInspirationBoard(true)  // 9 for Inspiration Board
       if (key === '0') setShowReadingList(true)  // 0 for Reading List
       if (key === '`') setShowQuickAIPrompt(true)  // ` for Quick AI Prompt
+      if (key === '\\') setShowQuickActionsBar(true)  // \ for Quick Actions Bar
       if (key === '=') setShowSEOChecklist(true)  // = for SEO Checklist
       if (key === '-') setShowToneAdjuster(true)  // - for Tone Adjuster
       if (key === '\\') setShowCLIRunner(true)  // \ for CLI Command Runner
@@ -9825,6 +9903,11 @@ function App() {
         quotes={quotes}
         onSaveQuote={saveQuote}
         onDeleteQuote={deleteQuote}
+      />
+      <QuickActionsBar
+        isOpen={showQuickActionsBar}
+        onClose={() => setShowQuickActionsBar(false)}
+        onAction={handleQuickAction}
       />
       <TopicFrequency 
         isOpen={showTopicFrequency} 
