@@ -1636,6 +1636,17 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '5.1', date: '2026-03-13', changes: [
+      'Added Pinned Items Bar — Quick access to favorite tools at the top',
+      'Added Notion Sync Status indicator — Shows real-time sync state',
+      'Added Enhanced Toast System — Improved notifications with better animations',
+      'Added Card Gradient Borders — New visual polish with gradient edges',
+      'Added Glow Effects — New glow-red, glow-green, glow-purple, glow-blue utilities',
+      'Added Micro-interactions — Smooth hover states on cards',
+      'Added Improved Spinner — Better loading indicator animations',
+      'Added Responsive Grid Patterns — New grid-auto and grid-masonry classes',
+      'Updated version badge to v5.1'
+    ]},
     { version: '4.8', date: '2026-03-13', changes: [
       'Added SEO Checklist (= key) — Pre-publish checklist with weighted scoring',
       'Added Tone Adjuster (- key) — Transform text between 6 different tones',
@@ -7247,7 +7258,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v5.0</span>
+          <span className="logo-badge">v5.1</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -7318,6 +7329,35 @@ function App() {
           <LiveClock />
         </div>
       </header>
+
+      {/* Pinned Items Bar (NEW v5.1) */}
+      <div className="pinned-bar">
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginRight: '0.5rem' }}>Pinned:</span>
+        <button className="pinned-item" onClick={() => setShowQuickDraft(true)}>
+          <span className="pin-icon">📝</span>
+          Quick Draft
+        </button>
+        <button className="pinned-item" onClick={() => setShowHeadlineGen(true)}>
+          <span className="pin-icon">📰</span>
+          Headlines
+        </button>
+        <button className="pinned-item" onClick={() => setShowIdeasBank(true)}>
+          <span className="pin-icon">💡</span>
+          Ideas Bank
+        </button>
+        <button className="pinned-item" onClick={() => setShowWordSprint(true)}>
+          <span className="pin-icon">⚡</span>
+          Word Sprint
+        </button>
+        <button className="pinned-item" onClick={() => setShowFocusMode(true)}>
+          <span className="pin-icon">🎯</span>
+          Focus Mode
+        </button>
+        <button className="pinned-item" onClick={() => setShowGlobalSearch(true)}>
+          <span className="pin-icon">🔍</span>
+          Search
+        </button>
+      </div>
 
       <main className="main">
         <section className="hero">
@@ -7994,7 +8034,7 @@ function App() {
       <KeyboardShortcutsFooter onShowShortcuts={() => setShowShortcuts(true)} />
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v4.9 • Press ⌘K for commands, ? for all shortcuts</p>
+        <p className="footer-version">v5.1 • Press ⌘K for commands, ? for all shortcuts</p>
       </footer>
     </div>
   )
