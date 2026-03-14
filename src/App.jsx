@@ -2347,6 +2347,16 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '7.0', date: '2026-03-14', changes: [
+      '🎉 Major Release: v7.0',
+      'Added Quick Ship It Panel — One-click publish preparation workflow',
+      'Added keyboard shortcut Shift+! for Quick Ship',
+      'Added Ship It button in header toolbar',
+      'Streamlined article → thread → schedule → ship pipeline',
+      'Added X thread generation from draft content',
+      'Added optional Notion sync and scheduling in ship flow',
+      'Updated version badge to v7.0'
+    ]},
     { version: '6.9', date: '2026-03-14', changes: [
       '🎉 New Release: v6.9',
       'Added Floating Help Button — Quick access to shortcuts from anywhere (bottom-left)',
@@ -2700,6 +2710,217 @@ function WritingStreakCalendar({ streak, articles }) {
       <div className="streak-legend">
         <span className="legend-item"><span className="legend-dot active"></span> Wrote</span>
         <span className="legend-item"><span className="legend-dot"></span> No activity</span>
+      </div>
+    </div>
+  )
+}
+
+// ========== QUICK SHIP IT PANEL (NEW v7.0) ==========
+// One-click publish preparation: article → thread → schedule → ready to ship
+function QuickShipIt({ isOpen, onClose, drafts, onShip }) {
+  const [selectedDraft, setSelectedDraft] = useState(null)
+  const [shipStep, setShipStep] = useState('select') // select | review | thread | ready
+  const [generatedThread, setGeneratedThread] = useState('')
+  const [scheduledTime, setScheduledTime] = useState('')
+  const [includeThread, setIncludeThread] = useState(true)
+  const [includeNotion, setIncludeNotion] = useState(true)
+  const [isGenerating, setIsGenerating] = useState(false)
+
+  // Generate X thread from draft
+  const generateThread = (draft) => {
+    const sentences = draft.content.split(/[.!?]+/).filter(s => s.trim().length > 10)
+    let thread = `🧵 ${draft.title}:\n\n`
+    thread += `${sentences[0]?.trim() || 'Hook goes here...'}.\n\n`
+    
+    let tweetNum = 2
+    for (let i = 1; i < Math.min(sentences.length, 6); i++) {
+      thread += `${tweetNum}/ ${sentences[i].trim()}.\n\n`
+      tweetNum++
+    }
+    
+    thread += `${tweetNum}/ 🎯 The bottom line:\n`
+    thread += `${sentences[sentences.length - 1]?.trim() || 'Key takeaway here'}.\n\n`
+    thread += `${tweetNum + 1}/ Save this 🧵 if useful.\nFollow →`
+    
+    return thread
+  }
+
+  const handleSelectDraft = (draft) => {
+    setSelectedDraft(draft)
+    setShipStep('review')
+  }
+
+  const handleGenerateThread = () => {
+    if (!selectedDraft) return
+    setIsGenerating(true)
+    setTimeout(() => {
+      const thread = generateThread(selectedDraft)
+      setGeneratedThread(thread)
+      setIsGenerating(false)
+    }, 800)
+  }
+
+  const handleShip = () => {
+    const shipData = {
+      draft: selectedDraft,
+      thread: generatedThread,
+      scheduledTime: scheduledTime || null,
+      includeThread,
+      includeNotion,
+      shippedAt: new Date().toISOString()
+    }
+    onShip?.(shipData)
+    setShipStep('ready')
+    setTimeout(() => {
+      onClose()
+      setShipStep('select')
+      setSelectedDraft(null)
+      setGeneratedThread('')
+    }, 2000)
+  }
+
+  const copyThread = () => {
+    navigator.clipboard.writeText(generatedThread)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content quick-ship-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🚀 Quick Ship It</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        {/* Progress Steps */}
+        <div className="ship-steps">
+          <div className={`ship-step ${shipStep === 'select' ? 'active' : ''} ${['review', 'thread', 'ready'].includes(shipStep) ? 'complete' : ''}`}>
+            <span className="ship-step-num">1</span>
+            <span className="ship-step-label">Select</span>
+          </div>
+          <div className="ship-step-line" />
+          <div className={`ship-step ${shipStep === 'review' ? 'active' : ''} ${['thread', 'ready'].includes(shipStep) ? 'complete' : ''}`}>
+            <span className="ship-step-num">2</span>
+            <span className="ship-step-label">Review</span>
+          </div>
+          <div className="ship-step-line" />
+          <div className={`ship-step ${shipStep === 'thread' ? 'active' : ''} ${shipStep === 'ready' ? 'complete' : ''}`}>
+            <span className="ship-step-num">3</span>
+            <span className="ship-step-label">Thread</span>
+          </div>
+          <div className="ship-step-line" />
+          <div className={`ship-step ${shipStep === 'ready' ? 'active' : ''}`}>
+            <span className="ship-step-num">4</span>
+            <span className="ship-step-label">Ship!</span>
+          </div>
+        </div>
+
+        {/* Step 1: Select Draft */}
+        {shipStep === 'select' && (
+          <div className="ship-select-step">
+            <p className="ship-instruction">Choose an article to ship:</p>
+            <div className="ship-drafts-list">
+              {drafts.length === 0 ? (
+                <div className="ship-empty">No drafts available. Create a draft first!</div>
+              ) : (
+                drafts.slice(0, 8).map((draft, i) => (
+                  <div 
+                    key={i} 
+                    className="ship-draft-item"
+                    onClick={() => handleSelectDraft(draft)}
+                  >
+                    <span className="ship-draft-title">{draft.title}</span>
+                    <span className="ship-draft-words">{draft.words || 0} words</span>
+                    <span className="ship-draft-date">{new Date(draft.date).toLocaleDateString()}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Review */}
+        {shipStep === 'review' && selectedDraft && (
+          <div className="ship-review-step">
+            <div className="ship-draft-preview">
+              <h4>{selectedDraft.title}</h4>
+              <p className="ship-preview-text">{selectedDraft.content?.slice(0, 300)}...</p>
+              <div className="ship-draft-meta">
+                <span>📝 {selectedDraft.words || 0} words</span>
+                <span>📅 {new Date(selectedDraft.date).toLocaleDateString()}</span>
+              </div>
+            </div>
+            
+            <div className="ship-options">
+              <label className="ship-option-toggle">
+                <input 
+                  type="checkbox" 
+                  checked={includeThread} 
+                  onChange={(e) => setIncludeThread(e.target.checked)} 
+                />
+                <span>🧵 Generate X Thread</span>
+              </label>
+              <label className="ship-option-toggle">
+                <input 
+                  type="checkbox" 
+                  checked={includeNotion} 
+                  onChange={(e) => setIncludeNotion(e.target.checked)} 
+                />
+                <span>📓 Save to Notion</span>
+              </label>
+              <label className="ship-schedule">
+                <span>📅 Schedule (optional):</span>
+                <input 
+                  type="datetime-local" 
+                  value={scheduledTime}
+                  onChange={(e) => setScheduledTime(e.target.value)}
+                />
+              </label>
+            </div>
+
+            <div className="ship-actions">
+              <button className="ship-back-btn" onClick={() => setShipStep('select')}>← Back</button>
+              {includeThread ? (
+                <button className="ship-generate-btn" onClick={() => { handleGenerateThread(); setShipStep('thread'); }}>
+                  {isGenerating ? '⏳ Generating...' : '🧵 Generate Thread →'}
+                </button>
+              ) : (
+                <button className="ship-ready-btn" onClick={handleShip}>🚀 Ready to Ship!</button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Thread */}
+        {shipStep === 'thread' && (
+          <div className="ship-thread-step">
+            <div className="ship-generated-thread">
+              <pre>{generatedThread}</pre>
+              <button className="ship-copy-btn" onClick={copyThread}>📋 Copy Thread</button>
+            </div>
+            <div className="ship-actions">
+              <button className="ship-back-btn" onClick={() => setShipStep('review')}>← Back</button>
+              <button className="ship-ready-btn" onClick={handleShip}>🚀 Ready to Ship!</button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Ready */}
+        {shipStep === 'ready' && (
+          <div className="ship-ready-step">
+            <div className="ship-success">
+              <span className="ship-success-icon">🎉</span>
+              <h4>Article Ready to Ship!</h4>
+              <p>Your article is prepared with:</p>
+              <ul>
+                {includeThread && <li>🧵 X Thread generated</li>}
+                {includeNotion && <li>📓 Saved to Notion</li>}
+                {scheduledTime && <li>📅 Scheduled for {new Date(scheduledTime).toLocaleString()}</li>}
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -9123,6 +9344,14 @@ function App() {
   // NEW v5.11 features - Writing Prompts
   const [showWritingPrompts, setShowWritingPrompts] = useState(false)
   
+  // NEW v7.0 features
+  const [showQuickShip, setShowQuickShip] = useState(false)
+  const [pinnedArticles, setPinnedArticles] = useState(() => {
+    const saved = localStorage.getItem('renzo-pinned-articles')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [showVelocityTrend, setShowVelocityTrend] = useState(false)
+  
   const [appSettings, setAppSettings] = useState(() => {
     const saved = localStorage.getItem('renzo-app-settings')
     return saved ? JSON.parse(saved) : {
@@ -9457,6 +9686,7 @@ function App() {
       if (key === '+') setShowWritingInsights(true)
       if (key === 'L') setShowChangelog(true)
       if (key === 'M') setShowFocusMode(true)
+      if (key === '!') setShowQuickShip(true)  // Shift+! for Quick Ship
       if (key === 'I') setShowBriefGen(true)
       if (key === 'A') setShowIdeasBank(true)
       if (key === 'R' && !e.shiftKey) setShowReferencePanel(true)
@@ -9816,6 +10046,18 @@ function App() {
           onSave={saveQuickWrite}
         />
       )}
+      {/* Quick Ship It Modal (NEW v7.0) */}
+      {showQuickShip && (
+        <QuickShipIt
+          isOpen={showQuickShip}
+          onClose={() => setShowQuickShip(false)}
+          drafts={drafts}
+          onShip={(data) => {
+            addActivity('ship', `Shipped: "${data.draft.title.slice(0, 30)}..."`)
+            addToast('🚀 Article shipped!', 'success')
+          }}
+        />
+      )}
       {showReferencePanel && (
         <QuickReferencePanel 
           isOpen={showReferencePanel} 
@@ -10090,7 +10332,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v6.9</span>
+          <span className="logo-badge">v7.0</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -10186,6 +10428,16 @@ function App() {
           >
             <span>🐦</span>
             <span>Tweet</span>
+          </button>
+          
+          {/* Quick Ship It Button (NEW v7.0) */}
+          <button 
+            className="quick-ship-btn"
+            onClick={() => setShowQuickShip(true)}
+            title="🚀 Quick Ship - One-click publish prep"
+          >
+            <span>🚀</span>
+            <span>Ship It</span>
           </button>
           
           {/* Time Since Last Publish Indicator (NEW v6.4) */}

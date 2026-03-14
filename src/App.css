@@ -5079,6 +5079,33 @@ button:hover::after { opacity: 1; }
   font-size: 1rem;
 }
 
+/* Quick Ship Button (NEW v7.0) */
+.quick-ship-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.2));
+  border: 1px solid var(--accent-green);
+  border-radius: var(--radius-lg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-green);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quick-ship-btn:hover {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(59, 130, 246, 0.3));
+  border-color: var(--accent-green);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+}
+
+.quick-ship-btn span:first-child {
+  font-size: 1rem;
+}
+
 /* Quick Stats Widget (NEW v6.1) */
 .quick-stats-widget {
   display: flex;
@@ -5998,3 +6025,288 @@ select:focus {
   50% { transform: scale(1.3); opacity: 0.7; }
 }
 
+
+/* ========== QUICK SHIP IT MODAL (NEW v7.0) ========== */
+.quick-ship-modal {
+  width: 90%;
+  max-width: 650px;
+}
+
+.ship-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ship-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+}
+
+.ship-step.active {
+  opacity: 1;
+}
+
+.ship-step.complete {
+  opacity: 0.7;
+}
+
+.ship-step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ship-step.active .ship-step-num {
+  background: var(--accent-green);
+  color: white;
+}
+
+.ship-step.complete .ship-step-num {
+  background: var(--accent-purple);
+  color: white;
+}
+
+.ship-step-line {
+  width: 30px;
+  height: 2px;
+  background: var(--border);
+}
+
+.ship-instruction {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.ship-drafts-list {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.ship-draft-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ship-draft-item:hover {
+  background: var(--bg-elevated);
+  border-color: var(--accent-green);
+}
+
+.ship-draft-title {
+  font-weight: 500;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ship-draft-words {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 1rem;
+}
+
+.ship-draft-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 1rem;
+}
+
+.ship-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem;
+}
+
+.ship-draft-preview {
+  background: var(--bg-hover);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ship-draft-preview h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+}
+
+.ship-preview-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.ship-draft-meta {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.ship-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.ship-option-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.ship-option-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-green);
+}
+
+.ship-schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ship-schedule input {
+  padding: 0.5rem;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+
+.ship-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.ship-back-btn {
+  padding: 0.6rem 1.2rem;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ship-back-btn:hover {
+  background: var(--bg-elevated);
+}
+
+.ship-generate-btn {
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ship-generate-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+}
+
+.ship-ready-btn {
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, var(--accent-green), #10b981);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ship-ready-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+}
+
+.ship-generated-thread pre {
+  background: var(--bg-hover);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.ship-copy-btn {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ship-copy-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.ship-ready-step {
+  text-align: center;
+  padding: 2rem;
+}
+
+.ship-success {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(59, 130, 246, 0.1));
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+}
+
+.ship-success-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.ship-success h4 {
+  color: var(--accent-green);
+  margin: 0 0 0.5rem 0;
+}
+
+.ship-success ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+.ship-success li {
+  padding: 0.25rem 0;
+  color: var(--text-secondary);
+}
