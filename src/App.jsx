@@ -3878,6 +3878,225 @@ function WeeklyStatsDashboard({ articles }) {
   )
 }
 
+// ========== QUOTE COLLECTION (NEW v5.9) ==========
+function QuoteCollection({ isOpen, onClose, quotes, onSaveQuote, onDeleteQuote }) {
+  const [newQuote, setNewQuote] = useState('')
+  const [source, setSource] = useState('')
+  const [author, setAuthor] = useState('')
+  const [category, setCategory] = useState('Science')
+  const [filter, setFilter] = useState('all')
+  
+  const categories = ['Science', 'Motivation', 'Technique', 'Nutrition', 'Health', 'Performance', 'Other']
+  
+  const filteredQuotes = filter === 'all' ? quotes : quotes.filter(q => q.category === filter)
+  
+  const handleSave = () => {
+    if (!newQuote.trim()) return
+    onSaveQuote({ text: newQuote, source, author, category, date: new Date().toISOString() })
+    setNewQuote('')
+    setSource('')
+    setAuthor('')
+  }
+  
+  const copyQuote = (text) => {
+    navigator.clipboard.writeText(text)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content quote-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>💬 Quote Collection</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="quote-form">
+          <textarea
+            className="quote-input"
+            placeholder="Paste or write a notable quote..."
+            value={newQuote}
+            onChange={(e) => setNewQuote(e.target.value)}
+            rows={3}
+          />
+          <div className="quote-form-row">
+            <input
+              type="text"
+              className="quote-author"
+              placeholder="Author"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+            />
+            <input
+              type="text"
+              className="quote-source"
+              placeholder="Source (book, study, article)"
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+            />
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="quote-category">
+              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
+          </div>
+          <button className="quote-save-btn" onClick={handleSave} disabled={!newQuote.trim()}>
+            Save Quote
+          </button>
+        </div>
+        
+        <div className="quote-filter">
+          <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
+            All ({quotes.length})
+          </button>
+          {categories.map(cat => (
+            <button 
+              key={cat} 
+              className={`filter-btn ${filter === cat ? 'active' : ''}`}
+              onClick={() => setFilter(cat)}
+            >
+              {cat} ({quotes.filter(q => q.category === cat).length})
+            </button>
+          ))}
+        </div>
+        
+        <div className="quote-list">
+          {filteredQuotes.length === 0 ? (
+            <div className="quote-empty">No quotes yet. Start collecting!</div>
+          ) : (
+            filteredQuotes.map((quote, i) => (
+              <div key={i} className="quote-card">
+                <div className="quote-text">"{quote.text}"</div>
+                <div className="quote-meta">
+                  {quote.author && <span className="quote-author-name">— {quote.author}</span>}
+                  {quote.source && <span className="quote-source-name"> from {quote.source}</span>}
+                  <span className="quote-category-tag">{quote.category}</span>
+                </div>
+                <div className="quote-actions">
+                  <button className="quote-copy-btn" onClick={() => copyQuote(quote.text)}>Copy</button>
+                  <button className="quote-delete-btn" onClick={() => onDeleteQuote(i)}>Delete</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== TOPIC FREQUENCY ANALYZER (NEW v5.9) ==========
+function TopicFrequency({ isOpen, onClose, ideas, articles }) {
+  const [timeRange, setTimeRange] = useState('all') // all, 30, 7
+  
+  const getTopics = () => {
+    const topics = {}
+    
+    // Extract from ideas
+    ideas.forEach(idea => {
+      const title = idea.title.toLowerCase()
+      const words = title.split(/\s+/).filter(w => w.length > 3)
+      words.forEach(word => {
+        topics[word] = (topics[word] || 0) + 1
+      })
+    })
+    
+    // Extract from articles
+    articles.forEach(article => {
+      const title = (article.title || '').toLowerCase()
+      const words = title.split(/\s+/).filter(w => w.length > 3)
+      words.forEach(word => {
+        topics[word] = (topics[word] || 0) + 2 // Weight articles more
+      })
+    })
+    
+    return Object.entries(topics)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+  }
+  
+  const topics = getTopics()
+  const maxCount = topics[0]?.[1] || 1
+  
+  // Find content gaps - topics with low frequency
+  const getGaps = () => {
+    const importantTopics = ['protein', 'strength', 'cardio', 'recovery', 'sleep', 'nutrition', 'hypertrophy', 'endurance', 'mobility', 'fatloss', 'muscle', 'weight', 'health', 'fitness', 'training', 'workout', 'exercise', 'diet', 'weightloss', 'gains']
+    const currentTopics = topics.map(t => t[0])
+    
+    return importantTopics
+      .filter(t => !currentTopics.includes(t))
+      .slice(0, 10)
+  }
+  
+  const gaps = getGaps()
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content frequency-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📊 Topic Frequency Analyzer</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="frequency-section">
+          <h4>Top Topics in Your Content Bank</h4>
+          <p className="frequency-subtitle">Words that appear most often in your ideas and articles</p>
+          
+          <div className="frequency-chart">
+            {topics.length === 0 ? (
+              <div className="frequency-empty">No topics found. Add some ideas first!</div>
+            ) : (
+              topics.map(([topic, count], i) => (
+                <div key={i} className="frequency-bar-row">
+                  <span className="frequency-label">{topic}</span>
+                  <div className="frequency-bar-container">
+                    <div 
+                      className="frequency-bar" 
+                      style={{ width: `${(count / maxCount) * 100}%` }}
+                    />
+                  </div>
+                  <span className="frequency-count">{count}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+        
+        <div className="frequency-section gaps-section">
+          <h4>🎯 Content Gaps</h4>
+          <p className="frequency-subtitle">Important topics you haven't covered recently</p>
+          
+          <div className="gaps-list">
+            {gaps.length === 0 ? (
+              <div className="gaps-full">Great job! You've covered all major topics.</div>
+            ) : (
+              gaps.map((gap, i) => (
+                <span key={i} className="gap-tag">{gap}</span>
+              ))
+            )}
+          </div>
+        </div>
+        
+        <div className="frequency-stats">
+          <div className="stat-card">
+            <span className="stat-number">{ideas.length}</span>
+            <span className="stat-label">Ideas</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-number">{articles.length}</span>
+            <span className="stat-label">Articles</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-number">{topics.length}</span>
+            <span className="stat-label">Unique Topics</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ========== SCRATCHPAD (NEW v5.8) ==========
 function Scratchpad({ isOpen, onClose }) {
   const [notes, setNotes] = useState(() => {
@@ -8403,6 +8622,14 @@ function App() {
   const [showQuickWebResearch, setShowQuickWebResearch] = useState(false)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   
+  // NEW v5.9 features - Quote Collection & Topic Analyzer
+  const [showQuoteCollection, setShowQuoteCollection] = useState(false)
+  const [quotes, setQuotes] = useState(() => {
+    const saved = localStorage.getItem('renzo-quotes')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [showTopicFrequency, setShowTopicFrequency] = useState(false)
+  
   // NEW v5.3 features
   const [showPerformanceAnalytics, setShowPerformanceAnalytics] = useState(false)
   const [showWritingGoals, setShowWritingGoals] = useState(false)
@@ -8499,6 +8726,22 @@ function App() {
     localStorage.setItem('renzo-quick-notes', JSON.stringify(newNotes))
     addActivity('prompt', `Captured: ${note.category} - "${note.note.slice(0, 30)}..."`)
     addToast('Note captured!', 'success')
+  }
+
+  // Quote Collection handlers
+  const saveQuote = (quote) => {
+    const newQuotes = [quote, ...quotes].slice(0, 100)
+    setQuotes(newQuotes)
+    localStorage.setItem('renzo-quotes', JSON.stringify(newQuotes))
+    addActivity('quote', `Saved quote: "${quote.text.slice(0, 30)}..."`)
+    addToast('Quote saved!', 'success')
+  }
+  
+  const deleteQuote = (index) => {
+    const newQuotes = quotes.filter((_, i) => i !== index)
+    setQuotes(newQuotes)
+    localStorage.setItem('renzo-quotes', JSON.stringify(newQuotes))
+    addToast('Quote deleted', 'info')
   }
 
   // Quick Export All - One click backup of everything
@@ -8720,6 +8963,8 @@ function App() {
       if (key === '=') setShowSEOChecklist(true)  // = for SEO Checklist
       if (key === '-') setShowToneAdjuster(true)  // - for Tone Adjuster
       if (key === '\\') setShowCLIRunner(true)  // \ for CLI Command Runner
+      if (key === ']') setShowQuoteCollection(true)  // ] for Quote Collection
+      if (key === '\'') setShowTopicFrequency(true)  // ' for Topic Frequency Analyzer
       if (key === ']') handleQuickExportAll()  // ] for Quick Export All
       if (key === '*') setShowDraftAnalyzer(true)  // * for Draft Analyzer
       if (key === '(') setShowFormatPreview(true)  // ( for Format Preview
@@ -9143,6 +9388,19 @@ function App() {
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
       <Scratchpad isOpen={showScratchpad} onClose={() => setShowScratchpad(false)} />
+      <QuoteCollection 
+        isOpen={showQuoteCollection} 
+        onClose={() => setShowQuoteCollection(false)}
+        quotes={quotes}
+        onSaveQuote={saveQuote}
+        onDeleteQuote={deleteQuote}
+      />
+      <TopicFrequency 
+        isOpen={showTopicFrequency} 
+        onClose={() => setShowTopicFrequency(false)}
+        ideas={contentIdeas}
+        articles={drafts}
+      />
       <BrainstormMode isOpen={showBrainstorm} onClose={() => setShowBrainstorm(false)} />
       <DailyWritingChallenge isOpen={showDailyChallenge} onClose={() => setShowDailyChallenge(false)} />
       <QuickCapture 
@@ -9333,9 +9591,13 @@ function App() {
           <span className="pin-icon">⚡</span>
           Word Sprint
         </button>
-        <button className="pinned-item" onClick={() => setShowFocusMode(true)}>
-          <span className="pin-icon">🎯</span>
-          Focus Mode
+        <button className="pinned-item" onClick={() => setShowQuoteCollection(true)}>
+          <span className="pin-icon">💬</span>
+          Quotes
+        </button>
+        <button className="pinned-item" onClick={() => setShowTopicFrequency(true)}>
+          <span className="pin-icon">📊</span>
+          Topics
         </button>
         <button className="pinned-item" onClick={() => setShowGlobalSearch(true)}>
           <span className="pin-icon">🔍</span>
@@ -9479,6 +9741,16 @@ function App() {
             <span>📊</span>
             <span>Pipeline</span>
             <span className="feature-hint">P</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowQuoteCollection(true)}>
+            <span>💬</span>
+            <span>Quotes</span>
+            <span className="feature-hint">]</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowTopicFrequency(true)}>
+            <span>📈</span>
+            <span>Topic Freq</span>
+            <span className="feature-hint">'</span>
           </button>
           <button className="feature-btn" onClick={() => setShowThread(true)}>
             <span>🐦</span>

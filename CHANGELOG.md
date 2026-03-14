@@ -1,4 +1,35 @@
 
+## [5.9.0] — March 14, 2026 (4:45 AM)
+
+### Added
+
+#### Quote Collection (NEW - Keyboard: ] key)
+- Save and organize notable quotes from research
+- Categorize quotes by type (Science, Motivation, Technique, Nutrition, etc.)
+- Quick copy-to-clipboard functionality
+- Persistent storage (up to 100 quotes)
+- Filter by category
+- Added to pinned bar for quick access
+
+#### Topic Frequency Analyzer (NEW - Keyboard: ' key)
+- Visualize which topics appear most in your ideas and articles
+- Bar chart showing top 20 topics with frequency counts
+- Content Gap detection - identifies important fitness topics you haven't covered
+- Shows total ideas, articles, and unique topic counts
+- Helps identify content opportunities and gaps
+
+### Changed
+- Version bump to v5.9
+- Added Quotes and Topics buttons to pinned bar
+- Added Quotes and Topic Freq to feature buttons row
+
+### Improved
+- CSS styling for new Quote Collection modal
+- CSS styling for Topic Frequency Analyzer with gradient bars
+- Better visual hierarchy for new components
+
+---
+
 ## [5.8.0] — March 14, 2026 (4:15 AM)
 
 ### Added
