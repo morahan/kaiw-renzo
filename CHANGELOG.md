@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.9.0] — March 13, 2026
+
+### Added
+
+#### Quick Export All (Key ])
+- One-click full backup of all data
+- Exports: drafts, ideas, hooks, headlines, references, notes, activities, research queue, series, pipeline, writing history, velocity history, inspiration board, reading list, clipboard history, and settings
+- Downloads as timestamped JSON file
+- Quick access button in header (📦)
+
+#### Featured Article Section
+- Highlights top-performing article on dashboard
+- Shows engagement score, reads, shares
+- Click to view full analytics
+- Animated entrance
+
+### Changed
+- Updated version badge to v4.9 (was v4.7 in index.html)
+
+### Improvements
+- Added keyboard shortcut (]) for Quick Export All
+- Enhanced header with export button
+- Better visual hierarchy on dashboard
+
 ## [4.7.0] — March 13, 2026
 
 ### Added

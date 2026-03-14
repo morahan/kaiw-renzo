@@ -3908,6 +3908,7 @@ function KeyboardShortcuts({ isOpen, onClose }) {
     { key: 'E', action: 'Export Drafts' },
     { key: 'L', action: 'Changelog' },
     { key: '/', action: 'Search Articles' },
+    { key: ']', action: 'Quick Export All' },
     { key: 'Esc', action: 'Close Modal' },
   ]
   
@@ -6488,6 +6489,53 @@ function App() {
     addToast('Note captured!', 'success')
   }
 
+  // Quick Export All - One click backup of everything
+  const handleQuickExportAll = () => {
+    try {
+      const allData = {
+        // Core data
+        drafts: JSON.parse(localStorage.getItem('renzo-drafts') || '[]'),
+        ideas: JSON.parse(localStorage.getItem('renzo-content-ideas') || '[]'),
+        hooks: JSON.parse(localStorage.getItem('renzo-saved-hooks') || '[]'),
+        headlines: JSON.parse(localStorage.getItem('renzo-generated-headlines') || '[]'),
+        references: JSON.parse(localStorage.getItem('renzo-references') || '[]'),
+        quickNotes: JSON.parse(localStorage.getItem('renzo-quick-notes') || '[]'),
+        activities: JSON.parse(localStorage.getItem('renzo-activities') || '[]'),
+        // Research & Queue
+        researchQueue: JSON.parse(localStorage.getItem('renzo-research-queue') || '[]'),
+        // Series & Pipeline
+        articleSeries: JSON.parse(localStorage.getItem('renzo-article-series') || '[]'),
+        pipeline: JSON.parse(localStorage.getItem('renzo-pipeline') || '[]'),
+        // Writing data
+        writingHistory: JSON.parse(localStorage.getItem('renzo-writing-history') || '[]'),
+        velocityHistory: JSON.parse(localStorage.getItem('renzo-velocity-history') || '[]'),
+        // Collections
+        inspirationBoard: JSON.parse(localStorage.getItem('renzo-inspiration-board') || '[]'),
+        readingList: JSON.parse(localStorage.getItem('renzo-reading-list') || '[]'),
+        clipboardHistory: JSON.parse(localStorage.getItem('renzo-clipboard-history') || '[]'),
+        // Settings & Metrics
+        settings: appSettings,
+        mood: mood,
+        dailyWordGoal: dailyWordGoal,
+        energyLevel: energyLevel,
+        // Metadata
+        exportedAt: new Date().toISOString(),
+        version: '4.9'
+      }
+      
+      const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `renzo-full-backup-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      addToast('Full backup exported! 📦', 'success')
+    } catch (e) {
+      addToast('Export failed: ' + e.message, 'error')
+    }
+  }
+
   // Content Ideas Bank functions
   const saveContentIdea = (idea) => {
     const newIdeas = [{ ...idea, id: Date.now(), date: new Date().toISOString(), status: 'pending' }, ...contentIdeas]
@@ -6643,6 +6691,7 @@ function App() {
       if (key === '`') setShowQuickAIPrompt(true)  // ` for Quick AI Prompt
       if (key === '=') setShowSEOChecklist(true)  // = for SEO Checklist
       if (key === '-') setShowToneAdjuster(true)  // - for Tone Adjuster
+      if (key === ']') handleQuickExportAll()  // ] for Quick Export All
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -7097,7 +7146,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v4.8</span>
+          <span className="logo-badge">v4.9</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -7128,6 +7177,13 @@ function App() {
           
           <ThemeToggle isDark={isDarkMode} onToggle={toggleTheme} />
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />
+          <button 
+            className="export-all-btn" 
+            onClick={handleQuickExportAll}
+            title="Quick Export All (backup everything)"
+          >
+            📦
+          </button>
           <button 
             className="sound-toggle" 
             onClick={() => { 
@@ -7514,6 +7570,54 @@ function App() {
           </div>
         </section>
 
+        {/* Featured Article Highlight */}
+        {recentArticles.length > 0 && (
+          <section className="featured-section">
+            <div className="section-header">
+              <h2 className="section-title">
+                <span className="section-icon">⭐</span>
+                Featured Article
+              </h2>
+            </div>
+            {(() => {
+              const topArticle = [...recentArticles].sort((a, b) => b.engagement - a.engagement)[0]
+              return (
+                <div className="featured-card" onClick={() => setExpandedArticle(recentArticles.indexOf(topArticle))}>
+                  <div className="featured-badge">🏆 Top Performer</div>
+                  <div className="featured-content">
+                    <span 
+                      className="featured-category"
+                      style={{ color: categoryColors[topArticle.category] }}
+                    >
+                      {topArticle.category}
+                    </span>
+                    <h3 className="featured-title">{topArticle.title}</h3>
+                    <div className="featured-stats">
+                      <span className="featured-stat">
+                        <strong>{topArticle.engagement}</strong>/10 engagement
+                      </span>
+                      <span className="featured-stat">
+                        <strong>{topArticle.reads.toLocaleString()}</strong> reads
+                      </span>
+                      <span className="featured-stat">
+                        <strong>{Math.round(topArticle.reads * 0.12)}</strong> shares
+                      </span>
+                    </div>
+                    <div className="featured-meta">
+                      <span>{formatDate(topArticle.date)}</span>
+                      <span>•</span>
+                      <span>{topArticle.words.toLocaleString()} words</span>
+                    </div>
+                  </div>
+                  <div className="featured-action">
+                    <button className="view-btn">View Analytics →</button>
+                  </div>
+                </div>
+              )
+            })()}
+          </section>
+        )}
+
         <section className="feed-section">
           <div className="section-header">
             <h2 className="section-title">
@@ -7779,7 +7883,7 @@ function App() {
       <KeyboardShortcutsFooter onShowShortcuts={() => setShowShortcuts(true)} />
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v4.8 • Press ⌘K for commands, ? for all shortcuts</p>
+        <p className="footer-version">v4.9 • Press ⌘K for commands, ? for all shortcuts</p>
       </footer>
     </div>
   )
