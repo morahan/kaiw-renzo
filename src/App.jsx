@@ -3934,6 +3934,104 @@ function KeyboardShortcuts({ isOpen, onClose }) {
   )
 }
 
+// Daily Writing Challenge - Gamified daily writing prompts
+function DailyWritingChallenge({ isOpen, onClose, onSelect }) {
+  const [completed, setCompleted] = useState(false)
+  const [streak, setStreak] = useState(0)
+  
+  // Deterministic daily challenge based on date
+  const dailyChallenges = [
+    { id: 1, type: 'hook', prompt: 'Write 3 different hooks for an article about protein timing', emoji: '🎣' },
+    { id: 2, type: 'headline', prompt: 'Generate 5 headlines using the "Number + Benefit" formula', emoji: '📰' },
+    { id: 3, type: 'myth', prompt: 'Debunk a popular fitness myth in 3 sentences', emoji: '🚫' },
+    { id: 4, type: 'cta', prompt: 'Write 3 different CTAs for a strength training article', emoji: '💪' },
+    { id: 5, type: 'thread', prompt: 'Outline a 5-tweet thread on sleep optimization', emoji: '🧵' },
+    { id: 6, type: 'sci', prompt: 'Explain the mechanisms of muscle protein synthesis', emoji: '🔬' },
+    { id: 7, type: 'compare', prompt: 'Compare HIIT vs. steady-state cardio for fat loss', emoji: '⚔️' },
+  ]
+  
+  const today = new Date()
+  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000)
+  const todayChallenge = dailyChallenges[dayOfYear % dailyChallenges.length]
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('renzo-daily-challenge')
+    if (saved) {
+      const data = JSON.parse(saved)
+      if (data.date === today.toISOString().split('T')[0]) {
+        setCompleted(data.completed)
+      }
+    }
+    const savedStreak = localStorage.getItem('renzo-challenge-streak') || 0
+    setStreak(parseInt(savedStreak))
+  }, [])
+  
+  const markComplete = () => {
+    setCompleted(true)
+    const newStreak = streak + 1
+    setStreak(newStreak)
+    localStorage.setItem('renzo-daily-challenge', JSON.stringify({
+      date: today.toISOString().split('T')[0],
+      completed: true
+    }))
+    localStorage.setItem('renzo-challenge-streak', newStreak.toString())
+  }
+  
+  const resetChallenge = () => {
+    setCompleted(false)
+    localStorage.setItem('renzo-daily-challenge', JSON.stringify({
+      date: today.toISOString().split('T')[0],
+      completed: false
+    }))
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content challenge-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🎯 Daily Writing Challenge</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="challenge-card">
+          <div className="challenge-emoji">{todayChallenge.emoji}</div>
+          <div className="challenge-date">{today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+          <div className="challenge-prompt">{todayChallenge.prompt}</div>
+          
+          {completed ? (
+            <div className="challenge-complete">
+              <span className="check-emoji">✅</span>
+              <p>Challenge completed!</p>
+              <button className="secondary-btn" onClick={resetChallenge}>Mark Incomplete</button>
+            </div>
+          ) : (
+            <button className="primary-btn challenge-btn" onClick={markComplete}>
+              ✓ Mark as Complete
+            </button>
+          )}
+        </div>
+        
+        <div className="challenge-streak">
+          <span className="streak-fire">🔥</span>
+          <span className="streak-count">{streak}</span>
+          <span className="streak-label">day streak</span>
+        </div>
+        
+        <div className="challenge-tips">
+          <h4>💡 Challenge Tips</h4>
+          <ul>
+            <li>Complete daily to build your streak</li>
+            <li>Use completed challenges as article inspiration</li>
+            <li>Challenge resets at midnight local time</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Brainstorm Mode - Quick idea generation
 function BrainstormMode({ isOpen, onClose, onSelect }) {
   const [ideas, setIdeas] = useState([])
@@ -6349,6 +6447,7 @@ function App() {
   const [showTopicGenerator, setShowTopicGenerator] = useState(false)
   const [showClipboard, setShowClipboard] = useState(false)
   const [showBrainstorm, setShowBrainstorm] = useState(false)
+  const [showDailyChallenge, setShowDailyChallenge] = useState(false)
   const [showExportDrafts, setShowExportDrafts] = useState(false)
   const [showChangelog, setShowChangelog] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
@@ -6662,6 +6761,7 @@ function App() {
       if (key === 'G') setShowTopicGenerator(true)
       if (key === 'C' && !e.metaKey && !e.ctrlKey) setShowClipboard(true)
       if (key === 'B') setShowBrainstorm(true)
+      if (key === '!') setShowDailyChallenge(true)  // Shift+1 for Daily Challenge
       if (key === 'Q') setShowQuickCapture(true)
       if (key === 'E') setShowExportDrafts(true)
       if (key === 'L') setShowChangelog(true)
@@ -7053,6 +7153,7 @@ function App() {
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
       <BrainstormMode isOpen={showBrainstorm} onClose={() => setShowBrainstorm(false)} />
+      <DailyWritingChallenge isOpen={showDailyChallenge} onClose={() => setShowDailyChallenge(false)} />
       <QuickCapture 
         isOpen={showQuickCapture} 
         onClose={() => setShowQuickCapture(false)}
@@ -7146,7 +7247,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v4.9</span>
+          <span className="logo-badge">v5.0</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -7159,6 +7260,16 @@ function App() {
               />
             </div>
             <span className="goal-count">{wordsWritten}/{dailyWordGoal}</span>
+          </div>
+          
+          {/* Daily Challenge Widget */}
+          <div 
+            className="daily-challenge-widget" 
+            onClick={() => setShowDailyChallenge(true)}
+            title="Daily Writing Challenge"
+          >
+            <span className="challenge-icon">🎯</span>
+            <span className="challenge-label">Challenge</span>
           </div>
           
           {/* Quick Mood Indicator */}

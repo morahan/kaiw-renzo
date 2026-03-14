@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.0] — March 13, 2026
+
+### Added
+
+#### Daily Writing Challenge (Shift+1)
+- Gamified daily writing prompts that change each day
+- 7 rotating challenge types: hooks, headlines, myths, CTAs, threads, science, comparisons
+- Streak tracking - build consecutive day streaks
+- Header widget for quick access
+- Mark complete/incomplete toggle
+- Persistent storage with localStorage
+- Challenge resets at midnight local time
+
+#### Quick Access Header Widget
+- Daily Challenge widget added to header
+- One-click access to today's writing challenge
+
+### Changed
+- Version bump to v5.0
+- Added Shift+1 keyboard shortcut for Daily Challenge
+
 ## [4.9.0] — March 13, 2026
 
 ### Added

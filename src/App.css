@@ -47,6 +47,139 @@
   text-align: right;
 }
 
+/* ========== DAILY CHALLENGE WIDGET & MODAL ========== */
+.daily-challenge-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.daily-challenge-widget:hover {
+  border-color: var(--accent-orange);
+  background: var(--bg-hover);
+}
+
+.challenge-icon {
+  font-size: 1rem;
+}
+
+.challenge-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.challenge-modal {
+  width: 90%;
+  max-width: 480px;
+}
+
+.challenge-card {
+  text-align: center;
+  padding: 2rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.challenge-emoji {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.challenge-date {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.challenge-prompt {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.challenge-btn {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.challenge-complete {
+  text-align: center;
+}
+
+.check-emoji {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.challenge-complete p {
+  color: var(--accent-green);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.challenge-streak {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.streak-fire {
+  font-size: 1.5rem;
+}
+
+.streak-count {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-orange);
+}
+
+.streak-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.challenge-tips {
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.challenge-tips h4 {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.challenge-tips ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.challenge-tips li {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
 /* ========== WRITING MOOD TRACKER ========== */
 .mood-modal {
   width: 90%;
