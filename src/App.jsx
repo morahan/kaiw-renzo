@@ -10190,6 +10190,11 @@ function App() {
             <span>Topic Freq</span>
             <span className="feature-hint">'</span>
           </button>
+          <button className="feature-btn" onClick={() => setShowWritingPrompts(true)}>
+            <span>💡</span>
+            <span>Prompts</span>
+            <span className="feature-hint">}</span>
+          </button>
           <button className="feature-btn" onClick={() => setShowThread(true)}>
             <span>🐦</span>
             <span>Thread</span>
