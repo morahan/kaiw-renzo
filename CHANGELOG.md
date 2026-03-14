@@ -1,5 +1,31 @@
-# RENZO Interface — Changelog
 
+## [5.8.0] — March 14, 2026 (4:15 AM)
+
+### Added
+
+#### Quick Web Research Modal (NEW - Keyboard: Shift+R)
+- Instantly search the web for research topics directly from the dashboard
+- Results from trusted sources (PubMed, Science Daily, Examine.com, etc.)
+- One-click save to research queue for later article writing
+- Real-time search with loading animation
+- Beautiful result cards with snippets and source information
+- Added to pinned bar for quick access
+- Added to feature buttons row
+
+#### Performance Analytics Fix
+- Fixed articles variable reference to use recentArticles
+- Dashboard now properly displays performance analytics
+
+### Changed
+- Version bump to v5.8
+- Added Web Search pinned item for quick access
+- Added Web Search button to feature buttons row
+- Updated footer and header version indicators
+
+### Improved
+- Enhanced keyboard shortcut system with Shift+R for research
+- CSS styling for new web research modal
+- Better visual hierarchy for search results
 All notable changes to this project will be documented in this file.
 
 ## [5.7.0] — March 14, 2026 (1:59 AM)

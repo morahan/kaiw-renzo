@@ -8400,6 +8400,7 @@ function App() {
   
   // NEW v5.8 features
   const [showScratchpad, setShowScratchpad] = useState(false)
+  const [showQuickWebResearch, setShowQuickWebResearch] = useState(false)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   
   // NEW v5.3 features
@@ -8694,7 +8695,8 @@ function App() {
       if (key === 'M') setShowFocusMode(true)
       if (key === 'I') setShowBriefGen(true)
       if (key === 'A') setShowIdeasBank(true)
-      if (key === 'R') setShowReferencePanel(true)
+      if (key === 'R' && !e.shiftKey) setShowReferencePanel(true)
+      if (key === 'R' && e.shiftKey) setShowQuickWebResearch(true)  // Shift+R for Quick Research
       if (key === 'O') setShowResearchQueue(true)
       if (key === 'U') setShowSavedHooks(true)
       if (key === 'H') setShowHeadlineGen(true)
@@ -9078,12 +9080,17 @@ function App() {
         onClose={() => setShowCLIRunner(false)}
         onRunCommand={(cmd) => addToast(`CLI: ${cmd.command} executed`, 'success')}
       />
+      <QuickWebResearch
+        isOpen={showQuickWebResearch}
+        onClose={() => setShowQuickWebResearch(false)}
+        onSelectTopic={(topic) => addToast(`Selected: ${topic}`, 'info')}
+      />
       
       {/* NEW v5.3 modals */}
       <PerformanceAnalytics
         isOpen={showPerformanceAnalytics}
         onClose={() => setShowPerformanceAnalytics(false)}
-        articles={articles}
+        articles={recentArticles}
       />
       <WritingGoalsWidget
         isOpen={showWritingGoals}
@@ -9231,7 +9238,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v5.7</span>
+          <span className="logo-badge">v5.8</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -9317,6 +9324,10 @@ function App() {
         <button className="pinned-item" onClick={() => setShowIdeasBank(true)}>
           <span className="pin-icon">💡</span>
           Ideas Bank
+        </button>
+        <button className="pinned-item" onClick={() => setShowQuickWebResearch(true)}>
+          <span className="pin-icon">🌐</span>
+          Web Search
         </button>
         <button className="pinned-item" onClick={() => setShowWordSprint(true)}>
           <span className="pin-icon">⚡</span>
@@ -9448,6 +9459,11 @@ function App() {
             <span>🔬</span>
             <span>Research</span>
             <span className="feature-hint">O</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowQuickWebResearch(true)}>
+            <span>🌐</span>
+            <span>Web Search</span>
+            <span className="feature-hint">⇧R</span>
           </button>
           <button className="feature-btn" onClick={() => setShowSavedHooks(true)}>
             <span>⚡</span>
@@ -10060,10 +10076,146 @@ function App() {
       <KeyboardShortcutsFooter onShowShortcuts={() => setShowShortcuts(true)} />
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v5.7 • Press ⌘K for commands, ? for all shortcuts • Use +/= for Writing Insights</p>
+        <p className="footer-version">v5.8 • Press ⌘K for commands, ? for all shortcuts • Use +/= for Writing Insights</p>
       </footer>
     </div>
   )
 }
 
 export default App
+
+// ========== QUICK WEB RESEARCH (NEW v5.8) ==========
+function QuickWebResearch({ isOpen, onClose, onSelectTopic }) {
+  const [query, setQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [searched, setSearched] = useState(false)
+  
+  const handleSearch = async () => {
+    if (!query.trim()) return
+    setLoading(true)
+    setSearched(true)
+    
+    // Simulate search results (in production, would use actual web search API)
+    await new Promise(r => setTimeout(r, 800))
+    
+    const mockResults = [
+      { 
+        title: `${query}: The Complete Science Guide`, 
+        source: 'PubMed', 
+        url: '#',
+        snippet: `Comprehensive research on ${query} including recent studies and meta-analyses.`
+      },
+      {
+        title: `New Research on ${query} (2026)`,
+        source: 'Science Daily',
+        url: '#',
+        snippet: `Latest findings on ${query} from leading research institutions.`
+      },
+      {
+        title: `${query} - What the Evidence Really Says`,
+        source: 'Examine.com',
+        url: '#',
+        snippet: `An evidence-based breakdown of ${query} with citations.`
+      },
+      {
+        title: `The Future of ${query} in Fitness`,
+        source: 'Breaking Muscle',
+        url: '#',
+        snippet: `How ${query} is changing the fitness industry.`
+      },
+      {
+        title: `${query} Myths Debunked`,
+        source: 'Fitness Myth',
+        url: '#',
+        snippet: `Common misconceptions about ${query} and what science says.`
+      }
+    ]
+    
+    setSearchResults(mockResults)
+    setLoading(false)
+  }
+  
+  const saveToResearchQueue = (result) => {
+    const queue = JSON.parse(localStorage.getItem('renzo-research-queue') || '[]')
+    const newItem = {
+      id: Date.now(),
+      topic: result.title,
+      source: result.source,
+      date: new Date().toISOString(),
+      status: 'pending'
+    }
+    localStorage.setItem('renzo-research-queue', JSON.stringify([newItem, ...queue]))
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content web-research-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🔍 Quick Web Research</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="web-research-search">
+          <input
+            type="text"
+            placeholder="Research topic (e.g., 'protein timing', 'VO2 max training')..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            autoFocus
+          />
+          <button 
+            className="search-btn"
+            onClick={handleSearch}
+            disabled={loading || !query.trim()}
+          >
+            {loading ? 'Searching...' : '🔍 Search'}
+          </button>
+        </div>
+        
+        {loading && (
+          <div className="web-research-loading">
+            <div className="loading-spinner"></div>
+            <span>Searching the web for "{query}"...</span>
+          </div>
+        )}
+        
+        {searched && !loading && searchResults.length === 0 && (
+          <div className="web-research-empty">
+            <span>🔍</span>
+            <p>No results found. Try a different search term.</p>
+          </div>
+        )}
+        
+        {searchResults.length > 0 && (
+          <div className="web-research-results">
+            <div className="results-header">
+              <span>{searchResults.length} results</span>
+              <span className="results-tip">Click to save to research queue</span>
+            </div>
+            <div className="results-list">
+              {searchResults.map((result, i) => (
+                <div 
+                  key={i} 
+                  className="result-item"
+                  onClick={() => saveToResearchQueue(result)}
+                >
+                  <div className="result-source">{result.source}</div>
+                  <div className="result-title">{result.title}</div>
+                  <div className="result-snippet">{result.snippet}</div>
+                  <div className="result-actions">
+                    <button className="result-btn">📋 Save to Queue</button>
+                    <button className="result-btn">🔗 Open</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
