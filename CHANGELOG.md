@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.3.0] — March 13, 2026
+
+### Added
+
+#### Performance Analytics (Key: !)
+- New modal with comprehensive performance metrics
+- Time range filtering: Week, Month, Year
+- Key metrics displayed:
+  - 📝 Total articles written
+  - 💬 Average engagement score
+  - 👁️ Total reads across content
+  - 🔥 Top performing category
+- Trend indicators showing up/down movement vs previous periods
+- Key insights section with data-driven recommendations
+- Responsive grid layout for metrics cards
+
+#### Writing Goals Widget (Key: @)
+- Goal creation and tracking system
+- Support for multiple goal types: words, articles, threads, hours
+- Visual progress bars with percentage indicators
+- Quick progress increment buttons
+- Persistent storage with localStorage
+- Goal completion badges
+- Delete goals functionality
+- Deadline tracking for weekly goals
+
+### Changed
+- Version bump to v5.3
+- Updated footer to reflect v5.3
+- Added new keyboard shortcuts (! for Analytics, @ for Goals)
+- Enhanced UI with gradient progress bars and improved visual feedback
+
 ## [5.2.0] — March 13, 2026
 
 ### Added
