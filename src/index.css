@@ -3511,3 +3511,90 @@ textarea:focus {
   color: var(--text-primary);
   border-color: var(--border-hover);
 }
+
+/* ========== QUICK TWEET BUTTON (NEW v6.4) ========== */
+.quick-tweet-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  background: linear-gradient(135deg, #1da1f2, #0d8ecf);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quick-tweet-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(29, 161, 242, 0.4);
+}
+
+.quick-tweet-btn span:first-child {
+  font-size: 1rem;
+}
+
+/* ========== TIME SINCE LAST PUBLISH (NEW v6.4) ========== */
+.time-since-publish {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+}
+
+.time-since-publish:hover {
+  border-color: var(--accent-blue);
+}
+
+.time-icon {
+  font-size: 1rem;
+}
+
+.time-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.time-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.time-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.time-alert {
+  font-size: 0.9rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.time-since-publish:has(.time-alert) {
+  border-color: var(--accent-orange);
+  background: rgba(249, 115, 22, 0.1);
+}
+
+/* ========== VERSION BADGE v6.4 ========== */
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent-purple));
+  color: white;
+  border-radius: 12px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}

@@ -1,3 +1,16 @@
+## [6.4.0] — March 14, 2026 (11:03 AM) [TINKER SESSION]
+
+### Added
+- **Quick Tweet Button** — One-click X/Twitter post access from header
+- **Time Since Last Publish Indicator** — Visual reminder of when you last shipped an article
+- **Enhanced Daily Progress Ring** — Better visual feedback for word count goals
+- **Updated Version Badge** — Gradient glow effect on the logo badge
+
+### Changed
+- Updated version to v6.4 across all files
+
+---
+
 ## [6.3.0] — March 14, 2026 (10:24 AM) [TINKER SESSION]
 
 ### Added

@@ -2347,6 +2347,14 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '6.4', date: '2026-03-14', changes: [
+      '🎉 New Release: v6.4',
+      'Added Quick Tweet Button — One-click X/Twitter post from header',
+      'Added Time Since Last Publish indicator — Visual reminder of when you last shipped',
+      'Enhanced daily progress ring with better visual feedback',
+      'Updated version badge with gradient glow effect',
+      'Improved header layout for better productivity tracking'
+    ]},
     { version: '6.1', date: '2026-03-14', changes: [
       '🎉 New Release: v6.1',
       'Added Quick Stats Widget in header — real-time view count, shares, and engagement at a glance',
@@ -9508,6 +9516,27 @@ function App() {
     return '🌱'
   }
 
+  // Time Since Last Publish (NEW v6.4)
+  const getTimeSinceLastPublish = () => {
+    const publishedArticles = drafts.filter(d => d.status === 'published' || d.published)
+    if (publishedArticles.length === 0) {
+      return { days: 0, hours: 0, isUrgent: false }
+    }
+    
+    const sorted = [...publishedArticles].sort((a, b) => new Date(b.date) - new Date(a.date))
+    const lastPublished = new Date(sorted[0].date)
+    const now = new Date()
+    const diffMs = now - lastPublished
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    
+    return {
+      days: diffDays,
+      hours: diffHours,
+      isUrgent: diffDays >= 2
+    }
+  }
+
   const hour = currentTime.getHours()
   const getGreeting = () => {
     if (hour < 12) return "Good morning"
@@ -9898,7 +9927,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v6.1</span>
+          <span className="logo-badge">v6.4</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -9970,6 +9999,37 @@ function App() {
             <span>⚡</span>
             <span>Quick Sprint</span>
           </button>
+          
+          {/* Quick Tweet Button (NEW v6.4) */}
+          <button 
+            className="quick-tweet-btn"
+            onClick={() => setShowQuickTweet(true)}
+            title="🐦 Quick Tweet - Fast X post"
+          >
+            <span>🐦</span>
+            <span>Tweet</span>
+          </button>
+          
+          {/* Time Since Last Publish Indicator (NEW v6.4) */}
+          <div 
+            className="time-since-publish"
+            title="Time since last published article"
+          >
+            <span className="time-icon">📤</span>
+            <div className="time-info">
+              <span className="time-value">
+                {getTimeSinceLastPublish().days > 0 
+                  ? `${getTimeSinceLastPublish().days}d` 
+                  : getTimeSinceLastPublish().hours > 0 
+                    ? `${getTimeSinceLastPublish().hours}h`
+                    : '<1h'}
+              </span>
+              <span className="time-label">last publish</span>
+            </div>
+            {getTimeSinceLastPublish().days >= 2 && (
+              <span className="time-alert">⚠️</span>
+            )}
+          </div>
           
           {/* Quick Stats Widget (NEW v6.1) */}
           <div className="quick-stats-widget" title="Quick Stats - Views, shares & engagement">
