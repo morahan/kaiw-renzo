@@ -1,4 +1,4 @@
-# RENZO — Content Writing Interface (v5.4)
+# RENZO — Content Writing Interface (v5.7)
 
 A comprehensive web-based writing and content management interface for fitness article creation, built with React + Vite.
 
@@ -63,8 +63,9 @@ A comprehensive web-based writing and content management interface for fitness a
 ```
 ⌘K              Command Palette
 Ctrl+Space      Mini Command Bar
-!               Performance Analytics (NEW v5.3)
-@               Writing Goals (NEW v5.3)
++/=             Writing Time Insights (NEW v5.7)
+!               Performance Analytics
+@               Writing Goals
 3               Global Search
 ,               Settings
 4               Data Management
@@ -74,6 +75,7 @@ Ctrl+Space      Mini Command Bar
 9               Inspiration Board
 0               Reading List
 `               Quick AI Prompt
+E               Export Drafts
 H               Headline Generator
 I               Article Brief Generator
 D               Quick Draft
@@ -134,6 +136,23 @@ npm run preview
 - Smooth transitions and animations
 - Mobile-responsive design
 - Accessibility-first approach
+
+## What's New in v5.7
+
+✅ **Writing Time Insights Modal** (+/= key) — Analyze when you write best
+  - Shows activity breakdown by day of week with visual charts
+  - Identifies your peak productivity hours
+  - Weekly session counts and average words per session
+  - Smart recommendations for optimal writing schedule
+  - Interactive bar charts with hover effects
+
+✅ **Enhanced Export Drafts Panel** (E key) — Multiple format support
+  - **NEW: Notion Format** — Exports in Notion-compatible block structure
+  - **NEW: HTML Format** — Self-contained professional HTML page
+  - **Improved Markdown** — Better formatting with metadata
+  - **JSON** — Complete data with all metadata
+  - Radio button format selection with descriptions
+  - Now shows what each format is best for
 
 ## What's New in v5.4
 
