@@ -1,3 +1,21 @@
+## [5.11.0] — March 14, 2026 (7:15 AM) [TINKER SESSION]
+
+### Added
+- **Writing Prompts Generator** (Keyboard: Shift+] or FAB)
+  - 7 prompt categories: Myth-Bust, How-To, Comparison, Listicle, Hot-Take, Science, Longevity
+  - Random prompt generation with one click
+  - Copy prompt to clipboard
+  - "Use This" to start writing with the prompt
+  - Recent prompts history (last 5)
+  - All prompts are fitness/content themed
+
+- **NEW v5.11 UI Enhancements**
+  - Added Writing Prompts to FAB menu
+  - New keyboard shortcut (Shift+] for Prompts)
+  - Footer updated to v5.11 with new feature callouts
+
+---
+
 ## [5.10.0] — March 14, 2026 (6:00 AM) [TINKER SESSION]
 
 ### Added
