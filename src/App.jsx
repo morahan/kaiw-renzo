@@ -10332,7 +10332,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v7.0</span>
+          <span className="logo-badge">v7.1</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -10380,6 +10380,15 @@ function App() {
                 className="weekly-bar-fill" 
                 style={{ width: `${Math.min((weeklyWords / weeklyGoal) * 100, 100)}%` }}
               />
+            </div>
+          </div>
+          
+          {/* Today's Words Widget (NEW v7.1) */}
+          <div className="today-words-widget" title="Words written today">
+            <span className="today-icon">✍️</span>
+            <div className="today-info">
+              <span className="today-value">{wordsWritten.toLocaleString()}</span>
+              <span className="today-label">today</span>
             </div>
           </div>
           

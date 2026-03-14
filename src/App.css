@@ -101,6 +101,49 @@
   transition: width 0.3s ease;
 }
 
+/* ========== TODAY'S WORDS WIDGET (v7.1) ========== */
+.today-words-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.today-words-widget:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+}
+
+.today-icon {
+  font-size: 1rem;
+}
+
+.today-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.today-value {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+
+.today-label {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 /* ========== DAILY CHALLENGE WIDGET & MODAL ========== */
 .daily-challenge-widget {
   display: flex;
@@ -1412,11 +1455,19 @@ button:hover::after { opacity: 1; }
 .logo-badge {
   font-size: 0.7rem;
   padding: 0.25rem 0.5rem;
-  background: var(--bg-elevated);
-  border: 1px solid var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 50%, var(--accent-blue) 100%);
+  background-size: 200% 200%;
+  border: 1px solid transparent;
   border-radius: 12px;
-  color: var(--accent);
-  font-weight: 600;
+  color: white;
+  font-weight: 700;
+  animation: badgeGradient 3s ease infinite;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+@keyframes badgeGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 /* Hero section improvements */

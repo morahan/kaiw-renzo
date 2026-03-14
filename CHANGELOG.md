@@ -1,3 +1,48 @@
+## [7.1.0] — March 14, 2026 (5:00 PM) [TINKER SESSION]
+
+### Added
+- **Today's Words Widget (v7.1)**
+  - New standalone word count display in header
+  - Shows today's total words written with accent color
+  - Hover effect with glow animation
+  - Quick glance at daily progress without the ring
+
+### Changed
+- Updated version badge to v7.1 in header, footer, and index.html
+
+---
+
+## [7.0.0] — March 14, 2026 (4:00 PM) [TINKER SESSION]
+
+### Added
+- **Quick Ship It Panel (v7.0)**
+  - One-click publish preparation workflow
+  - Select draft → review → generate thread → ship
+  - Auto-generates X/Twitter thread from article content
+  - Optional Notion sync and scheduling
+  - Keyboard shortcut Shift+!
+  - Ship It button in header toolbar
+
+### Changed
+- Updated version badge to v7.0 in header, footer, and index.html
+
+---
+
+## [6.9.0] — March 14, 2026 (3:45 PM) [TINKER SESSION]
+
+### Added
+- **Floating Help Button**
+  - Quick access to shortcuts from anywhere (bottom-left)
+  - Quick Shortcuts Tooltip on click
+  - Animated gradient glow effect on version badge
+  - Feature notification dot with pulse animation
+  - Improved header visual polish with gradient borders
+
+### Changed
+- Updated version badge to v6.9 in header, footer, and index.html
+
+---
+
 ## [6.8.0] — March 14, 2026 (3:30 PM) [TINKER SESSION]
 
 ### Added
