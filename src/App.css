@@ -5025,6 +5025,52 @@ button:hover::after { opacity: 1; }
   font-size: 1rem;
 }
 
+/* Quick Stats Widget (NEW v6.1) */
+.quick-stats-widget {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quick-stats-widget:hover {
+  border-color: var(--accent-blue);
+  background: var(--bg-hover);
+}
+
+.quick-stats-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.quick-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.quick-stat .stat-icon {
+  font-size: 0.7rem;
+}
+
+.quick-stat .stat-num {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.quick-stats-label {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+}
+
 /* Enhanced Card Gradient Borders (v6.0) */
 .card-gradient-border {
   position: relative;
