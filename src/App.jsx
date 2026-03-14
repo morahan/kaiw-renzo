@@ -9455,6 +9455,23 @@ function App() {
       if (key === '{') setShowOutlineGenerator(true)  // Shift+[ for Outline Generator (📋)
       if (key === '}') setShowWritingPrompts(true)  // Shift+] for Writing Prompts (💡)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
+      
+      // Session Timer shortcuts (v5.5.1+)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'T') {
+        e.preventDefault()
+        setSessionActive(!sessionActive)
+        if (!sessionActive) {
+          addToast('⏱️ Session started', 'info')
+        } else {
+          addToast(`📊 Session ended: ${Math.floor(sessionElapsed / 60)}m ${sessionElapsed % 60}s`, 'success')
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
+        e.preventDefault()
+        setSessionElapsed(0)
+        setSessionActive(false)
+        addToast('✨ Session timer reset', 'info')
+      }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
         setShowCommandPalette(false)
