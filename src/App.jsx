@@ -9336,7 +9336,7 @@ function App() {
       if (key === '\\') setShowCLIRunner(true)  // \ for CLI Command Runner
       if (key === ']') setShowQuoteCollection(true)  // ] for Quote Collection
       if (key === '\'') setShowTopicFrequency(true)  // ' for Topic Frequency Analyzer
-      if (key === ']') handleQuickExportAll()  // ] for Quick Export All
+      if (key === '}') handleQuickExportAll()  // Shift+] for Quick Export All
       if (key === '*') setShowDraftAnalyzer(true)  // * for Draft Analyzer
       if (key === '(') setShowFormatPreview(true)  // ( for Format Preview
       if (key === ')') setShowPomodoro(true)  // ) for Pomodoro Timer
