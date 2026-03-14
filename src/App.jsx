@@ -3878,6 +3878,68 @@ function WeeklyStatsDashboard({ articles }) {
   )
 }
 
+// ========== SCRATCHPAD (NEW v5.8) ==========
+function Scratchpad({ isOpen, onClose }) {
+  const [notes, setNotes] = useState(() => {
+    return localStorage.getItem('renzo-scratchpad') || ''
+  })
+  const [copied, setCopied] = useState(false)
+  const textareaRef = useRef(null)
+
+  useEffect(() => {
+    if (isOpen && textareaRef.current) {
+      textareaRef.current.focus()
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    localStorage.setItem('renzo-scratchpad', notes)
+  }, [notes])
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(notes)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleClear = () => {
+    if (confirm('Clear all scratch notes?')) {
+      setNotes('')
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content scratchpad-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📝 Scratchpad</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="scratchpad-toolbar">
+          <button onClick={handleCopy} className={copied ? 'copied' : ''}>
+            {copied ? '✓ Copied!' : '📋 Copy All'}
+          </button>
+          <button onClick={handleClear}>🗑️ Clear</button>
+          <span className="scratchpad-hint">Auto-saves as you type</span>
+        </div>
+        <textarea
+          ref={textareaRef}
+          className="scratchpad-textarea"
+          placeholder="Quick notes, research snippets, article ideas... anything goes here. Auto-saves to localStorage."
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+        <div className="scratchpad-footer">
+          <span>{notes.length} characters</span>
+          <span>{notes.trim().split(/\s+/).filter(w => w).length} words</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Daily Quote Component
 function DailyQuote() {
   const quotes = [
@@ -8336,6 +8398,10 @@ function App() {
   // NEW v5.2 features
   const [showCLIRunner, setShowCLIRunner] = useState(false)
   
+  // NEW v5.8 features
+  const [showScratchpad, setShowScratchpad] = useState(false)
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
+  
   // NEW v5.3 features
   const [showPerformanceAnalytics, setShowPerformanceAnalytics] = useState(false)
   const [showWritingGoals, setShowWritingGoals] = useState(false)
@@ -8611,7 +8677,8 @@ function App() {
       if (key === 'J') setShowHookTester(true)
       if (key === 'Y') setShowHotTake(true)
       if (key === 'D') setShowQuickDraft(true)
-      if (key === '?') setShowShortcuts(true)
+      if (key === '?') setShowKeyboardShortcuts(true)
+      if (key === '/') setShowScratchpad(true)
       if (key === 'V') setShowVirality(true)
       if (key === 'W') setShowQuickWrite(true)
       if (key === 'X') setShowThreadFormat(true)
@@ -9068,6 +9135,7 @@ function App() {
       {showTopicGenerator && <TopicGenerator onClose={() => setShowTopicGenerator(false)} />}
       <ClipboardHistory isOpen={showClipboard} onClose={() => setShowClipboard(false)} />
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
+      <Scratchpad isOpen={showScratchpad} onClose={() => setShowScratchpad(false)} />
       <BrainstormMode isOpen={showBrainstorm} onClose={() => setShowBrainstorm(false)} />
       <DailyWritingChallenge isOpen={showDailyChallenge} onClose={() => setShowDailyChallenge(false)} />
       <QuickCapture 
