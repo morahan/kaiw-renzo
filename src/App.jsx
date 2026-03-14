@@ -2347,6 +2347,18 @@ const tips = [
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '6.0', date: '2026-03-14', changes: [
+      '🎉 Major Release: v6.0',
+      'Added Streak Protection Widget — Visual streak counter with fire indicator (7 days = on fire!)',
+      'Added Quick Session Button — One-click 5-minute writing sprint from header',
+      'Enhanced Card Gradient Borders — Animated gradient borders on hover',
+      'Added Glow Effects — glow-red, glow-green, glow-purple, glow-blue utilities',
+      'Improved Mobile Responsiveness — Better touch targets and stacked layouts',
+      'Enhanced Focus Mode — New radial gradient background for distraction-free writing',
+      'Improved Tip Banner — Gradient border animation',
+      'Added Feature Button Micro-interactions — Shimmer effect on hover',
+      'Updated version badge to v6.0 with new gradient design'
+    ]},
     { version: '5.2', date: '2026-03-13', changes: [
       'Added CLI Command Runner (\\ key) — Run renzo CLI commands directly from UI',
       'Added Quick Command Access — brief, quickbrief, status, thread, check, sync, tools',
@@ -9712,7 +9724,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v5.9</span>
+          <span className="logo-badge">v6.0</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -9757,6 +9769,33 @@ function App() {
             <span className="challenge-icon">🎯</span>
             <span className="challenge-label">Challenge</span>
           </div>
+          
+          {/* Streak Protection Widget (NEW v6.0) */}
+          <div 
+            className="streak-protection-widget" 
+            title={metrics.currentStreak > 0 ? `🔥 ${metrics.currentStreak} day streak - keep it going!` : 'Start your streak today!'}
+          >
+            <span className={`streak-icon ${metrics.currentStreak >= 7 ? 'on-fire' : metrics.currentStreak > 0 ? 'active' : ''}`}>
+              {metrics.currentStreak >= 7 ? '🔥🔥' : metrics.currentStreak >= 3 ? '🔥' : metrics.currentStreak > 0 ? '💫' : '○'}
+            </span>
+            <div className="streak-info">
+              <span className="streak-value">{metrics.currentStreak}</span>
+              <span className="streak-label">streak</span>
+            </div>
+            {metrics.currentStreak > 0 && metrics.currentStreak < 7 && (
+              <span className="streak-need">{(7 - metrics.currentStreak)} to fire</span>
+            )}
+          </div>
+          
+          {/* Quick Session Button (NEW v6.0) - 5 min sprint */}
+          <button 
+            className="quick-session-btn"
+            onClick={() => setShowWordSprint(true)}
+            title="⚡ Quick 5-min writing sprint"
+          >
+            <span>⚡</span>
+            <span>Quick Sprint</span>
+          </button>
           
           {/* Quick Mood Indicator */}
           <div 
