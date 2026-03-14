@@ -1,4 +1,4 @@
-# RENZO — Content Writing Interface (v5.3)
+# RENZO — Content Writing Interface (v5.4)
 
 A comprehensive web-based writing and content management interface for fitness article creation, built with React + Vite.
 
