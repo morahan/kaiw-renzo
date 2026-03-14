@@ -8967,6 +8967,11 @@ function App() {
   ]
   const [wordsWritten, setWordsWritten] = useState(0)
   const [showQuickWrite, setShowQuickWrite] = useState(false)
+  
+  // Session Timer (v5.5.1+)
+  const [sessionActive, setSessionActive] = useState(false)
+  const [sessionElapsed, setSessionElapsed] = useState(0)
+  
   const [todayWordCount, setTodayWordCount] = useState(() => {
     const saved = localStorage.getItem('renzo-today-word-count')
     const savedDate = localStorage.getItem('renzo-today-word-count-date')
@@ -9120,6 +9125,15 @@ function App() {
     if (savedFocus) setTodaysFocus(savedFocus)
     if (savedDrafts) setDrafts(JSON.parse(savedDrafts))
   }, [])
+
+  // Session Timer Effect (v5.5.1+)
+  useEffect(() => {
+    if (!sessionActive) return
+    const interval = setInterval(() => {
+      setSessionElapsed(prev => prev + 1)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [sessionActive])
 
   // Save drafts to localStorage
   const saveDraft = (draft) => {
@@ -10153,6 +10167,25 @@ function App() {
             </span>
             <span className="mood-text">
               {moods.find(m => m.id === mood)?.label || 'Neutral'}
+            </span>
+          </div>
+
+          {/* Session Timer Widget (v5.5.1+) */}
+          <div 
+            className={`session-timer ${sessionActive ? 'active' : ''}`}
+            onClick={() => {
+              setSessionActive(!sessionActive)
+              if (!sessionActive) {
+                addToast('⏱️ Session started', 'info')
+              } else {
+                addToast(`📊 Session ended: ${Math.floor(sessionElapsed / 60)}m ${sessionElapsed % 60}s`, 'success')
+              }
+            }}
+            title={sessionActive ? 'Click to stop session' : 'Click to start writing session'}
+          >
+            <span className="timer-icon">{sessionActive ? '⏸️' : '⏱️'}</span>
+            <span className="timer-text">
+              {String(Math.floor(sessionElapsed / 60)).padStart(2, '0')}:{String(sessionElapsed % 60).padStart(2, '0')}
             </span>
           </div>
           
