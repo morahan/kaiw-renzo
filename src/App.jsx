@@ -4286,6 +4286,112 @@ function TrendingHashtags() {
   )
 }
 
+// ========== TRENDING TOPICS PANEL (NEW v5.4) ==========
+function TrendingTopics() {
+  const [topics, setTopics] = useState(() => {
+    const saved = localStorage.getItem('renzo-trending-topics')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        if (parsed.date === new Date().toDateString()) {
+          return parsed.topics
+        }
+      } catch {}
+    }
+    // Default trending topics for fitness content
+    return [
+      { topic: 'Photobiomodulation', category: 'Longevity', virality: 9, angle: 'Red light therapy science' },
+      { topic: 'Myostatin inhibition', category: 'Science', virality: 8, angle: 'Future of muscle growth' },
+      { topic: 'Zone 2 training', category: 'Training', virality: 9, angle: 'Cardio myths busted' },
+      { topic: 'Epigenetic age reversal', category: 'Longevity', virality: 10, angle: 'Biological age optimization' },
+      { topic: 'Sleep tracking accuracy', category: 'Metrics', virality: 7, angle: 'What your device misses' },
+      { topic: 'Creatine timing', category: 'Science', virality: 6, angle: 'Does timing matter?' },
+      { topic: 'Sarcopenia prevention', category: 'Longevity', virality: 8, angle: 'Stop muscle loss' },
+      { topic: 'HRV optimization', category: 'Metrics', virality: 7, angle: 'Recovery metrics that matter' },
+    ]
+  })
+  const [copiedTopic, setCopiedTopic] = useState(null)
+  
+  const saveTopics = (newTopics) => {
+    setTopics(newTopics)
+    localStorage.setItem('renzo-trending-topics', JSON.stringify({
+      topics: newTopics,
+      date: new Date().toDateString()
+    }))
+  }
+  
+  const copyTopic = (topic) => {
+    navigator.clipboard.writeText(topic.topic)
+    setCopiedTopic(topic.topic)
+    setTimeout(() => setCopiedTopic(null), 1500)
+  }
+  
+  const getCategoryColor = (cat) => {
+    const colors = { 'Longevity': '#22c55e', 'Science': '#3b82f6', 'Training': '#f97316', 'Metrics': '#a855f7', 'Recovery': '#06b6d4' }
+    return colors[cat] || '#a1a1aa'
+  }
+  
+  const getViralityColor = (v) => {
+    if (v >= 9) return '#22c55e'
+    if (v >= 7) return '#f97316'
+    return '#a1a1aa'
+  }
+  
+  const useTopic = (topic) => {
+    // Create a quick draft from this topic
+    const draft = {
+      title: topic.topic,
+      category: topic.category,
+      hook: topic.angle,
+      content: `${topic.angle}.\n\nThe science behind ${topic.topic} shows promising results...`,
+      words: 500,
+      date: new Date().toISOString()
+    }
+    const saved = JSON.parse(localStorage.getItem('renzo-drafts') || '[]')
+    localStorage.setItem('renzo-drafts', JSON.stringify([draft, ...saved]))
+    setCopiedTopic('Draft created!')
+    setTimeout(() => setCopiedTopic(null), 2000)
+  }
+  
+  const refreshTopics = () => {
+    const shuffled = [...topics].sort(() => 0.5 - Math.random())
+    saveTopics(shuffled)
+  }
+  
+  return (
+    <div className="trending-topics">
+      <div className="topics-header">
+        <span className="topics-icon">🔥</span>
+        <span className="topics-label">Trending Topics</span>
+        <button className="topics-refresh" onClick={refreshTopics}>↻</button>
+      </div>
+      <div className="topics-list">
+        {topics.slice(0, 6).map((t, i) => (
+          <div key={i} className="topic-item">
+            <div className="topic-main" onClick={() => copyTopic(t)}>
+              <span className="topic-name">{t.topic}</span>
+              <span className="topic-angle">{t.angle}</span>
+            </div>
+            <div className="topic-meta">
+              <span className="topic-category" style={{ color: getCategoryColor(t.category) }}>
+                {t.category}
+              </span>
+              <span className="topic-virality" style={{ color: getViralityColor(t.virality) }}>
+                {t.virality}/10
+              </span>
+            </div>
+            <button className="topic-use" onClick={() => useTopic(t)}>
+              Use →
+            </button>
+            {copiedTopic === t.topic && <span className="topic-copied">Copied!</span>}
+            {copiedTopic === 'Draft created!' && copiedTopic !== t.topic === false && <span className="topic-copied">Draft created!</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // Article Brief Generator - Quick article brief from topic
 function ArticleBriefGenerator({ isOpen, onClose, onSave }) {
   const [topic, setTopic] = useState('')
@@ -8714,7 +8820,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v5.2</span>
+          <span className="logo-badge">v5.4</span>
         </div>
         <div className="header-right">
           {/* Daily Word Goal Progress */}
@@ -8853,6 +8959,7 @@ function App() {
           <StudySpotlight />
           <QuickStatGenerator />
           <TrendingHashtags />
+          <TrendingTopics />
           <ContentCalendar />
           <WritingTimer onComplete={() => addToast('Session complete! Take a break ☕', 'success')} />
           <WritingVelocityTracker />
