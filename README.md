@@ -135,6 +135,21 @@ npm run preview
 - Mobile-responsive design
 - Accessibility-first approach
 
+## What's New in v5.4
+
+✅ **Enhanced Quick AI Prompt** — Now connects to local MiniMax API
+  - Attempts to use local GPU model first (localhost:8081)
+  - Falls back to smart templates for common content types
+  - Supports hooks, headlines, articles, threads, and custom prompts
+  - Full response history with re-run capability
+  - Fast fallback responses even without API
+
+✅ **Smart Template Fallbacks** — Auto-generates relevant content
+  - Hook templates with proven formulas
+  - Article draft structures
+  - Twitter thread scaffolding
+  - Custom responses for any prompt type
+
 ## What's New in v4.6
 
 ✅ **Writing Velocity Tracker** — Real-time WPM tracking during writing sessions

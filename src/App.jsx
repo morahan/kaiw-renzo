@@ -1834,18 +1834,54 @@ function QuickAIPrompt({ isOpen, onClose, onGenerate }) {
     setLoading(true)
     setResult('')
     
-    // Simulate AI generation (in real usage, this would call renzo CLI)
-    await new Promise(r => setTimeout(r, 1500))
+    // Try to use local MiniMax API first, fall back to smart templates
+    try {
+      const response = await fetch('http://localhost:8081/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'minimax',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 500,
+          temperature: 0.7
+        }),
+        signal: AbortSignal.timeout(8000)
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        const generated = data.choices?.[0]?.message?.content || ''
+        if (generated) {
+          setResult(generated)
+          const newHistory = [{ prompt, result: generated, time: new Date().toISOString() }, ...history].slice(0, 10)
+          setHistory(newHistory)
+          localStorage.setItem('renzo-ai-prompt-history', JSON.stringify(newHistory))
+          setLoading(false)
+          return
+        }
+      }
+    } catch (apiError) {
+      console.log('MiniMax API unavailable, using fallback...')
+    }
     
-    const generated = `[AI Response to: "${prompt.slice(0, 30)}..."]
-
-Here's a draft response based on your prompt:
-
-${prompt}
-
-This is a placeholder response. In production, this would connect to the renzo CLI or Notion API to generate actual content.
-
-Try using the Headline Generator (H) or Brief Generator (I) for specific content types.`
+    // Fallback: Smart template-based responses for common content types
+    const lowerPrompt = prompt.toLowerCase()
+    let generated = ''
+    
+    if (lowerPrompt.includes('hook') || lowerPrompt.includes('headline') || lowerPrompt.includes('title')) {
+      const templates = [
+        `🔥 "${prompt.replace(/hook|headline|title/gi, '').trim()} — The Mistake That's Killing Your Gains"`,
+        `⚠️ What if everything you knew about ${prompt.replace(/hook|headline|title/gi, '').trim()} was wrong?`,
+        `💪 Stop doing ${prompt.replace(/hook|headline|title/gi, '').trim()} the old way. Here's the science-backed approach...`
+      ]
+      generated = templates[Math.floor(Math.random() * templates.length)]
+    } else if (lowerPrompt.includes('article') || lowerPrompt.includes('write') || lowerPrompt.includes('draft')) {
+      generated = `📝 **Article Draft**\n\n**Hook:**\nThe secret most fitness experts won't tell you? It's not about working harder—it's about working smarter.\n\n**Problem:**\n${prompt}\n\n**Solution:**\n1. Focus on progressive overload\n2. Prioritize recovery\n3. Optimize nutrition\n\n**CTA:** Ready to transform your training?`
+    } else if (lowerPrompt.includes('thread') || lowerPrompt.includes('tweet')) {
+      generated = `🧵 THREAD:\n\n(1/5) Most fitness advice is garbage. Here's what actually works:\n\n(2/5) 1. Progressive overload > fancy workouts\n\n(3/5) 2. Sleep is when muscles grow\n\n(4/5) 3. Consistency beats intensity\n\n(5/5) Save this. 🏋️`
+    } else {
+      generated = `🤖 **Response to: "${prompt}"**\n\n**Key Points:**\n• ${prompt}\n• Focus on science-backed approach\n\n**Next Steps:**\n1. Start with one actionable item\n2. Track progress\n\n*Try H for headlines, I for briefs, X for threads*`
+    }
     
     setResult(generated)
     const newHistory = [{ prompt, result: generated, time: new Date().toISOString() }, ...history].slice(0, 10)

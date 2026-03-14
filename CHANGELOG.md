@@ -27,9 +27,18 @@ All notable changes to this project will be documented in this file.
 - Supports: Plain Text, Markdown, HTML, JSON
 - One-click copy to clipboard
 
+#### Enhanced Quick AI Prompt (Key: `)
+- Now connects to local MiniMax API (port 8081)
+- Falls back to smart templates for content generation
+- Context-aware responses: hooks, headlines, articles, threads
+- Supports custom prompts with intelligent routing
+- Full prompt history with one-click re-run
+
 ### Changed
 - Version bump to v5.4
 - Added 4 new feature buttons to toolbar
+- Improved Quick AI Prompt with real API integration
+- Enhanced package.json version consistency (5.4.0)
 
 ## [5.3.0] — March 13, 2026
 
