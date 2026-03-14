@@ -9404,7 +9404,8 @@ function App() {
       if (key === '/') setShowScratchpad(true)
       if (key === 'V') setShowVirality(true)
       if (key === 'W') setShowQuickWrite(true)
-      if (key === 'X') setShowThreadFormat(true)
+      if (key === 'X') setShowThreadFormat(true)  // X for Thread Format
+      if (key === 'T' && e.shiftKey) setShowThread(true)  // Shift+T for Thread view
       if (key === 'F') setShowFormula(true)
       if (key === 'G') setShowTopicGenerator(true)
       if (key === 'C' && !e.metaKey && !e.ctrlKey) setShowClipboard(true)
@@ -9412,7 +9413,7 @@ function App() {
       if (key === '!') setShowDailyChallenge(true)  // Shift+1 for Daily Challenge
       if (key === 'Q') setShowQuickCapture(true)
       if (key === 'E') setShowExportDrafts(true)
-      if (key === '+' || key === '=') setShowWritingInsights(true)
+      if (key === '+') setShowWritingInsights(true)
       if (key === 'L') setShowChangelog(true)
       if (key === 'M') setShowFocusMode(true)
       if (key === 'I') setShowBriefGen(true)
@@ -9440,9 +9441,7 @@ function App() {
       if (key === '0') setShowReadingList(true)  // 0 for Reading List
       if (key === '`') setShowQuickAIPrompt(true)  // ` for Quick AI Prompt
       if (key === '\\') setShowQuickActionsBar(true)  // \ for Quick Actions Bar
-      if (key === '=') setShowSEOChecklist(true)  // = for SEO Checklist
-      if (key === '-') setShowToneAdjuster(true)  // - for Tone Adjuster
-      if (key === '\\') setShowCLIRunner(true)  // \ for CLI Command Runner
+      if (key === '[') setShowCLIRunner(true)  // [ for CLI Command Runner
       if (key === ']') setShowQuoteCollection(true)  // ] for Quote Collection
       if (key === '\'') setShowTopicFrequency(true)  // ' for Topic Frequency Analyzer
       if (key === '}') handleQuickExportAll()  // Shift+] for Quick Export All
@@ -10050,7 +10049,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v6.4</span>
+          <span className="logo-badge">v6.7</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
