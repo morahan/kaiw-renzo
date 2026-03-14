@@ -3984,6 +3984,193 @@ function QuoteCollection({ isOpen, onClose, quotes, onSaveQuote, onDeleteQuote }
   )
 }
 
+// ========== ARTICLE OUTLINE GENERATOR (NEW v5.10) ==========
+function ArticleOutlineGenerator({ isOpen, onClose }) {
+  const [topic, setTopic] = useState('')
+  const [articleType, setArticleType] = useState('science')
+  const [outline, setOutline] = useState(null)
+  const [generating, setGenerating] = useState(false)
+
+  const outlineTemplates = {
+    science: {
+      name: 'Science-Backed',
+      sections: [
+        { title: 'Hook', prompt: 'Start with a surprising finding or paradox about {{topic}}' },
+        { title: 'The Problem', prompt: 'What misconception do people have about {{topic}}?' },
+        { title: 'The Science', prompt: 'What does research actually show about {{topic}}?' },
+        { title: 'Mechanism Explained', prompt: 'How does {{topic}} work at the cellular level?' },
+        { title: 'Practical Application', prompt: 'How can readers apply this {{topic}} today?' },
+        { title: 'Call to Action', prompt: 'What should readers do next about {{topic}}?' }
+      ]
+    },
+    howto: {
+      name: 'How-To Guide',
+      sections: [
+        { title: 'Hook', prompt: 'Start with a relatable problem about {{topic}}' },
+        { title: 'Why It Matters', prompt: 'Why should readers care about learning {{topic}}?' },
+        { title: 'Step 1', prompt: 'First step to {{topic}} - the foundation' },
+        { title: 'Step 2', prompt: 'Second step - building on the first' },
+        { title: 'Step 3', prompt: 'Third step - advanced techniques for {{topic}}' },
+        { title: 'Common Mistakes', prompt: 'What NOT to do when learning {{topic}}' },
+        { title: 'Next Steps', prompt: 'How to progress further with {{topic}}' }
+      ]
+    },
+    myth: {
+      name: 'Myth Buster',
+      sections: [
+        { title: 'The Myth', prompt: 'State the common misconception about {{topic}}' },
+        { title: 'Why People Believe It', prompt: 'Why is this myth so widespread?' },
+        { title: 'The Truth', prompt: 'What science actually shows about {{topic}}' },
+        { title: 'Evidence 1', prompt: 'First study or finding that debunks the myth' },
+        { title: 'Evidence 2', prompt: 'Second study or finding supporting the truth' },
+        { title: 'What This Means', prompt: 'How should this change the reader\'s approach?' },
+        { title: 'Call to Action', prompt: 'Encourage readers to apply this knowledge' }
+      ]
+    },
+    listicle: {
+      name: '5-Point Listicle',
+      sections: [
+        { title: 'Hook', prompt: 'Opening statement about {{topic}}' },
+        { title: 'Point 1', prompt: 'First insight about {{topic}}' },
+        { title: 'Point 2', prompt: 'Second insight about {{topic}}' },
+        { title: 'Point 3', prompt: 'Third insight about {{topic}}' },
+        { title: 'Point 4', prompt: 'Fourth insight about {{topic}}' },
+        { title: 'Point 5', prompt: 'Fifth insight about {{topic}}' },
+        { title: 'Conclusion', prompt: 'Wrap up the key takeaways about {{topic}}' }
+      ]
+    }
+  }
+
+  const generateOutline = () => {
+    if (!topic.trim()) return
+    setGenerating(true)
+    
+    setTimeout(() => {
+      const template = outlineTemplates[articleType]
+      const generatedOutline = template.sections.map(section => ({
+        ...section,
+        prompt: section.prompt.replace('{{topic}}', topic),
+        content: '', // Placeholder for user to fill in
+        targetWords: Math.floor(1200 / template.sections.length)
+      }))
+      
+      setOutline({
+        topic,
+        type: articleType,
+        template: template.name,
+        sections: generatedOutline,
+        totalWords: 1200,
+        created: new Date().toISOString()
+      })
+      setGenerating(false)
+    }, 600)
+  }
+
+  const saveOutline = () => {
+    if (!outline) return
+    const saved = JSON.parse(localStorage.getItem('renzo-article-outlines') || '[]')
+    localStorage.setItem('renzo-article-outlines', JSON.stringify([outline, ...saved].slice(0, 50)))
+  }
+
+  const copyOutlineAsText = () => {
+    if (!outline) return
+    let text = `# ${outline.topic}\n\nType: ${outline.template}\n\n`
+    outline.sections.forEach(s => {
+      text += `## ${s.title}\n\n${s.prompt}\n\n`
+    })
+    navigator.clipboard.writeText(text)
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content outline-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📋 Article Outline Generator</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        {!outline ? (
+          <>
+            <div className="outline-input-section">
+              <label>Article Topic</label>
+              <input
+                type="text"
+                placeholder="e.g., Creatine and Muscle Growth"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && generateOutline()}
+              />
+            </div>
+
+            <div className="outline-type-section">
+              <label>Article Type</label>
+              <div className="outline-types">
+                {Object.entries(outlineTemplates).map(([key, template]) => (
+                  <button
+                    key={key}
+                    className={`outline-type-btn ${articleType === key ? 'active' : ''}`}
+                    onClick={() => setArticleType(key)}
+                  >
+                    {template.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button 
+              className="outline-generate-btn"
+              onClick={generateOutline}
+              disabled={!topic.trim() || generating}
+            >
+              {generating ? '⏳ Generating...' : '✨ Generate Outline'}
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="outline-preview">
+              <div className="outline-header">
+                <h2>{outline.topic}</h2>
+                <span className="outline-type">{outline.template}</span>
+              </div>
+
+              <div className="outline-sections">
+                {outline.sections.map((section, i) => (
+                  <div key={i} className="outline-section">
+                    <div className="section-header">
+                      <h3>{i + 1}. {section.title}</h3>
+                      <span className="section-words">{section.targetWords} words</span>
+                    </div>
+                    <p className="section-prompt">{section.prompt}</p>
+                    <textarea
+                      className="section-content"
+                      placeholder={`Write content for: ${section.title}`}
+                      value={section.content}
+                      onChange={(e) => {
+                        const updated = [...outline.sections]
+                        updated[i].content = e.target.value
+                        setOutline({ ...outline, sections: updated })
+                      }}
+                      rows={3}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="outline-actions">
+                <button className="outline-copy" onClick={copyOutlineAsText}>📋 Copy as Text</button>
+                <button className="outline-save" onClick={saveOutline}>💾 Save Outline</button>
+                <button className="outline-restart" onClick={() => setOutline(null)}>↻ New Topic</button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ========== TOPIC FREQUENCY ANALYZER (NEW v5.9) ==========
 function TopicFrequency({ isOpen, onClose, ideas, articles }) {
   const [timeRange, setTimeRange] = useState('all') // all, 30, 7
@@ -8629,6 +8816,9 @@ function App() {
     return saved ? JSON.parse(saved) : []
   })
   const [showTopicFrequency, setShowTopicFrequency] = useState(false)
+
+  // NEW v5.10 features - Outline Generator & Enhanced Productivity
+  const [showOutlineGenerator, setShowOutlineGenerator] = useState(false)
   
   // NEW v5.3 features
   const [showPerformanceAnalytics, setShowPerformanceAnalytics] = useState(false)
@@ -8970,6 +9160,9 @@ function App() {
       if (key === '(') setShowFormatPreview(true)  // ( for Format Preview
       if (key === ')') setShowPomodoro(true)  // ) for Pomodoro Timer
       if (key === '+') setShowQuickShare(true)  // + for Quick Share
+      
+      // NEW v5.10 shortcuts
+      if (key === '{') setShowOutlineGenerator(true)  // Shift+[ for Outline Generator (📋)
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       if (key === 'ESCAPE') {
         setShowPrompt(false)
@@ -10353,6 +10546,16 @@ function App() {
               <span>Ideas</span>
               <kbd>A</kbd>
             </button>
+            <button className="fab-action" onClick={() => { setShowPomodoro(true); setFabOpen(false) }}>
+              <span>⏲️</span>
+              <span>Pomodoro</span>
+              <kbd>)</kbd>
+            </button>
+            <button className="fab-action" onClick={() => { setShowOutlineGenerator(true); setFabOpen(false) }}>
+              <span>📋</span>
+              <span>Outline</span>
+              <kbd>[</kbd>
+            </button>
           </div>
           <button 
             className={`fab-main ${fabOpen ? 'active' : ''}`}
@@ -10389,10 +10592,18 @@ function App() {
         </div>
       </main>
 
+      {/* NEW v5.10 MODALS - Outline Generator & Enhanced Productivity */}
+      {showOutlineGenerator && (
+        <ArticleOutlineGenerator
+          isOpen={showOutlineGenerator}
+          onClose={() => setShowOutlineGenerator(false)}
+        />
+      )}
+
       <KeyboardShortcutsFooter onShowShortcuts={() => setShowShortcuts(true)} />
       <footer className="footer">
         <p>Built by Renzo • Workout Flow Content Engine</p>
-        <p className="footer-version">v5.8 • Press ⌘K for commands, ? for all shortcuts • Use +/= for Writing Insights</p>
+        <p className="footer-version">v5.10 • Press ⌘K for commands, ? for all shortcuts • ⏲️ Pomodoro & 📋 Outline Generator</p>
       </footer>
     </div>
   )

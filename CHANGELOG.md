@@ -1,3 +1,35 @@
+## [5.10.0] — March 14, 2026 (6:00 AM) [TINKER SESSION]
+
+### Added
+- **Pomodoro Timer Modal** (Keyboard: Shift+; or FAB)
+  - 25-min work sessions with customizable durations
+  - 5-min short breaks and 15-min long breaks
+  - Visual circular progress indicator
+  - Session history tracking (up to 50 sessions)
+  - Real-time WPM and total focus time calculations
+  - Save settings to localStorage
+
+- **Article Outline Generator** (Keyboard: Shift+[ or FAB)
+  - 4 template types: Science-Backed, How-To, Myth Buster, Listicle
+  - Auto-generates section structure with writing prompts
+  - Editable content areas for each section
+  - Target word count guidance per section
+  - Copy as text or save outline for later
+  - Total word count calculation
+
+- **NEW v5.10 UI Enhancements**
+  - Added Pomodoro and Outline Generator to FAB menu
+  - New keyboard shortcuts (Shift+; for Pomodoro, Shift+[ for Outline)
+  - Enhanced CSS with conic-gradient progress circles
+  - Responsive design for modals on mobile
+
+### Improved
+- Footer updated to v5.10 with new feature callouts
+- FAB menu expanded with new productivity tools
+- Keyboard shortcuts now include Shift variants for new features
+
+---
+
 ## [5.9.1] — March 14, 2026 (5:45 AM) [TINKER SESSION]
 
 ### Added
