@@ -1216,6 +1216,35 @@ button:hover::after { opacity: 1; }
 .tone-copy-btn:hover { border-color: var(--accent-purple); }
 .tone-copy-btn.copied { background: var(--accent-green); border-color: var(--accent-green); color: white; }
 
+/* ========== CLI COMMAND RUNNER (v5.2) ========== */
+.cli-modal { max-width: 650px; width: 90%; }
+.cli-commands { margin-bottom: 1rem; }
+.cli-commands label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; }
+.cli-command-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; }
+.cli-cmd-btn { display: flex; flex-direction: column; align-items: flex-start; padding: 0.6rem 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast); }
+.cli-cmd-btn:hover { border-color: var(--accent); background: var(--bg-hover); }
+.cli-cmd-btn.active { border-color: var(--accent); background: var(--bg-elevated); box-shadow: 0 0 10px rgba(220, 38, 38, 0.2); }
+.cli-cmd-name { font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
+.cli-cmd-desc { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem; }
+.cli-argument { margin-bottom: 1rem; }
+.cli-argument label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; }
+.cli-argument input { width: 100%; padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); font-size: 0.9rem; }
+.cli-argument input:focus { outline: none; border-color: var(--accent); }
+.cli-run-btn { width: 100%; padding: 0.75rem; background: linear-gradient(135deg, var(--accent), var(--accent-purple)); border: none; border-radius: var(--radius-md); color: white; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all var(--transition-fast); }
+.cli-run-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-glow); }
+.cli-run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cli-output-section { margin-top: 1rem; }
+.cli-output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; }
+.cli-output-header button { padding: 0.3rem 0.6rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.8rem; cursor: pointer; }
+.cli-output { padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-md); border-left: 3px solid var(--accent); font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; max-height: 250px; overflow-y: auto; }
+.cli-history { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.cli-history label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; }
+.cli-history-list { display: flex; flex-direction: column; gap: 0.25rem; }
+.cli-history-item { display: flex; justify-content: space-between; padding: 0.4rem 0.6rem; background: var(--bg-secondary); border-radius: var(--radius-sm); font-size: 0.8rem; cursor: pointer; transition: background var(--transition-fast); }
+.cli-history-item:hover { background: var(--bg-hover); }
+.history-cmd { color: var(--accent-purple); font-weight: 500; }
+.history-arg { color: var(--text-muted); }
+
 /* ========== v4.5 ENHANCEMENTS ========== */
 
 /* Enhanced animations */
