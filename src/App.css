@@ -1532,92 +1532,6 @@ button:hover::after { opacity: 1; }
   align-items: flex-end;
 }
 
-/* Session Notes Widget (v7.6) */
-.session-notes {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  font-size: 0.85rem;
-  min-width: 180px;
-}
-
-.session-notes-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0.8rem;
-  cursor: pointer;
-  user-select: none;
-  transition: var(--transition-fast);
-}
-
-.session-notes-header:hover {
-  background: var(--bg-hover);
-}
-
-.notes-icon {
-  font-size: 0.95rem;
-}
-
-.notes-label {
-  flex: 1;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.notes-toggle {
-  color: var(--text-muted);
-  font-weight: bold;
-}
-
-.session-notes.expanded .session-notes-header {
-  border-bottom: 1px solid var(--border);
-}
-
-.session-notes-content {
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.notes-textarea {
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  padding: 0.5rem;
-  font-family: inherit;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  resize: vertical;
-  min-height: 80px;
-  max-height: 200px;
-}
-
-.notes-textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
-}
-
-.notes-clear-btn {
-  align-self: flex-end;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 0.4rem 0.8rem;
-  font-size: 0.7rem;
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.notes-clear-btn:hover {
-  background: var(--accent-hover);
-}
-
 /* Writing indicator with better animation */
 .writing-indicator {
   display: flex;
@@ -6821,100 +6735,289 @@ select:focus {
   font-size: 1rem;
 }
 
-/* ========== CATEGORY STATS LIBRARY (NEW v7.7) ========== */
-.category-stats-modal {
-  max-width: 700px;
-  max-height: 80vh;
-}
-
-.category-tabs {
+/* ========== TAB NAVIGATION (NEW v7.6) ========== */
+.tab-navigation {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
 }
 
-.category-tab {
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   padding: 0.5rem 1rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background: transparent;
+  border: none;
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-size: 0.8rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
-.category-tab:hover {
-  background: var(--bg-tertiary);
+.tab-btn:hover {
   color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
-.category-tab.active {
-  background: var(--cat-color, var(--accent-primary));
-  border-color: var(--cat-color, var(--accent-primary));
+.tab-btn.active {
+  background: var(--accent);
   color: white;
 }
 
-.category-stats-list {
-  padding: 1rem;
-  max-height: 400px;
-  overflow-y: auto;
+.tab-btn .tab-icon {
+  font-size: 1rem;
+}
+
+/* ========== ENHANCED HEADER (NEW v7.6) ========== */
+.header-left {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
   gap: 0.75rem;
 }
 
-.category-stat-item {
-  padding: 1rem;
+/* ========== QUICK STATS PANEL (NEW v7.6) ========== */
+.quick-stats-panel {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
   background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
 }
 
-.category-stat-item:hover {
-  border-color: var(--accent-primary);
-  transform: translateX(4px);
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.25rem 0.5rem;
+  border-right: 1px solid var(--border);
 }
 
-.category-stat-item .stat-text {
+.stat-item:last-child {
+  border-right: none;
+}
+
+.stat-value {
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--text-primary);
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin: 0 0 0.5rem 0;
 }
 
-.category-stat-item .stat-source {
-  color: var(--text-secondary);
+.stat-label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value.urgent {
+  color: var(--accent);
+}
+
+.stat-value.success {
+  color: var(--accent-green);
+}
+
+/* ========== IMPROVED KEYBOARD SHORTCUTS PANEL (NEW v7.6) ========== */
+.shortcuts-panel {
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.shortcuts-panel h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
   font-size: 0.75rem;
-  font-style: italic;
 }
 
-.category-stat-item .stat-copy-icon {
-  position: absolute;
+.shortcut-item .shortcut-desc {
+  color: var(--text-secondary);
+}
+
+.shortcut-item kbd {
+  padding: 0.15rem 0.4rem;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: var(--text-primary);
+}
+
+/* ========== ENHANCED TOAST NOTIFICATIONS (NEW v7.6) ========== */
+.toast-container {
+  position: fixed;
+  top: 1rem;
   right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.category-stat-item:hover .stat-copy-icon {
+.toast-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  animation: toastSlideIn 0.3s ease;
+  min-width: 280px;
+}
+
+.toast-item.success {
+  border-left: 3px solid var(--accent-green);
+}
+
+.toast-item.error {
+  border-left: 3px solid var(--accent);
+}
+
+.toast-item.info {
+  border-left: 3px solid var(--accent-blue);
+}
+
+.toast-message {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  font-size: 1rem;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ========== IMPROVED CARD HOVER EFFECTS (NEW v7.6) ========== */
+.article-card {
+  transition: all var(--transition-normal);
+}
+
+.article-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.article-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent, transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.article-card:hover::before {
+  background: linear-gradient(135deg, var(--accent), var(--accent-purple));
   opacity: 1;
 }
 
-.category-stats-footer {
-  padding: 0.75rem 1rem;
-  border-top: 1px solid var(--border-color);
-  text-align: center;
+/* ========== ENHANCED RESPONSIVE DESIGN (NEW v7.6) ========== */
+@media (max-width: 768px) {
+  .header {
+    padding: 0.75rem;
+  }
+  
+  .header-left, .header-right {
+    gap: 0.5rem;
+  }
+  
+  .tab-navigation {
+    display: none;
+  }
+  
+  .quick-stats-panel {
+    display: none;
+  }
+  
+  .modal-content {
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
+  }
+  
+  .article-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.category-stats-footer p {
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  margin: 0;
+@media (max-width: 480px) {
+  .fab-container {
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .floating-help-btn {
+    bottom: 1rem;
+    left: 1rem;
+  }
+  
+  .footer {
+    padding: 1rem;
+    font-size: 0.7rem;
+  }
 }
