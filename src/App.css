@@ -7021,3 +7021,224 @@ select:focus {
     font-size: 0.7rem;
   }
 }
+
+/* ========== CATEGORY STATS LIBRARY (v7.7) ========== */
+.category-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.category-stats-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  transition: all var(--transition-fast);
+}
+
+.category-stats-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.category-stats-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.category-stats-icon {
+  font-size: 1.25rem;
+}
+
+.category-stats-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.stat-item-copy {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.stat-item-copy:hover {
+  background: var(--bg-hover);
+}
+
+.stat-value-num {
+  font-weight: 700;
+  color: var(--accent-green);
+  font-size: 0.85rem;
+  min-width: 60px;
+}
+
+.stat-value-text {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.stat-copy-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.stat-item-copy:hover .stat-copy-btn {
+  opacity: 1;
+}
+
+/* ========== IMPROVED TOOLBAR BUTTONS (v7.7) ========== */
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.65rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toolbar-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.toolbar-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.toolbar-btn .toolbar-icon {
+  font-size: 0.9rem;
+}
+
+/* ========== SMOOTH MODAL TRANSITIONS (v7.7) ========== */
+.modal-overlay {
+  animation: modalFadeIn 0.2s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  animation: modalSlideUp 0.3s ease;
+}
+
+@keyframes modalSlideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ========== IMPROVED INPUT STYLES (v7.7) ========== */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* ========== BUTTON VARIANTS (v7.7) ========== */
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+/* ========== NOTIFICATION BADGE (v7.7) ========== */
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 50%;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* ========== DARK THEME TOGGLE BUTTON (v7.7) ========== */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.theme-toggle .theme-icon {
+  font-size: 1.1rem;
+}
