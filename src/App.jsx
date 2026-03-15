@@ -2585,6 +2585,13 @@ function SentenceStartersModal({ isOpen, onClose, onSelect }) {
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '7.8', date: '2026-03-15', changes: [
+      '🎉 New Release: v7.8',
+      'Added Daily Writing Prompt Widget — Changes each day to inspire your writing',
+      'Click the prompt to instantly start Focus Mode with that topic',
+      '15 rotating prompts covering myths, mechanisms, comparisons, and more',
+      'Updated version badge to v7.8'
+    ]},
     { version: '7.3', date: '2026-03-14', changes: [
       '🎉 New Release: v7.5',
       'Added Copy Title button to article cards — one-click title copying',
@@ -10194,6 +10201,30 @@ function App() {
   const [showPublishingPrep, setShowPublishingPrep] = useState(false)
   const [showPerformanceTracker, setShowPerformanceTracker] = useState(false)
   const [showDraftCollections, setShowDraftCollections] = useState(false)
+
+  // Daily Writing Prompt (NEW v7.8) - Changes each day
+  const [dailyPrompt, setDailyPrompt] = useState(() => {
+    const prompts = [
+      "Write about a fitness myth people still believe",
+      "Explain a complex mechanism in simple terms",
+      "Compare two training methods with data",
+      "Tell the story of a breakthrough finding",
+      "Create a step-by-step guide for beginners",
+      "Challenge a popular belief with evidence",
+      "Write about the science of recovery",
+      "Explain why most advice fails",
+      "Break down a controversial study",
+      "Create a persuasive argument for one side",
+      "Write about the future of fitness",
+      "Explain the mechanism behind a supplement",
+      "Compare old vs. new research on a topic",
+      "Write about what experts disagree on",
+      "Create content around surprising statistics"
+    ]
+    const today = new Date()
+    const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24))
+    return prompts[dayOfYear % prompts.length]
+  })
   
   // NEW v4.5 features
   const [showInspirationBoard, setShowInspirationBoard] = useState(false)
@@ -11318,7 +11349,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v7.7</span>
+          <span className="logo-badge">v7.8</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -11375,6 +11406,19 @@ function App() {
             <div className="today-info">
               <span className="today-value">{wordsWritten.toLocaleString()}</span>
               <span className="today-label">today</span>
+            </div>
+          </div>
+          
+          {/* Daily Writing Prompt Widget (NEW v7.8) */}
+          <div 
+            className="daily-prompt-widget" 
+            onClick={() => setShowFocusMode(true)}
+            title="Click to start writing this prompt"
+          >
+            <span className="prompt-icon">💭</span>
+            <div className="prompt-info">
+              <span className="prompt-label">Today's Prompt</span>
+              <span className="prompt-text">{dailyPrompt}</span>
             </div>
           </div>
           
