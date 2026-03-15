@@ -7221,7 +7221,10 @@ function CommandPalette({ isOpen, onClose, onAction }) {
     { id: 'prompt', label: 'Random Prompt', icon: '💡', shortcut: 'P', category: 'Create' },
     { id: 'hottake', label: 'Hot Take Generator', icon: '🔥', shortcut: 'H', category: 'Create' },
     { id: 'trends', label: 'View Trends', icon: '🔥', shortcut: 'T', category: 'Research' },
-    { id: 'analytics', label: 'Analytics', icon: '📊', shortcut: 'A', category: 'View' },
+    { id: 'analytics', label: 'Performance Analytics', icon: '📊', shortcut: '!', category: 'View' },
+    { id: 'goals', label: 'Writing Goals', icon: '🎯', shortcut: '@', category: 'Track' },
+    { id: 'calendar', label: 'Content Calendar', icon: '📅', shortcut: '*', category: 'Plan' },
+    { id: 'pitch', label: 'Article Pitch Generator', icon: '📣', shortcut: 'P', category: 'Create' },
     { id: 'voice', label: 'Voice Brief', icon: '🎙️', shortcut: 'V', category: 'Tools' },
     { id: 'search', label: 'Search Articles', icon: '🔍', shortcut: '/', category: 'Search' },
     { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: '⌨️', shortcut: '?', category: 'Help' },
@@ -10680,6 +10683,15 @@ function App() {
         break
       case 'analytics':
         document.querySelector('.feed-section')?.scrollIntoView({ behavior: 'smooth' })
+        break
+      case 'goals':
+        setShowWritingGoals(true)
+        break
+      case 'calendar':
+        setShowContentCalendar(true)
+        break
+      case 'pitch':
+        setShowPitchGenerator(true)
         break
       case 'search':
         document.getElementById('article-search')?.focus()

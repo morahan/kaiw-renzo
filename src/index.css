@@ -4572,3 +4572,69 @@ textarea:focus {
 .quick-export-toolbar-btn span:first-child {
   font-size: 1rem;
 }
+
+/* ========== NIGHT TINKER ENHANCEMENTS ========== */
+
+/* Improved focus states for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Better modal backdrop blur */
+.modal-overlay {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Enhanced button press feedback */
+.feature-btn:active {
+  transform: scale(0.97);
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better text selection */
+::selection {
+  background: rgba(220, 38, 38, 0.3);
+  color: var(--text-primary);
+}
+
+/* Improved scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Command palette category styling */
+.command-category {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: 0.5rem 0 0.25rem;
+}
+
+/* Calendar day selection animation */
+.calendar-day.selected {
+  background: var(--accent);
+  color: white;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
