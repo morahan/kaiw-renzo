@@ -6611,3 +6611,126 @@ select:focus {
   background: var(--accent);
   color: white;
 }
+
+/* ========== MILESTONES MODAL (NEW v7.4) ========== */
+.milestones-modal {
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.milestones-progress {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-orange) 100%);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1rem;
+}
+
+.milestones-count {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+}
+
+.milestones-label {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.milestones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.milestone-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.milestone-card.locked {
+  opacity: 0.5;
+  filter: grayscale(0.8);
+}
+
+.milestone-card.unlocked {
+  border-color: var(--accent-gold);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+  animation: milestone-unlock 0.5s ease;
+}
+
+.milestone-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
+}
+
+.milestone-icon {
+  font-size: 1.75rem;
+}
+
+.milestone-card.locked .milestone-icon {
+  filter: grayscale(1);
+}
+
+.milestone-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.milestone-requirement {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.milestone-check {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--accent-gold);
+  font-weight: 700;
+}
+
+@keyframes milestone-unlock {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* ========== MILESTONES BUTTON (NEW v7.4) ========== */
+.milestones-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-orange) 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.milestones-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+}
+
+.milestones-btn span:first-child {
+  font-size: 1rem;
+}

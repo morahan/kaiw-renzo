@@ -1,3 +1,19 @@
+## [7.4.0] — March 14, 2026 (7:33 PM) [TINKER SESSION]
+
+### Added
+- **Writing Milestones System (v7.4)**
+  - Track achievements and writing accomplishments
+  - 16 milestones: Word count (5), Streak (4), Articles (4), Sessions (3)
+  - Visual grid display with locked/unlocked states
+  - Progress tracking persisted in localStorage
+  - Keyboard shortcut: `=` to open
+  - New Milestones button in header toolbar
+
+### Changed
+- Updated version badge to v7.4 in header, footer, and index.html
+
+---
+
 ## [7.2.0] — March 14, 2026 (5:32 PM) [TINKER SESSION]
 
 ### Added

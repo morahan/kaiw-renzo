@@ -2586,7 +2586,7 @@ function SentenceStartersModal({ isOpen, onClose, onSelect }) {
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
     { version: '7.3', date: '2026-03-14', changes: [
-      '🎉 New Release: v7.3',
+      '🎉 New Release: v7.4',
       'Added Copy Title button to article cards — one-click title copying',
       'Enhanced version badge with animated glow effect',
       'Added full article card styles with better visual hierarchy',
@@ -5027,6 +5027,7 @@ function KeyboardShortcutsFooter({ onShowShortcuts }) {
     { key: 'S', help: 'Sprint' },
     { key: 'A', help: 'Ideas' },
     { key: 'Q', help: 'Capture' },
+    { key: '=', help: 'Milestones' },
   ]
   
   return (
@@ -5779,7 +5780,7 @@ function KeyboardShortcuts({ isOpen, onClose }) {
     { key: '0', action: 'Reading List' },
     { key: '`', action: 'AI Prompt' },
     { key: '-', action: 'Tone Adjuster' },
-    { key: '=', action: 'SEO Checklist' },
+    { key: '=', action: 'Milestones' },
     { key: '\\', action: 'CLI Runner' },
     { key: 'Esc', action: 'Close Modal' },
   ]
@@ -7418,6 +7419,124 @@ function AnimatedCounter({ end, duration = 1500, suffix = '' }) {
   }, [end, duration, isVisible])
 
   return <span ref={ref}>{count.toLocaleString()}{suffix}</span>
+}
+
+// ========== WRITING MILESTONES SYSTEM (NEW v7.4) ==========
+function MilestonesModal({ isOpen, onClose, metrics, articles }) {
+  const [milestones, setMilestones] = useState(() => {
+    const saved = localStorage.getItem('renzo-milestones')
+    return saved ? JSON.parse(saved) : {
+      firstDraft: false,
+      words100: false,
+      words500: false,
+      words1000: false,
+      words5000: false,
+      words10000: false,
+      streak3: false,
+      streak7: false,
+      streak14: false,
+      streak30: false,
+      articles1: false,
+      articles5: false,
+      articles10: false,
+      articles25: false,
+      sessions5: false,
+      sessions25: false,
+      sessions50: false,
+      focusHours1: false,
+      focusHours10: false,
+    }
+  })
+
+  // Check and unlock milestones
+  useEffect(() => {
+    const newMilestones = { ...milestones }
+    let changed = false
+
+    // Word count milestones
+    if (!newMilestones.words100 && metrics.totalWords >= 100) { newMilestones.words100 = true; changed = true }
+    if (!newMilestones.words500 && metrics.totalWords >= 500) { newMilestones.words500 = true; changed = true }
+    if (!newMilestones.words1000 && metrics.totalWords >= 1000) { newMilestones.words1000 = true; changed = true }
+    if (!newMilestones.words5000 && metrics.totalWords >= 5000) { newMilestones.words5000 = true; changed = true }
+    if (!newMilestones.words10000 && metrics.totalWords >= 10000) { newMilestones.words10000 = true; changed = true }
+
+    // Streak milestones
+    if (!newMilestones.streak3 && metrics.currentStreak >= 3) { newMilestones.streak3 = true; changed = true }
+    if (!newMilestones.streak7 && metrics.currentStreak >= 7) { newMilestones.streak7 = true; changed = true }
+    if (!newMilestones.streak14 && metrics.currentStreak >= 14) { newMilestones.streak14 = true; changed = true }
+    if (!newMilestones.streak30 && metrics.currentStreak >= 30) { newMilestones.streak30 = true; changed = true }
+
+    // Article milestones
+    if (!newMilestones.articles1 && articles.length >= 1) { newMilestones.articles1 = true; changed = true }
+    if (!newMilestones.articles5 && articles.length >= 5) { newMilestones.articles5 = true; changed = true }
+    if (!newMilestones.articles10 && articles.length >= 10) { newMilestones.articles10 = true; changed = true }
+    if (!newMilestones.articles25 && articles.length >= 25) { newMilestones.articles25 = true; changed = true }
+
+    // Session milestones
+    if (!newMilestones.sessions5 && metrics.sessions >= 5) { newMilestones.sessions5 = true; changed = true }
+    if (!newMilestones.sessions25 && metrics.sessions >= 25) { newMilestones.sessions25 = true; changed = true }
+    if (!newMilestones.sessions50 && metrics.sessions >= 50) { newMilestones.sessions50 = true; changed = true }
+
+    if (changed) {
+      setMilestones(newMilestones)
+      localStorage.setItem('renzo-milestones', JSON.stringify(newMilestones))
+    }
+  }, [metrics, articles])
+
+  const milestoneDefinitions = [
+    { id: 'words100', label: 'Wordsmith', desc: 'Write 100 words', icon: '📝', requirement: '100 words', unlocked: milestones.words100 },
+    { id: 'words500', label: 'Getting Started', desc: 'Write 500 words', icon: '📄', requirement: '500 words', unlocked: milestones.words500 },
+    { id: 'words1000', label: 'Article Author', desc: 'Write 1,000 words', icon: '📃', requirement: '1,000 words', unlocked: milestones.words1000 },
+    { id: 'words5000', label: 'Prolific Writer', desc: 'Write 5,000 words', icon: '📚', requirement: '5,000 words', unlocked: milestones.words5000 },
+    { id: 'words10000', label: 'Master Writer', desc: 'Write 10,000 words', icon: '🏆', requirement: '10,000 words', unlocked: milestones.words10000 },
+    { id: 'streak3', label: 'Consistent', desc: '3-day writing streak', icon: '🔥', requirement: '3 days', unlocked: milestones.streak3 },
+    { id: 'streak7', label: 'Week Warrior', desc: '7-day writing streak', icon: '💪', requirement: '7 days', unlocked: milestones.streak7 },
+    { id: 'streak14', label: 'Fortnight Focus', desc: '14-day writing streak', icon: '⭐', requirement: '14 days', unlocked: milestones.streak14 },
+    { id: 'streak30', label: 'Monthly Master', desc: '30-day writing streak', icon: '👑', requirement: '30 days', unlocked: milestones.streak30 },
+    { id: 'articles1', label: 'First Article', desc: 'Publish your first article', icon: '🎉', requirement: '1 article', unlocked: milestones.articles1 },
+    { id: 'articles5', label: 'Regular Publisher', desc: 'Publish 5 articles', icon: '📰', requirement: '5 articles', unlocked: milestones.articles5 },
+    { id: 'articles10', label: 'Content Machine', desc: 'Publish 10 articles', icon: '🎯', requirement: '10 articles', unlocked: milestones.articles10 },
+    { id: 'articles25', label: 'Published Author', desc: 'Publish 25 articles', icon: '📖', requirement: '25 articles', unlocked: milestones.articles25 },
+    { id: 'sessions5', label: 'Session Starter', desc: 'Complete 5 writing sessions', icon: '⏱️', requirement: '5 sessions', unlocked: milestones.sessions5 },
+    { id: 'sessions25', label: 'Session Pro', desc: 'Complete 25 writing sessions', icon: '🕐', requirement: '25 sessions', unlocked: milestones.sessions25 },
+    { id: 'sessions50', label: 'Session Master', desc: 'Complete 50 writing sessions', icon: '⌛', requirement: '50 sessions', unlocked: milestones.sessions50 },
+  ]
+
+  const unlockedCount = milestoneDefinitions.filter(m => m.unlocked).length
+  const totalCount = milestoneDefinitions.length
+
+  if (!isOpen) return null
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content milestones-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>🏆 Writing Milestones</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="milestones-progress">
+          <span className="milestones-count">{unlockedCount} / {totalCount}</span>
+          <span className="milestones-label">unlocked</span>
+        </div>
+        
+        <div className="milestones-grid">
+          {milestoneDefinitions.map(m => (
+            <div 
+              key={m.id} 
+              className={`milestone-card ${m.unlocked ? 'unlocked' : 'locked'}`}
+              title={m.desc}
+            >
+              <span className="milestone-icon">{m.icon}</span>
+              <span className="milestone-label">{m.label}</span>
+              <span className="milestone-requirement">{m.requirement}</span>
+              {m.unlocked && <span className="milestone-check">✓</span>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // Recent articles data
@@ -9595,6 +9714,9 @@ function App() {
   const [showWarmup, setShowWarmup] = useState(false)
   const [showSentenceStarters, setShowSentenceStarters] = useState(false)
   
+  // NEW v7.4 features - Milestones
+  const [showMilestones, setShowMilestones] = useState(false)
+  
   // NEW v7.0 features
   const [showQuickShip, setShowQuickShip] = useState(false)
   const [pinnedArticles, setPinnedArticles] = useState(() => {
@@ -9979,6 +10101,9 @@ function App() {
       // NEW v7.2 shortcuts - Writing Tools
       if (e.shiftKey && key === 'W') setShowWarmup(true)  // Shift+W for Writing Warmup
       if (e.shiftKey && key === 'E') setShowSentenceStarters(true)  // Shift+E for Sentence Starters
+      
+      // NEW v7.4 shortcuts - Milestones
+      if (key === '=') setShowMilestones(true)  // = for Milestones
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       
       // Session Timer shortcuts (v5.5.1+)
@@ -10031,6 +10156,7 @@ function App() {
         setShowInspirationBoard(false)
         setShowReadingList(false)
         setShowQuickAIPrompt(false)
+        setShowMilestones(false)
       }
     }
     window.addEventListener('keydown', handleKeyPress)
@@ -10456,6 +10582,12 @@ function App() {
           addToast('Sentence starter copied!', 'info')
         }}
       />
+      <MilestonesModal
+        isOpen={showMilestones}
+        onClose={() => setShowMilestones(false)}
+        metrics={metrics}
+        articles={recentArticles}
+      />
       <PublishingPrepWorkflow
         isOpen={showPublishingPrep}
         onClose={() => setShowPublishingPrep(false)}
@@ -10599,7 +10731,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v7.3</span>
+          <span className="logo-badge">v7.4</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -10714,6 +10846,16 @@ function App() {
           >
             <span>🚀</span>
             <span>Ship It</span>
+          </button>
+          
+          {/* Milestones Button (NEW v7.4) */}
+          <button 
+            className="milestones-btn"
+            onClick={() => setShowMilestones(true)}
+            title="🏆 Writing Milestones - Press ="
+          >
+            <span>🏆</span>
+            <span>Milestones</span>
           </button>
           
           {/* Time Since Last Publish Indicator (NEW v6.4) */}
