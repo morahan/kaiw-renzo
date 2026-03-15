@@ -1,3 +1,30 @@
+## [7.5.0] — March 14, 2026 (10:30 PM) [TINKER SESSION]
+
+### Added
+- **Quick Text Analyzer (v7.5)**
+  - Analyze any text for word count, character count, sentences, paragraphs
+  - Reading time calculator (based on 200 WPM)
+  - Readability score (Flesch-Kincaid approximation)
+  - Content type detection (Scientific, How-To, Listicle, Myth-Buster, etc.)
+  - Top keywords extraction with frequency counts
+  - Copy full analysis report
+  - Keyboard shortcut: Shift+A
+
+- **Quick Export All (v7.5)**
+  - One-click export of ALL Renzo data
+  - Downloads JSON backup + Markdown drafts
+  - Includes: hooks, ideas, headlines, references, research queue, series, pipeline, drafts, clipboard history, mood history, quotes, quick notes, reading list, inspiration board, settings
+  - Keyboard shortcut: *
+
+- **New Toolbar Buttons (v7.5)**
+  - Analyze button - opens Text Analyzer
+  - Export button - opens Quick Export All
+
+### Changed
+- Updated version badge to v7.5 in header and footer
+
+---
+
 ## [7.4.0] — March 14, 2026 (7:33 PM) [TINKER SESSION]
 
 ### Added

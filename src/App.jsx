@@ -2586,7 +2586,7 @@ function SentenceStartersModal({ isOpen, onClose, onSelect }) {
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
     { version: '7.3', date: '2026-03-14', changes: [
-      '🎉 New Release: v7.4',
+      '🎉 New Release: v7.5',
       'Added Copy Title button to article cards — one-click title copying',
       'Enhanced version badge with animated glow effect',
       'Added full article card styles with better visual hierarchy',
@@ -4165,6 +4165,324 @@ function ToneAdjuster({ isOpen, onClose }) {
             </button>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+// ========== QUICK TEXT ANALYZER (NEW v7.5) ==========
+function TextAnalyzer({ isOpen, onClose, onAnalyze }) {
+  const [text, setText] = useState('')
+  const [analysis, setAnalysis] = useState(null)
+  
+  const analyzeText = () => {
+    if (!text.trim()) return
+    
+    const words = text.trim().split(/\s+/).filter(w => w).length
+    const chars = text.length
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length
+    const paragraphs = text.split(/\n\n+/).filter(p => p.trim()).length
+    const readingTime = Math.ceil(words / 200)
+    
+    // Calculate readability (simplified Flesch-Kincaid approximation)
+    const avgWordsPerSentence = sentences > 0 ? words / sentences : 0
+    const readabilityScore = Math.max(0, Math.min(100, 206.835 - 1.015 * avgWordsPerSentence))
+    
+    // Count specific elements
+    const questionCount = (text.match(/\?/g) || []).length
+    const exclamationCount = (text.match(/!/g) || []).length
+    const numbers = (text.match(/\d+/g) || []).length
+    
+    // Word frequency (simple)
+    const wordFreq = {}
+    const cleanWords = text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/)
+    cleanWords.forEach(w => {
+      if (w.length > 3) {
+        wordFreq[w] = (wordFreq[w] || 0) + 1
+      }
+    })
+    const topWords = Object.entries(wordFreq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([word, count]) => ({ word, count }))
+    
+    // Detect content type
+    let contentType = 'General'
+    const lower = text.toLowerCase()
+    if (lower.includes('study') || lower.includes('research') || lower.includes('data')) contentType = 'Scientific'
+    else if (lower.includes('how to') || lower.includes('step') || lower.includes('guide')) contentType = 'How-To'
+    else if (lower.includes('?') && lower.includes('?')) contentType = 'Question/Quiz'
+    else if (lower.includes('best') || lower.includes('top') || lower.includes('ranking')) contentType = 'Listicle'
+    else if (lower.includes('myth') || lower.includes('truth') || lower.includes('wrong')) contentType = 'Myth-Buster'
+    
+    setAnalysis({
+      words,
+      chars,
+      sentences,
+      paragraphs,
+      readingTime,
+      readabilityScore: Math.round(readabilityScore),
+      questionCount,
+      exclamationCount,
+      numbers,
+      topWords,
+      contentType,
+      avgWordsPerSentence: Math.round(avgWordsPerSentence)
+    })
+  }
+  
+  const copyAnalysis = () => {
+    if (!analysis) return
+    const report = `
+📊 TEXT ANALYSIS REPORT
+========================
+Words: ${analysis.words}
+Characters: ${analysis.chars}
+Sentences: ${analysis.sentences}
+Paragraphs: ${analysis.paragraphs}
+Reading Time: ${analysis.readingTime} min
+Readability Score: ${analysis.readabilityScore}/100
+Content Type: ${analysis.contentType}
+
+Questions: ${analysis.questionCount}
+Exclamations: ${analysis.exclamationCount}
+Numbers: ${analysis.numbers}
+Avg Words/Sentence: ${analysis.avgWordsPerSentence}
+
+Top Words: ${analysis.topWords.map(w => `${w.word}(${w.count})`).join(', ')}
+    `.trim()
+    navigator.clipboard.writeText(report)
+  }
+  
+  const getReadabilityLabel = (score) => {
+    if (score >= 90) return { label: 'Very Easy', color: '#22c55e' }
+    if (score >= 80) return { label: 'Easy', color: '#84cc16' }
+    if (score >= 70) return { label: 'Fairly Easy', color: '#a3e635' }
+    if (score >= 60) return { label: 'Standard', color: '#facc15' }
+    if (score >= 50) return { label: 'Fairly Difficult', color: '#f97316' }
+    if (score >= 30) return { label: 'Difficult', color: '#ef4444' }
+    return { label: 'Very Difficult', color: '#dc2626' }
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content analyzer-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📝 Text Analyzer</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="analyzer-input-section">
+          <label>Paste text to analyze:</label>
+          <textarea
+            placeholder="Paste your article, blog post, or any text here..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={5}
+          />
+        </div>
+        
+        <button 
+          className="analyzer-btn"
+          onClick={analyzeText}
+          disabled={!text.trim()}
+        >
+          Analyze Text
+        </button>
+        
+        {analysis && (
+          <div className="analyzer-results">
+            <div className="analyzer-stats-grid">
+              <div className="analyzer-stat-card">
+                <span className="stat-icon">📝</span>
+                <span className="stat-value">{analysis.words.toLocaleString()}</span>
+                <span className="stat-label">Words</span>
+              </div>
+              <div className="analyzer-stat-card">
+                <span className="stat-icon">📄</span>
+                <span className="stat-value">{analysis.chars.toLocaleString()}</span>
+                <span className="stat-label">Characters</span>
+              </div>
+              <div className="analyzer-stat-card">
+                <span className="stat-icon">📖</span>
+                <span className="stat-value">{analysis.sentences}</span>
+                <span className="stat-label">Sentences</span>
+              </div>
+              <div className="analyzer-stat-card">
+                <span className="stat-icon">⏱️</span>
+                <span className="stat-value">{analysis.readingTime}</span>
+                <span className="stat-label">Min Read</span>
+              </div>
+            </div>
+            
+            <div className="analyzer-readability">
+              <div className="readability-header">
+                <span>Readability Score</span>
+                <span className="readability-badge" style={{ background: getReadabilityLabel(analysis.readabilityScore).color }}>
+                  {analysis.readabilityScore}/100 — {getReadabilityLabel(analysis.readabilityScore).label}
+                </span>
+              </div>
+              <div className="readability-bar">
+                <div 
+                  className="readability-fill" 
+                  style={{ 
+                    width: `${analysis.readabilityScore}%`,
+                    background: getReadabilityLabel(analysis.readabilityScore).color
+                  }} 
+                />
+              </div>
+            </div>
+            
+            <div className="analyzer-details">
+              <div className="detail-row">
+                <span>Content Type</span>
+                <span className="detail-value">{analysis.contentType}</span>
+              </div>
+              <div className="detail-row">
+                <span>Questions</span>
+                <span className="detail-value">{analysis.questionCount}</span>
+              </div>
+              <div className="detail-row">
+                <span>Exclamations</span>
+                <span className="detail-value">{analysis.exclamationCount}</span>
+              </div>
+              <div className="detail-row">
+                <span>Numbers</span>
+                <span className="detail-value">{analysis.numbers}</span>
+              </div>
+              <div className="detail-row">
+                <span>Avg Words/Sentence</span>
+                <span className="detail-value">{analysis.avgWordsPerSentence}</span>
+              </div>
+            </div>
+            
+            {analysis.topWords.length > 0 && (
+              <div className="analyzer-topwords">
+                <span className="topwords-label">Top Keywords</span>
+                <div className="topwords-list">
+                  {analysis.topWords.slice(0, 8).map((w, i) => (
+                    <span key={i} className="topword-tag">
+                      {w.word} <span className="topword-count">{w.count}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <button className="analyzer-copy-btn" onClick={copyAnalysis}>
+              📋 Copy Full Report
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ========== QUICK EXPORT ALL (NEW v7.5) ==========
+function QuickExportAll({ isOpen, onClose }) {
+  const [exporting, setExporting] = useState(false)
+  const [exported, setExported] = useState(false)
+  
+  const handleExportAll = async () => {
+    setExporting(true)
+    
+    // Gather all data
+    const allData = {
+      exportedAt: new Date().toISOString(),
+      version: '7.5',
+      hooks: JSON.parse(localStorage.getItem('renzo-saved-hooks') || '[]'),
+      ideas: JSON.parse(localStorage.getItem('renzo-content-ideas') || '[]'),
+      headlines: JSON.parse(localStorage.getItem('renzo-generated-headlines') || '[]'),
+      references: JSON.parse(localStorage.getItem('renzo-references') || '[]'),
+      researchQueue: JSON.parse(localStorage.getItem('renzo-research-queue') || '[]'),
+      series: JSON.parse(localStorage.getItem('renzo-article-series') || '[]'),
+      pipeline: JSON.parse(localStorage.getItem('renzo-pipeline') || '[]'),
+      drafts: JSON.parse(localStorage.getItem('renzo-drafts') || '[]'),
+      clipboardHistory: JSON.parse(localStorage.getItem('renzo-clipboard-history') || '[]'),
+      moodHistory: JSON.parse(localStorage.getItem('renzo-mood-history') || '[]'),
+      quotes: JSON.parse(localStorage.getItem('renzo-quotes') || '[]'),
+      quickNotes: JSON.parse(localStorage.getItem('renzo-quick-notes') || '[]'),
+      readingList: JSON.parse(localStorage.getItem('renzo-reading-list') || '[]'),
+      inspirationBoard: JSON.parse(localStorage.getItem('renzo-inspiration-board') || '[]'),
+      settings: {
+        dailyWordGoal: localStorage.getItem('renzo-daily-word-goal') || 1000,
+        weeklyGoal: localStorage.getItem('renzo-weekly-goal') || 5000,
+        theme: localStorage.getItem('renzo-theme') || 'dark',
+        soundEnabled: localStorage.getItem('renzo-sound') !== 'false'
+      }
+    }
+    
+    // Create and download JSON file
+    const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `renzo-backup-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    
+    // Also create a simple markdown export of drafts
+    if (allData.drafts && allData.drafts.length > 0) {
+      let mdContent = '# Renzo Drafts Export\n\n'
+      allData.drafts.forEach((draft, i) => {
+        mdContent += `## ${i + 1}. ${draft.title || 'Untitled'}\n\n`
+        mdContent += `*${new Date(draft.date).toLocaleDateString()} | ${draft.words || 0} words*\n\n`
+        mdContent += `${draft.content || ''}\n\n---\n\n`
+      })
+      
+      const mdBlob = new Blob([mdContent], { type: 'text/markdown' })
+      const mdUrl = URL.createObjectURL(mdBlob)
+      const mdA = document.createElement('a')
+      mdA.href = mdUrl
+      mdA.download = `renzo-drafts-${new Date().toISOString().split('T')[0]}.md`
+      mdA.click()
+      URL.revokeObjectURL(mdUrl)
+    }
+    
+    setExporting(false)
+    setExported(true)
+    setTimeout(() => setExported(false), 2000)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content quick-export-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📦 Quick Export All</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="quick-export-content">
+          <div className="export-icon">📦</div>
+          <h4>Export Everything</h4>
+          <p>Download all your Renzo data in one click:</p>
+          
+          <ul className="export-includes">
+            <li>📝 Drafts ({JSON.parse(localStorage.getItem('renzo-drafts') || '[]').length})</li>
+            <li>💡 Ideas ({JSON.parse(localStorage.getItem('renzo-content-ideas') || '[]').length})</li>
+            <li>⚡ Hooks ({JSON.parse(localStorage.getItem('renzo-saved-hooks') || '[]').length})</li>
+            <li>🎯 Headlines ({JSON.parse(localStorage.getItem('renzo-generated-headlines') || '[]').length})</li>
+            <li>📚 References ({JSON.parse(localStorage.getItem('renzo-references') || '[]').length})</li>
+            <li>🔬 Research Queue ({JSON.parse(localStorage.getItem('renzo-research-queue') || '[]').length})</li>
+            <li>📚 Reading List ({JSON.parse(localStorage.getItem('renzo-reading-list') || '[]').length})</li>
+            <li>⚙️ Settings</li>
+          </ul>
+          
+          <p className="export-note">You'll get 2 files: JSON (full backup) + Markdown (drafts)</p>
+          
+          <button 
+            className={`quick-export-btn ${exported ? 'exported' : ''}`}
+            onClick={handleExportAll}
+            disabled={exporting}
+          >
+            {exporting ? '⏳ Exporting...' : exported ? '✅ Exported!' : '📥 Export All Data'}
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -9683,6 +10001,10 @@ function App() {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [showFloatingHelp, setShowFloatingHelp] = useState(false)
   
+  // NEW v7.5 features - Text Analyzer & Quick Export
+  const [showTextAnalyzer, setShowTextAnalyzer] = useState(false)
+  const [showQuickExportAll, setShowQuickExportAll] = useState(false)
+  
   // NEW v5.9 features - Quote Collection & Topic Analyzer
   const [showQuoteCollection, setShowQuoteCollection] = useState(false)
   const [quotes, setQuotes] = useState(() => {
@@ -10106,6 +10428,10 @@ function App() {
       if (key === '=') setShowMilestones(true)  // = for Milestones
       if (key === '/') { e.preventDefault(); document.getElementById('article-search')?.focus() }
       
+      // NEW v7.5 shortcuts - Text Analyzer & Quick Export
+      if (e.shiftKey && key === 'A') setShowTextAnalyzer(true)  // Shift+A for Text Analyzer
+      if (key === '*') { e.preventDefault(); setShowQuickExportAll(true) }  // * for Quick Export All
+      
       // Session Timer shortcuts (v5.5.1+)
       if ((e.ctrlKey || e.metaKey) && e.key === 'T') {
         e.preventDefault()
@@ -10528,6 +10854,15 @@ function App() {
         isOpen={showToneAdjuster}
         onClose={() => setShowToneAdjuster(false)}
       />
+      <TextAnalyzer
+        isOpen={showTextAnalyzer}
+        onClose={() => setShowTextAnalyzer(false)}
+        onAnalyze={(text) => setShowTextAnalyzer(false)}
+      />
+      <QuickExportAll
+        isOpen={showQuickExportAll}
+        onClose={() => setShowQuickExportAll(false)}
+      />
       <CLICommandRunner
         isOpen={showCLIRunner}
         onClose={() => setShowCLIRunner(false)}
@@ -10731,7 +11066,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v7.4</span>
+          <span className="logo-badge">v7.5</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -10856,6 +11191,26 @@ function App() {
           >
             <span>🏆</span>
             <span>Milestones</span>
+          </button>
+          
+          {/* Text Analyzer Button (NEW v7.5) */}
+          <button 
+            className="analyzer-btn-toolbar"
+            onClick={() => setShowTextAnalyzer(true)}
+            title="📝 Text Analyzer - Shift+A"
+          >
+            <span>📝</span>
+            <span>Analyze</span>
+          </button>
+          
+          {/* Quick Export Button (NEW v7.5) */}
+          <button 
+            className="quick-export-toolbar-btn"
+            onClick={() => setShowQuickExportAll(true)}
+            title="📦 Quick Export All - Press *"
+          >
+            <span>📦</span>
+            <span>Export</span>
           </button>
           
           {/* Time Since Last Publish Indicator (NEW v6.4) */}
@@ -11161,7 +11516,7 @@ function App() {
           <button className="feature-btn" onClick={() => setShowWritingPrompts(true)}>
             <span>💡</span>
             <span>Prompts</span>
-            <span className="feature-hint">}</span>
+            <span className="feature-hint">{'}'}</span>
           </button>
           <button className="feature-btn" onClick={() => setShowThread(true)}>
             <span>🐦</span>
