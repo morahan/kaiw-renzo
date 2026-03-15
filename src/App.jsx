@@ -2585,6 +2585,15 @@ function SentenceStartersModal({ isOpen, onClose, onSelect }) {
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '7.3', date: '2026-03-14', changes: [
+      '🎉 New Release: v7.3',
+      'Added Copy Title button to article cards — one-click title copying',
+      'Enhanced version badge with animated glow effect',
+      'Added full article card styles with better visual hierarchy',
+      'Improved article card hover states and interactions',
+      'Added toast notification when copying article titles',
+      'Updated version badge in header'
+    ]},
     { version: '7.0', date: '2026-03-14', changes: [
       '🎉 Major Release: v7.0',
       'Added Quick Ship It Panel — One-click publish preparation workflow',
@@ -10590,7 +10599,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v7.2</span>
+          <span className="logo-badge">v7.3</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -11402,6 +11411,17 @@ function App() {
                     {article.status}
                   </div>
                   <div className="article-right">
+                    <button 
+                      className="article-copy-btn" 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        navigator.clipboard.writeText(article.title);
+                        addToast('📋 Title copied!', 'success');
+                      }}
+                      title="Copy title"
+                    >
+                      📋
+                    </button>
                     <span 
                       className="engagement-badge"
                       style={{ 
