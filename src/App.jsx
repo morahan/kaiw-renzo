@@ -2155,12 +2155,20 @@ tools     - This list`,
   )
 }
 
-// Word Sprint - Quick 15-min timed writing
+// Word Sprint - Quick timed writing with presets (v7.9)
 function WordSprint({ isOpen, onClose, onSave }) {
   const [content, setContent] = useState('')
-  const [timeLeft, setTimeLeft] = useState(15 * 60) // 15 minutes
+  const [sprintDuration, setSprintDuration] = useState(15) // minutes - default 15
+  const [timeLeft, setTimeLeft] = useState(15 * 60)
   const [isRunning, setIsRunning] = useState(false)
   const [sprintWords, setSprintWords] = useState(0)
+  
+  const presets = [
+    { min: 5, label: '5m' },
+    { min: 15, label: '15m' },
+    { min: 25, label: '25m' },
+    { min: 45, label: '45m' }
+  ]
   
   useEffect(() => {
     let interval
@@ -2189,20 +2197,27 @@ function WordSprint({ isOpen, onClose, onSave }) {
     if (content.trim()) {
       onSave?.({ title: `Sprint - ${new Date().toLocaleTimeString()}`, content, words: sprintWords, date: new Date().toISOString() })
       setContent('')
-      setTimeLeft(15 * 60)
+      setTimeLeft(sprintDuration * 60)
       onClose()
     }
   }
   
   const resetSprint = () => {
     setIsRunning(false)
-    setTimeLeft(15 * 60)
+    setTimeLeft(sprintDuration * 60)
     setContent('')
+  }
+  
+  const changeDuration = (newMin) => {
+    if (!isRunning) {
+      setSprintDuration(newMin)
+      setTimeLeft(newMin * 60)
+    }
   }
   
   if (!isOpen) return null
   
-  const progress = ((15 * 60) - timeLeft) / (15 * 60) * 100
+  const progress = ((sprintDuration * 60) - timeLeft) / (sprintDuration * 60) * 100
   
   return (
     <div className="sprint-overlay">
@@ -2216,10 +2231,23 @@ function WordSprint({ isOpen, onClose, onSave }) {
           </div>
           <div className="sprint-controls">
             <button className="sprint-btn primary" onClick={() => setIsRunning(!isRunning)}>
-              {isRunning ? 'Pause' : timeLeft === 15 * 60 ? 'Start Sprint' : 'Resume'}
+              {isRunning ? 'Pause' : timeLeft === sprintDuration * 60 ? 'Start Sprint' : 'Resume'}
             </button>
             <button className="sprint-btn" onClick={resetSprint}>Reset</button>
             <button className="sprint-btn" onClick={onClose}>Exit</button>
+          </div>
+          <div className="sprint-presets">
+            {presets.map(p => (
+              <button 
+                key={p.min}
+                className={`sprint-preset-btn ${sprintDuration === p.min ? 'active' : ''}`}
+                onClick={() => changeDuration(p.min)}
+                disabled={isRunning}
+                title={`${p.min} minute sprint`}
+              >
+                {p.label}
+              </button>
+            ))}
           </div>
         </div>
         
@@ -2229,7 +2257,7 @@ function WordSprint({ isOpen, onClose, onSave }) {
             <span className="sprint-stat-label">words</span>
           </div>
           <div className="sprint-stat">
-            <span className="sprint-stat-value">{Math.max(0, Math.round((sprintWords / ((15 * 60 - timeLeft) || 1)) * 60))}</span>
+            <span className="sprint-stat-value">{Math.max(0, Math.round((sprintWords / (((sprintDuration * 60) - timeLeft) || 1)) * 60))}</span>
             <span className="sprint-stat-label">WPM</span>
           </div>
           <div className="sprint-stat">
@@ -2243,7 +2271,7 @@ function WordSprint({ isOpen, onClose, onSave }) {
           placeholder="Go! Write your heart out..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          disabled={!isRunning && timeLeft === 15 * 60}
+          disabled={!isRunning && timeLeft === sprintDuration * 60}
         />
         
         <div className="sprint-footer">
@@ -2585,6 +2613,12 @@ function SentenceStartersModal({ isOpen, onClose, onSelect }) {
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '7.9', date: '2026-03-15', changes: [
+      '🎉 New Release: v7.9',
+      'Added Pomodoro presets to Word Sprint: 5m, 15m, 25m, 45m options',
+      'Added Auto-save indicator in header showing last save time',
+      'Updated version badge to v7.9'
+    ]},
     { version: '7.8', date: '2026-03-15', changes: [
       '🎉 New Release: v7.8',
       'Added Daily Writing Prompt Widget — Changes each day to inspire your writing',
@@ -10446,6 +10480,12 @@ function App() {
     if (savedFocus) setTodaysFocus(savedFocus)
     if (savedDrafts) setDrafts(JSON.parse(savedDrafts))
   }, [])
+  
+  // Last saved timestamp for auto-save indicator (v7.9)
+  const [lastSaved, setLastSaved] = useState(() => {
+    const saved = localStorage.getItem('renzo-last-saved')
+    return saved ? new Date(saved) : null
+  })
 
   // Session Timer Effect (v5.5.1+)
   useEffect(() => {
@@ -10461,6 +10501,9 @@ function App() {
     const newDrafts = [draft, ...drafts]
     setDrafts(newDrafts)
     localStorage.setItem('renzo-drafts', JSON.stringify(newDrafts))
+    const now = new Date()
+    setLastSaved(now)
+    localStorage.setItem('renzo-last-saved', now.toISOString())
     addActivity('draft', `Created draft: "${draft.title.slice(0, 30)}..."`)
     addToast('Draft saved successfully!', 'success')
   }
@@ -10470,6 +10513,9 @@ function App() {
     const newDrafts = [{ ...data, category: 'Quick Write' }, ...drafts]
     setDrafts(newDrafts)
     localStorage.setItem('renzo-drafts', JSON.stringify(newDrafts))
+    const now = new Date()
+    setLastSaved(now)
+    localStorage.setItem('renzo-last-saved', now.toISOString())
     setWords(prev => prev + data.words)
     setWeeklyWords(prev => prev + data.words)  // Track weekly progress (v6.8)
     addActivity('draft', `Wrote ${data.words} words: "${data.title.slice(0, 30)}..."`)
@@ -11469,7 +11515,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v7.8</span>
+          <span className="logo-badge">v7.9</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -11731,6 +11777,23 @@ function App() {
               {String(Math.floor(sessionElapsed / 60)).padStart(2, '0')}:{String(sessionElapsed % 60).padStart(2, '0')}
             </span>
           </div>
+          
+          {/* Auto-save Indicator (v7.9) */}
+          {lastSaved && (
+            <div 
+              className="auto-save-indicator"
+              title={`Last saved: ${lastSaved.toLocaleTimeString()}`}
+            >
+              <span className="save-icon">💾</span>
+              <span className="save-time">
+                {new Date() - lastSaved < 60000 
+                  ? 'just now' 
+                  : new Date() - lastSaved < 3600000
+                    ? `${Math.floor((new Date() - lastSaved) / 60000)}m ago`
+                    : lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          )}
           
           <ThemeToggle isDark={isDarkMode} onToggle={toggleTheme} />
           <NotionSyncStatus onSync={() => addToast('Notion sync complete!', 'success')} />

@@ -1,3 +1,23 @@
+## [7.9.0] — March 15, 2026 (3:40 AM) [TINKER SESSION]
+
+### Added
+- **Pomodoro Presets for Word Sprint (v7.9)**
+  - New preset buttons: 5m, 15m, 25m, 45m
+  - Choose your sprint duration before starting
+  - Presets disabled during active sprint
+  - Duration persists between sprints
+  
+- **Auto-save Indicator (v7.9)**
+  - Shows last save time in header
+  - Displays "just now", "Xm ago", or time format
+  - Green color for visibility
+  - Persists across sessions
+
+### Changed
+- Updated version badge to v7.9 in header, footer, and index.html
+
+---
+
 ## [7.7.0] — March 15, 2026 (1:52 AM) [TINKER SESSION]
 
 ### Added

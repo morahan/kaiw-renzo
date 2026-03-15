@@ -888,6 +888,27 @@ input, textarea, select {
   text-align: center;
 }
 
+/* Auto-save Indicator (v7.9) */
+.auto-save-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.auto-save-indicator .save-icon {
+  font-size: 0.85rem;
+}
+
+.auto-save-indicator .save-time {
+  color: var(--accent-green);
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }
@@ -4102,6 +4123,41 @@ textarea:focus {
 .sprint-textarea:focus {
   outline: none;
   border-color: var(--accent);
+}
+
+/* Sprint Presets (v7.9) */
+.sprint-presets {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.sprint-preset-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sprint-preset-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.sprint-preset-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.sprint-preset-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ========== DASHBOARD CARDS v6.7 ========== */
