@@ -2617,12 +2617,16 @@ function ChangelogModal({ isOpen, onClose }) {
       '🎉 Major Release: v8.0',
       'Added Writing Velocity Widget — Real-time WPM display in header with animated bar',
       'Added Energy Ring Display — Visual energy level indicator with animated ring',
+      'Added Quick Stats Dashboard — Real-time view of all key metrics at a glance',
+      'Added Daily Writing Tip — Rotating expert tips in the header',
+      'Added Session Timer display in header — Track active writing time',
       'Added New CSS Animations — velocityPulse, energyFlow, popIn, gradient-text, card-glow',
       'Added Keyboard Shortcut Hints — kbd-style key display for better discoverability',
       'Added Focus Ring Animation — Visual focus indicator for active writing',
-      'Added Floating Toolbar Animation — Subtle floating effect for quick access bar',
-      'Enhanced Quick Stats Cards — Pop-in animations and improved visual hierarchy',
-      'Updated version badge to v8.0 with new gradient design'
+      'Added Better total Published counter — Shows total articles published',
+      'Enhanced streak widget with fire animation at 7+ days',
+      'Improved header layout with better visual hierarchy',
+      'Updated version badge to v8.0'
     ]},
     { version: '7.9', date: '2026-03-15', changes: [
       '🎉 New Release: v7.9',
@@ -10404,6 +10408,30 @@ function App() {
     return prompts[dayOfYear % prompts.length]
   })
   
+  // Daily Writing Tip (NEW v8.0) - Rotating expert tips
+  const [dailyTip] = useState(() => {
+    const tips = [
+      "The best hooks answer a question the reader didn't know they had",
+      "Paradox Open hooks convert 3x better than questions",
+      "Specific mechanisms beat generic advice every time",
+      "Your first sentence must work as a standalone tweet",
+      "Cut adjectives. Cut adverbs. Cut weak words.",
+      "Myth-busting articles hit 10/10 virality",
+      "If it bores you, it bores them. Cut it.",
+      "Lead with the controversial take, then back it up",
+      "The Stats Punch formula: Lead with the number",
+      "Always challenge assumptions — that's where the clicks live",
+      "Write drunk, edit sober — Hemingway",
+      "The CTA should tie directly back to your hook",
+      "Expansion Bridge: add detail after impact",
+      "Specific citations beat vague references",
+      "Story beats stats, but stats support stories"
+    ]
+    const today = new Date()
+    const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24))
+    return tips[dayOfYear % tips.length]
+  })
+  
   // NEW v4.5 features
   const [showInspirationBoard, setShowInspirationBoard] = useState(false)
   
@@ -11694,6 +11722,18 @@ function App() {
             </div>
           </div>
           
+          {/* Daily Writing Tip Widget (NEW v8.0) */}
+          <div 
+            className="daily-tip-widget" 
+            title="Daily writing tip from the pros"
+          >
+            <span className="tip-icon">💡</span>
+            <div className="tip-info">
+              <span className="tip-label">Tip of the Day</span>
+              <span className="tip-text">{dailyTip}</span>
+            </div>
+          </div>
+          
           {/* Daily Challenge Widget */}
           <div 
             className="daily-challenge-widget" 
@@ -11730,6 +11770,19 @@ function App() {
             <span>⚡</span>
             <span>Quick Sprint</span>
           </button>
+          
+          {/* Session Timer Display (NEW v8.0) */}
+          {sessionActive && (
+            <div 
+              className="session-timer-display"
+              title="Writing session in progress"
+            >
+              <span className="session-timer-icon">⏱️</span>
+              <span className="session-timer-value">
+                {Math.floor(sessionElapsed / 60)}:{String(sessionElapsed % 60).padStart(2, '0')}
+              </span>
+            </div>
+          )}
           
           {/* Quick Tweet Button (NEW v6.4) */}
           <button 
