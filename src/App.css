@@ -7715,3 +7715,286 @@ input::placeholder, textarea::placeholder {
 .flash-draft-btn span:first-child {
   font-size: 1rem;
 }
+
+/* ========== TRENDING TOPICS MODAL (v8.2) ========== */
+.trending-modal .trending-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.trending-modal .trending-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.trending-modal .trending-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.trending-modal .trending-item:hover {
+  border-color: var(--accent);
+  transform: translateX(4px);
+}
+
+.trending-modal .trending-hotness {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  min-width: 40px;
+  text-align: center;
+}
+
+.trending-modal .trending-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.trending-modal .trending-topic {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.trending-modal .trending-category {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.trending-modal .trending-trend {
+  font-size: 1rem;
+}
+
+.trending-modal .trending-footer {
+  margin-top: 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* ========== QUICK EXPORT MODAL (v8.2) ========== */
+.export-modal .export-preview {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.export-modal .export-article-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.export-modal .export-article-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.export-modal .export-options {
+  margin-bottom: 1rem;
+}
+
+.export-modal .export-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.export-modal .export-option input {
+  accent-color: var(--accent);
+}
+
+.export-modal .export-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.export-modal .export-btn {
+  flex: 1;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.export-modal .export-btn:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-hover);
+}
+
+.export-modal .export-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.export-modal .export-btn.primary:hover {
+  background: var(--accent-hover);
+}
+
+.export-modal .export-preview-code {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.export-modal .export-preview-code pre {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  font-family: 'Fira Code', monospace;
+}
+
+/* ========== WRITING ASSISTANT MODAL (v8.2) ========== */
+.assistant-modal .assistant-quick-prompts {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.assistant-modal .quick-prompt-btn {
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.assistant-modal .quick-prompt-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.assistant-modal .assistant-input {
+  margin-bottom: 1rem;
+}
+
+.assistant-modal .assistant-input textarea {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  resize: vertical;
+  margin-bottom: 0.75rem;
+}
+
+.assistant-modal .assistant-input textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.assistant-modal .assistant-generate-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-purple));
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.assistant-modal .assistant-generate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.assistant-modal .assistant-generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.assistant-modal .assistant-result {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.assistant-modal .assistant-result .result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.assistant-modal .assistant-result .result-header button {
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.assistant-modal .assistant-result pre {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.assistant-modal .assistant-history {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.assistant-modal .assistant-history h4 {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.assistant-modal .assistant-history .history-item {
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.assistant-modal .assistant-history .history-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
