@@ -7758,6 +7758,111 @@ function QuickDraftModal({ onClose, onSave }) {
   )
 }
 
+// Flash Draft Modal - Ultra-fast draft capture (NEW v7.8)
+function FlashDraftModal({ isOpen, onClose, onSave }) {
+  const [title, setTitle] = useState('')
+  const [points, setPoints] = useState('')
+  const [category, setCategory] = useState('Longevity')
+  const [timeLeft, setTimeLeft] = useState(60) // 60 second timer
+  const [isActive, setIsActive] = useState(false)
+  
+  useEffect(() => {
+    if (isOpen) {
+      setTitle('')
+      setPoints('')
+      setTimeLeft(60)
+      setIsActive(false)
+    }
+  }, [isOpen])
+  
+  useEffect(() => {
+    let interval
+    if (isActive && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft(prev => prev - 1)
+      }, 1000)
+    } else if (timeLeft === 0) {
+      setIsActive(false)
+    }
+    return () => clearInterval(interval)
+  }, [isActive, timeLeft])
+  
+  const handleStart = () => setIsActive(true)
+  
+  const handleSave = () => {
+    if (title.trim() || points.trim()) {
+      onSave({ 
+        title, 
+        content: points,
+        category, 
+        date: new Date().toISOString(),
+        type: 'flash'
+      })
+      addToast('⚡ Flash draft saved!', 'success')
+      onClose()
+    }
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content flash-draft-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>⚡ Flash Draft</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="flash-draft-timer">
+          <span className={`timer-value ${timeLeft <= 10 ? 'urgent' : ''}`}>
+            {timeLeft}s
+          </span>
+          <span className="timer-label">Capture your idea fast</span>
+        </div>
+        <div className="flash-draft-form">
+          <div className="flash-field">
+            <input
+              type="text"
+              placeholder="Title or topic..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              autoFocus={!isActive}
+              onFocus={handleStart}
+            />
+          </div>
+          <div className="flash-field">
+            <textarea
+              placeholder="Quick bullet points or ideas... (one per line)"
+              value={points}
+              onChange={(e) => setPoints(e.target.value)}
+              onFocus={handleStart}
+              rows={5}
+            />
+          </div>
+          <div className="flash-field">
+            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="Longevity">Longevity</option>
+              <option value="Training">Training</option>
+              <option value="Science">Science</option>
+              <option value="Metrics">Metrics</option>
+              <option value="Recovery">Recovery</option>
+              <option value="Nutrition">Nutrition</option>
+              <option value="Mindset">Mindset</option>
+            </select>
+          </div>
+        </div>
+        <div className="flash-draft-actions">
+          <button className="flash-save-btn" onClick={handleSave}>
+            ⚡ Save Flash Draft
+          </button>
+        </div>
+        <div className="flash-hint">
+          Press <kbd>Shift+F</kbd> anytime to open
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Keyboard Shortcuts Panel
 function ShortcutsPanel({ onClose }) {
   const shortcuts = [
@@ -10181,6 +10286,10 @@ function App() {
   })
   const [showSavedHooks, setShowSavedHooks] = useState(false)
   const [showWordSprint, setShowWordSprint] = useState(false)
+  
+  // Flash Draft (NEW v7.8) - Ultra-fast draft capture
+  const [showFlashDraft, setShowFlashDraft] = useState(false)
+  
   const [showArticleSeries, setShowArticleSeries] = useState(false)
   const [showPipeline, setShowPipeline] = useState(false)
   const [showThread, setShowThread] = useState(false)
@@ -10622,6 +10731,10 @@ function App() {
       if (key === 'J') setShowHookTester(true)
       if (key === 'Y') setShowHotTake(true)
       if (key === 'D') setShowQuickDraft(true)
+      if (key === 'F' && e.shiftKey) {
+        e.preventDefault()
+        setShowFlashDraft(true)  // Shift+F for Flash Draft
+      }
       if (key === '?') setShowKeyboardShortcuts(true)
       if (key === '/') setShowScratchpad(true)
       if (key === 'V') setShowVirality(true)
@@ -10979,6 +11092,13 @@ function App() {
       {showQuickWrite && (
         <QuickWriteMode 
           onClose={() => setShowQuickWrite(false)} 
+          onSave={saveQuickWrite}
+        />
+      )}
+      {showFlashDraft && (
+        <FlashDraftModal 
+          isOpen={showFlashDraft}
+          onClose={() => setShowFlashDraft(false)} 
           onSave={saveQuickWrite}
         />
       )}
@@ -11477,6 +11597,16 @@ function App() {
           >
             <span>🚀</span>
             <span>Ship It</span>
+          </button>
+          
+          {/* Flash Draft Button (NEW v7.8) */}
+          <button 
+            className="flash-draft-btn"
+            onClick={() => setShowFlashDraft(true)}
+            title="⚡ Flash Draft - 60 second idea capture - Press Shift+F"
+          >
+            <span>⚡</span>
+            <span>Flash</span>
           </button>
           
           {/* Milestones Button (NEW v7.4) */}
