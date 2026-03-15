@@ -2613,6 +2613,14 @@ function SentenceStartersModal({ isOpen, onClose, onSelect }) {
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '8.1', date: '2026-03-15', changes: [
+      '🎉 Minor Release: v8.1',
+      'Enhanced keyboard shortcuts — more discoverable tooltips on feature buttons',
+      'Improved modal animations — smoother transitions and better UX',
+      'Added keyboard hint badges to toolbar buttons for better discoverability',
+      'Updated version badge to v8.1',
+      'Improved responsive design for mobile devices'
+    ]},
     { version: '8.0', date: '2026-03-15', changes: [
       '🎉 Major Release: v8.0',
       'Added Writing Velocity Widget — Real-time WPM display in header with animated bar',
@@ -11609,7 +11617,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v8.0</span>
+          <span className="logo-badge">v8.1</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
