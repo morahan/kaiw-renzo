@@ -1,6 +1,12 @@
-## [7.9.0] — March 15, 2026 (3:40 AM) [TINKER SESSION]
+## [7.9.0] — March 15, 2026 (3:55 AM) [TINKER SESSION]
 
 ### Added
+- **Trending Topics Modal (v7.9)**
+  - Updated TrendingTopics component to work as both inline widget and modal
+  - Filterable by category (Training, Science, Nutrition, Recovery, Metrics, Longevity)
+  - Access via new "Trending" button in feature toolbar (🔥 icon) or press T key
+  - Displays trending fitness topics with virality scores and angles
+
 - **Pomodoro Presets for Word Sprint (v7.9)**
   - New preset buttons: 5m, 15m, 25m, 45m
   - Choose your sprint duration before starting
@@ -15,9 +21,22 @@
 
 ### Changed
 - Updated version badge to v7.9 in header, footer, and index.html
+- Enhanced TrendingTopics component to accept modal props while maintaining inline widget functionality
 
 ---
 
+## [7.8.0] — March 15, 2026 (2:25 AM) [TINKER SESSION]
+
+### Added
+- **Daily Writing Prompt Widget (v7.8)**
+  - New widget in hero showing today's writing prompt
+  - 15 rotating prompts covering myths, mechanisms, comparisons, and more
+  - Click to instantly start Focus Mode with that topic
+
+### Changed
+- Updated version badge to v7.8
+
+---
 ## [7.7.0] — March 15, 2026 (1:52 AM) [TINKER SESSION]
 
 ### Added

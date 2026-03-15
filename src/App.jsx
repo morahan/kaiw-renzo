@@ -5785,8 +5785,8 @@ function TrendingHashtags() {
   )
 }
 
-// ========== TRENDING TOPICS PANEL (NEW v5.4) ==========
-function TrendingTopics() {
+// ========== TRENDING TOPICS PANEL (NEW v5.4, updated v7.9) ==========
+function TrendingTopics({ isOpen, onClose, onSelectTopic }) {
   const [topics, setTopics] = useState(() => {
     const saved = localStorage.getItem('renzo-trending-topics')
     if (saved) {
@@ -5857,7 +5857,8 @@ function TrendingTopics() {
     saveTopics(shuffled)
   }
   
-  return (
+  // If isOpen is passed, render as modal; otherwise render inline
+  const renderContent = () => (
     <div className="trending-topics">
       <div className="topics-header">
         <span className="topics-icon">🔥</span>
@@ -5879,7 +5880,10 @@ function TrendingTopics() {
                 {t.virality}/10
               </span>
             </div>
-            <button className="topic-use" onClick={() => useTopic(t)}>
+            <button className="topic-use" onClick={() => {
+              useTopic(t)
+              if (onSelectTopic) onSelectTopic(t.topic)
+            }}>
               Use →
             </button>
             {copiedTopic === t.topic && <span className="topic-copied">Copied!</span>}
@@ -5889,6 +5893,25 @@ function TrendingTopics() {
       </div>
     </div>
   )
+  
+  // Modal mode - when isOpen is passed
+  if (isOpen !== undefined) {
+    if (!isOpen) return null
+    return (
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content trending-modal" onClick={e => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>🔥 Trending Topics</h3>
+            <button className="modal-close" onClick={onClose}>×</button>
+          </div>
+          {renderContent()}
+        </div>
+      </div>
+    )
+  }
+  
+  // Inline mode - original behavior
+  return renderContent()
 }
 
 // Article Brief Generator - Quick article brief from topic
@@ -10389,6 +10412,9 @@ function App() {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [showFloatingHelp, setShowFloatingHelp] = useState(false)
   
+  // NEW v7.9 features - Trending Topics
+  const [showTrendingTopics, setShowTrendingTopics] = useState(false)
+  
   // NEW v7.5 features - Text Analyzer & Quick Export
   const [showTextAnalyzer, setShowTextAnalyzer] = useState(false)
   const [showQuickExportAll, setShowQuickExportAll] = useState(false)
@@ -10811,6 +10837,7 @@ function App() {
       if (key === 'A') setShowIdeasBank(true)
       if (key === 'R' && !e.shiftKey) setShowReferencePanel(true)
       if (key === 'R' && e.shiftKey) setShowQuickWebResearch(true)  // Shift+R for Quick Research
+      if (key === 't' && !e.shiftKey) setShowTrendingTopics(true)  // T for Trending Topics
       if (key === 'O') setShowResearchQueue(true)
       if (key === 'U') setShowSavedHooks(true)
       if (key === 'H') setShowHeadlineGen(true)
@@ -11316,6 +11343,14 @@ function App() {
         isOpen={showQuickWebResearch}
         onClose={() => setShowQuickWebResearch(false)}
         onSelectTopic={(topic) => addToast(`Selected: ${topic}`, 'info')}
+      />
+      <TrendingTopics
+        isOpen={showTrendingTopics}
+        onClose={() => setShowTrendingTopics(false)}
+        onSelectTopic={(topic) => {
+          addToast(`Selected: ${topic}`, 'info')
+          setShowFocusMode(true)
+        }}
       />
       
       {/* NEW v5.3 modals */}
@@ -12001,6 +12036,11 @@ function App() {
             <span>🌐</span>
             <span>Web Search</span>
             <span className="feature-hint">⇧R</span>
+          </button>
+          <button className="feature-btn accent" onClick={() => setShowTrendingTopics(true)}>
+            <span>🔥</span>
+            <span>Trending</span>
+            <span className="feature-hint">T</span>
           </button>
           <button className="feature-btn" onClick={() => setShowSavedHooks(true)}>
             <span>⚡</span>
