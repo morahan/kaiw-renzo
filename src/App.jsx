@@ -5571,6 +5571,122 @@ function QuickStatGenerator() {
   )
 }
 
+// Category Stats Library - Organized fitness facts by topic (NEW v7.7)
+function CategoryStatsLibrary({ isOpen, onClose, onSelect }) {
+  const categories = [
+    { id: 'muscle', label: '💪 Muscle & Strength', color: '#f97316' },
+    { id: 'fatloss', label: '🔥 Fat Loss', color: '#ef4444' },
+    { id: 'recovery', label: '😴 Recovery & Sleep', color: '#8b5cf6' },
+    { id: 'longevity', label: '⏳ Longevity', color: '#06b6d4' },
+    { id: 'nutrition', label: '🥗 Nutrition', color: '#22c55e' },
+    { id: 'performance', label: '⚡ Performance', color: '#eab308' },
+  ]
+  
+  const statsByCategory = {
+    muscle: [
+      { text: "Muscle remains metabolically active for 72 hours post-workout", source: "J Appl Physiol" },
+      { text: "You can build muscle with just 3 sets per exercise", source: "J Strength Cond Res" },
+      { text: "Fast-twitch fibers fatigue 10x faster than slow-twitch", source: "Nature" },
+      { text: "Resistance training maintains bone density better than cardio", source: "Osteoporosis Int" },
+      { text: "Maximum muscle growth occurs with 6-12 reps per set", source: "Sports Med" },
+      { text: "Muscle protein synthesis peaks 24 hours after training", source: "Nutrients" },
+    ],
+    fatloss: [
+      { text: "Protein thermic effect is 20-30% vs 5-10% for carbs/fat", source: "Am J Clin Nutr" },
+      { text: "Walking 8,000+ steps daily reduces mortality risk by 50%", source: "JAMA Intern Med" },
+      { text: "Sleep deprivation can reduce testosterone by 15% in one week", source: "JAMA" },
+      { text: "Caffeine can boost fat oxidation by 10-30%", source: "Int J Sport Nutr" },
+      { text: "HIIT burns 25-30% more calories than steady-state cardio", source: "J Appl Physiol" },
+      { text: "Muscle mass is the biggest predictor of resting metabolic rate", source: "Am J Clin Nutr" },
+    ],
+    recovery: [
+      { text: "HRV is a stronger predictor of overtraining than resting HR", source: "Br J Sports Med" },
+      { text: "Your gut microbiome produces 10% of your daily energy", source: "Cell Host & Microbe" },
+      { text: "Deep sleep is when 70% of growth hormone is released", source: "Sleep" },
+      { text: "Cold exposure boosts norepinephrine levels by 200-500%", source: "J Appl Physiol" },
+      { text: "Active recovery can reduce muscle soreness by 20%", source: "Med Sci Sports Exerc" },
+      { text: "Magnesium deficiency affects over 50% of athletes", source: "J Int Soc Sports Nutr" },
+    ],
+    longevity: [
+      { text: "VO2 max is the strongest predictor of longevity in adults", source: "JAMA" },
+      { text: "Muscle mass at age 40 predicts mortality risk", source: "J Gerontol" },
+      { text: "Sarcopenia accelerates after age 50 without resistance training", source: "Ageing Res Rev" },
+      { text: "Telomere length correlates with exercise volume", source: "Med Sci Sports Exerc" },
+      { text: "Regular exercise reduces all-cause mortality by 30-45%", source: "Br J Sports Med" },
+      { text: "Strength training improves insulin sensitivity within weeks", source: "Diabetes Care" },
+    ],
+    nutrition: [
+      { text: "Creatine monohydrate is the most researched supplement in history", source: "Examine.com" },
+      { text: "Protein timing matters less than total daily protein intake", source: "ISSN" },
+      { text: "The average person walks 3,000-4,000 steps per day", source: "CDC" },
+      { text: "Beta-alanine causes paresthesia - totally harmless", source: "J Int Soc Sports Nutr" },
+      { text: "Caffeine can improve workout performance by 12%", source: "Sports Med" },
+      { text: "Omega-3s reduce muscle soreness after eccentric exercise", source: "J Int Soc Sports Nutr" },
+    ],
+    performance: [
+      { text: "Caffeine improves reaction time by 2-4%", source: "Sports Med" },
+      { text: "Carb loading can improve endurance by 2-3%", source: "Int J Sport Nutr" },
+      { text: "Creatine increases strength by 5-15% in first weeks", source: "J Strength Cond Res" },
+      { text: "Plyometrics can improve power output by 15%", source: "J Sports Sci" },
+      { text: "Warm-up reduces injury risk by 50%", source: "Br J Sports Med" },
+      { text: "Mental imagery can improve strength by 13%", source: "Int J Psychophysiol" },
+    ],
+  }
+  
+  const [activeCategory, setActiveCategory] = useState('muscle')
+  const [copiedStat, setCopiedStat] = useState(null)
+  
+  const copyStat = (stat) => {
+    navigator.clipboard.writeText(`${stat.text} (${stat.source})`)
+    setCopiedStat(stat.text)
+    setTimeout(() => setCopiedStat(null), 2000)
+  }
+  
+  if (!isOpen) return null
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content category-stats-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>📊 Category Stats Library</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="category-tabs">
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              className={`category-tab ${activeCategory === cat.id ? 'active' : ''}`}
+              style={{ '--cat-color': cat.color }}
+              onClick={() => setActiveCategory(cat.id)}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+        
+        <div className="category-stats-list">
+          {statsByCategory[activeCategory].map((stat, i) => (
+            <div 
+              key={i} 
+              className="category-stat-item"
+              onClick={() => { copyStat(stat); onSelect?.(stat) }}
+            >
+              <p className="stat-text">{stat.text}</p>
+              <span className="stat-source">{stat.source}</span>
+              <span className="stat-copy-icon">{copiedStat === stat.text ? '✓' : '📋'}</span>
+            </div>
+          ))}
+        </div>
+        
+        <div className="category-stats-footer">
+          <p>Click any stat to copy • {statsByCategory[activeCategory].length} stats in this category</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Trending Hashtags - For X/Twitter content
 function TrendingHashtags() {
   const [hashtags, setHashtags] = useState([
@@ -10077,6 +10193,9 @@ function App() {
   // NEW v5.11 features - Writing Prompts
   const [showWritingPrompts, setShowWritingPrompts] = useState(false)
   
+  // NEW v7.7 features - Category Stats Library
+  const [showCategoryStats, setShowCategoryStats] = useState(false)
+  
   // NEW v7.2 features - Writing Tools
   const [showWarmup, setShowWarmup] = useState(false)
   const [showSentenceStarters, setShowSentenceStarters] = useState(false)
@@ -10468,6 +10587,9 @@ function App() {
       // NEW v7.2 shortcuts - Writing Tools
       if (e.shiftKey && key === 'W') setShowWarmup(true)  // Shift+W for Writing Warmup
       if (e.shiftKey && key === 'E') setShowSentenceStarters(true)  // Shift+E for Sentence Starters
+      
+      // NEW v7.7 shortcuts - Category Stats
+      if (key === ';') setShowCategoryStats(true)  // ; for Category Stats Library
       
       // NEW v7.4 shortcuts - Milestones
       if (key === '=') setShowMilestones(true)  // = for Milestones
@@ -10950,6 +11072,11 @@ function App() {
         isOpen={showWritingPrompts}
         onClose={() => setShowWritingPrompts(false)}
       />
+      <CategoryStatsLibrary
+        isOpen={showCategoryStats}
+        onClose={() => setShowCategoryStats(false)}
+        onSelect={(stat) => addToast(`Copied: ${stat.text.slice(0, 50)}...`)}
+      />
       <WarmupModal
         isOpen={showWarmup}
         onClose={() => setShowWarmup(false)}
@@ -11111,7 +11238,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v7.6</span>
+          <span className="logo-badge">v7.7</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -11642,6 +11769,11 @@ function App() {
             <span>🤖</span>
             <span>AI Prompt</span>
             <span className="feature-hint">`</span>
+          </button>
+          <button className="feature-btn" onClick={() => setShowCategoryStats(true)}>
+            <span>📊</span>
+            <span>Stats Lib</span>
+            <span className="feature-hint">;</span>
           </button>
           
           {/* NEW v5.3 buttons */}

@@ -6820,3 +6820,101 @@ select:focus {
 .milestones-btn span:first-child {
   font-size: 1rem;
 }
+
+/* ========== CATEGORY STATS LIBRARY (NEW v7.7) ========== */
+.category-stats-modal {
+  max-width: 700px;
+  max-height: 80vh;
+}
+
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.category-tab {
+  padding: 0.5rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.category-tab:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.category-tab.active {
+  background: var(--cat-color, var(--accent-primary));
+  border-color: var(--cat-color, var(--accent-primary));
+  color: white;
+}
+
+.category-stats-list {
+  padding: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.category-stat-item {
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.category-stat-item:hover {
+  border-color: var(--accent-primary);
+  transform: translateX(4px);
+}
+
+.category-stat-item .stat-text {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 0.5rem 0;
+}
+
+.category-stat-item .stat-source {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.category-stat-item .stat-copy-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.category-stat-item:hover .stat-copy-icon {
+  opacity: 1;
+}
+
+.category-stats-footer {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.category-stats-footer p {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  margin: 0;
+}
