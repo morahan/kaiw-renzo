@@ -1,3 +1,19 @@
+## [7.6.0] — March 14, 2026 (11:15 PM) [TINKER SESSION]
+
+### Added
+- **Session Notes Widget (v7.6)**
+  - Quick note-taking widget in hero section for jotting down ideas during writing
+  - Auto-saves notes to localStorage
+  - Expandable/collapsible design to minimize clutter
+  - Clear button to start fresh
+  - Perfect for capturing research links, quick thoughts, or follow-up tasks
+  - Positioned in hero-status area alongside Energy Meter
+
+### Changed
+- Updated version badge to v7.6 in header, footer, and index.html
+
+---
+
 ## [7.5.0] — March 14, 2026 (10:30 PM) [TINKER SESSION]
 
 ### Added

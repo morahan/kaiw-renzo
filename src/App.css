@@ -1532,6 +1532,92 @@ button:hover::after { opacity: 1; }
   align-items: flex-end;
 }
 
+/* Session Notes Widget (v7.6) */
+.session-notes {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font-size: 0.85rem;
+  min-width: 180px;
+}
+
+.session-notes-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+  user-select: none;
+  transition: var(--transition-fast);
+}
+
+.session-notes-header:hover {
+  background: var(--bg-hover);
+}
+
+.notes-icon {
+  font-size: 0.95rem;
+}
+
+.notes-label {
+  flex: 1;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.notes-toggle {
+  color: var(--text-muted);
+  font-weight: bold;
+}
+
+.session-notes.expanded .session-notes-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.session-notes-content {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notes-textarea {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 0.5rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 80px;
+  max-height: 200px;
+}
+
+.notes-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+}
+
+.notes-clear-btn {
+  align-self: flex-end;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.notes-clear-btn:hover {
+  background: var(--accent-hover);
+}
+
 /* Writing indicator with better animation */
 .writing-indicator {
   display: flex;

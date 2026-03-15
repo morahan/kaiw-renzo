@@ -6801,6 +6801,36 @@ function EnergyMeter({ level, setLevel }) {
 }
 
 // Notion Sync Status Component
+// Session Notes Component (v7.6) - Quick note-taking during writing
+function SessionNotes({ notes, onChange, onClear }) {
+  const [expanded, setExpanded] = useState(false)
+  
+  return (
+    <div className={`session-notes ${expanded ? 'expanded' : ''}`}>
+      <div className="session-notes-header" onClick={() => setExpanded(!expanded)}>
+        <span className="notes-icon">📝</span>
+        <span className="notes-label">Session Notes</span>
+        <span className="notes-toggle">{expanded ? '−' : '+'}</span>
+      </div>
+      {expanded && (
+        <div className="session-notes-content">
+          <textarea
+            className="notes-textarea"
+            placeholder="Jot down ideas, research links, or thoughts..."
+            value={notes}
+            onChange={(e) => onChange(e.target.value)}
+          />
+          {notes && (
+            <button className="notes-clear-btn" onClick={onClear}>
+              Clear
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function NotionSyncStatus({ onSync }) {
   const [syncing, setSyncing] = useState(false)
   const [lastSync, setLastSync] = useState(() => {
@@ -9887,6 +9917,21 @@ function App() {
   const [sessionActive, setSessionActive] = useState(false)
   const [sessionElapsed, setSessionElapsed] = useState(0)
   
+  // Session Notes (v7.6) - Quick note-taking during writing
+  const [sessionNotes, setSessionNotes] = useState(() => {
+    return localStorage.getItem('renzo-session-notes') || ''
+  })
+  
+  // Auto-save session notes
+  useEffect(() => {
+    localStorage.setItem('renzo-session-notes', sessionNotes)
+  }, [sessionNotes])
+  
+  const clearSessionNotes = () => {
+    setSessionNotes('')
+    localStorage.removeItem('renzo-session-notes')
+  }
+  
   const [todayWordCount, setTodayWordCount] = useState(() => {
     const saved = localStorage.getItem('renzo-today-word-count')
     const savedDate = localStorage.getItem('renzo-today-word-count-date')
@@ -11066,7 +11111,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v7.5</span>
+          <span className="logo-badge">v7.6</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -11375,6 +11420,11 @@ function App() {
           </div>
           <div className="hero-status">
             <EnergyMeter level={energyLevel} setLevel={setEnergyLevel} />
+            <SessionNotes 
+              notes={sessionNotes} 
+              onChange={setSessionNotes} 
+              onClear={clearSessionNotes}
+            />
             <div className={`writing-indicator ${writingPulse ? 'active' : ''}`}>
               <span className="writing-dot"></span>
               <span className="writing-text">Ready to create</span>
