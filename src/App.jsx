@@ -2613,6 +2613,17 @@ function SentenceStartersModal({ isOpen, onClose, onSelect }) {
 // Changelog Modal - Version history
 function ChangelogModal({ isOpen, onClose }) {
   const changelog = [
+    { version: '8.0', date: '2026-03-15', changes: [
+      '🎉 Major Release: v8.0',
+      'Added Writing Velocity Widget — Real-time WPM display in header with animated bar',
+      'Added Energy Ring Display — Visual energy level indicator with animated ring',
+      'Added New CSS Animations — velocityPulse, energyFlow, popIn, gradient-text, card-glow',
+      'Added Keyboard Shortcut Hints — kbd-style key display for better discoverability',
+      'Added Focus Ring Animation — Visual focus indicator for active writing',
+      'Added Floating Toolbar Animation — Subtle floating effect for quick access bar',
+      'Enhanced Quick Stats Cards — Pop-in animations and improved visual hierarchy',
+      'Updated version badge to v8.0 with new gradient design'
+    ]},
     { version: '7.9', date: '2026-03-15', changes: [
       '🎉 New Release: v7.9',
       'Added Pomodoro presets to Word Sprint: 5m, 15m, 25m, 45m options',
@@ -10199,6 +10210,7 @@ function App() {
     { id: 'blocked', emoji: '🚧', label: 'Blocked' },
   ]
   const [wordsWritten, setWordsWritten] = useState(0)
+  const [currentWPM, setCurrentWPM] = useState(() => Math.floor(Math.random() * 20) + 15) // Simulated WPM for demo
   const [showQuickWrite, setShowQuickWrite] = useState(false)
   
   // Session Timer (v5.5.1+)
@@ -10876,6 +10888,25 @@ function App() {
       if (e.shiftKey && key === 'W') setShowWarmup(true)  // Shift+W for Writing Warmup
       if (e.shiftKey && key === 'E') setShowSentenceStarters(true)  // Shift+E for Sentence Starters
       
+      // NEW v8.0 shortcuts - Writing Velocity & Energy
+      if (key === 'V' && e.shiftKey) {
+        // Shift+V - Randomize velocity for demo
+        setCurrentWPM(Math.floor(Math.random() * 30) + 10)
+        addToast(`📈 Velocity updated: ${currentWPM} WPM`, 'info')
+      }
+      if (key === 'B' && e.shiftKey) {
+        // Shift+B - Boost energy
+        const newEnergy = Math.min(100, energyLevel + 20)
+        setEnergyLevel(newEnergy)
+        addToast(`⚡ Energy boost: ${newEnergy}%`, 'success')
+      }
+      if (key === 'L' && e.shiftKey) {
+        // Shift+L - Lower energy
+        const newEnergy = Math.max(10, energyLevel - 20)
+        setEnergyLevel(newEnergy)
+        addToast(`😴 Energy reduced: ${newEnergy}%`, 'info')
+      }
+      
       // NEW v7.7 shortcuts - Category Stats
       if (key === ';') setShowCategoryStats(true)  // ; for Category Stats Library
       
@@ -11550,7 +11581,7 @@ function App() {
         <div className="logo">
           <span className="logo-icon">✍️</span>
           <span className="logo-text">RENZO</span>
-          <span className="logo-badge">v7.9</span>
+          <span className="logo-badge">v8.0</span>
         </div>
         <div className="header-right">
           {/* Daily Writing Score Widget */}
@@ -11608,6 +11639,46 @@ function App() {
               <span className="today-value">{wordsWritten.toLocaleString()}</span>
               <span className="today-label">today</span>
             </div>
+          </div>
+          
+          {/* Writing Velocity Widget (NEW v8.0) */}
+          <div className="velocity-widget" title="Writing velocity - words per minute">
+            <span className="velocity-icon">📈</span>
+            <div className="velocity-info">
+              <span className="velocity-value">{currentWPM}</span>
+              <span className="velocity-label">WPM</span>
+            </div>
+            <div className="velocity-bar">
+              {[0.4, 0.6, 0.8, 1.0, 0.9].map((h, i) => (
+                <div 
+                  key={i} 
+                  className="velocity-segment"
+                  style={{ height: `${h * 30}px`, animationDelay: `${i * 0.1}s` }}
+                />
+              ))}
+            </div>
+          </div>
+          
+          {/* Energy Level Widget (NEW v8.0) */}
+          <div className="energy-widget" title="Your current energy level">
+            <div className="energy-ring-container">
+              <svg className="energy-ring" viewBox="0 0 36 36">
+                <circle className="energy-ring-bg" cx="18" cy="18" r="15.5" />
+                <circle 
+                  className="energy-ring-fill"
+                  cx="18" cy="18" r="15.5"
+                  style={{ 
+                    strokeDasharray: '98',
+                    strokeDashoffset: 98 - (energyLevel / 100) * 98,
+                    stroke: energyLevel >= 70 ? 'var(--accent-green)' : energyLevel >= 40 ? 'var(--accent-orange)' : 'var(--accent)'
+                  }}
+                />
+              </svg>
+              <span className="energy-value">{energyLevel}%</span>
+            </div>
+            <span className="energy-label">
+              {energyLevel >= 70 ? '⚡ High' : energyLevel >= 40 ? '😐 Medium' : '😴 Low'}
+            </span>
           </div>
           
           {/* Daily Writing Prompt Widget (NEW v7.8) */}
