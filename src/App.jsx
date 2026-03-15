@@ -10051,6 +10051,56 @@ function App() {
     localStorage.removeItem('renzo-session-notes')
   }
   
+  // Total Published Articles Counter (NEW v7.7)
+  const [totalPublished, setTotalPublished] = useState(() => {
+    return parseInt(localStorage.getItem('renzo-total-published')) || 0
+  })
+  
+  // Writing Streak - days in a row with writing (NEW v7.7)
+  const [writingStreak, setWritingStreak] = useState(() => {
+    const saved = localStorage.getItem('renzo-writing-streak')
+    const savedDate = localStorage.getItem('renzo-writing-streak-date')
+    const today = new Date().toDateString()
+    if (saved && savedDate === today) {
+      return parseInt(saved) || 0
+    }
+    return 0
+  })
+  
+  // Update streak on new day
+  useEffect(() => {
+    const today = new Date().toDateString()
+    const savedDate = localStorage.getItem('renzo-writing-streak-date')
+    if (savedDate && savedDate !== today) {
+      // Check if yesterday had writing
+      const yesterday = new Date()
+      yesterday.setDate(yesterday.getDate() - 1)
+      if (savedDate === yesterday.toDateString()) {
+        // Streak continues - already set
+      } else {
+        // Streak broken
+        setWritingStreak(0)
+      }
+    }
+  }, [])
+  
+  // Function to increment published count and streak
+  const incrementPublished = () => {
+    const newTotal = totalPublished + 1
+    setTotalPublished(newTotal)
+    localStorage.setItem('renzo-total-published', newTotal.toString())
+    
+    // Update streak
+    const today = new Date().toDateString()
+    const savedDate = localStorage.getItem('renzo-writing-streak-date')
+    if (savedDate !== today) {
+      const newStreak = writingStreak + 1
+      setWritingStreak(newStreak)
+      localStorage.setItem('renzo-writing-streak', newStreak.toString())
+      localStorage.setItem('renzo-writing-streak-date', today)
+    }
+  }
+  
   const [todayWordCount, setTodayWordCount] = useState(() => {
     const saved = localStorage.getItem('renzo-today-word-count')
     const savedDate = localStorage.getItem('renzo-today-word-count-date')
@@ -10528,6 +10578,15 @@ function App() {
       if (key === 'N') setShowQuickFlow(true)
       if (key === 'P') setShowPrompt(true)
       if (key === 'T') setShowTemplates(true)
+      if (key === 'T' && e.shiftKey) {
+        e.preventDefault()
+        setSessionActive(!sessionActive)
+        if (!sessionActive) {
+          addToast('⏱️ Session started', 'info')
+        } else {
+          addToast(`📊 Session ended: ${Math.floor(sessionElapsed / 60)}m ${sessionElapsed % 60}s`, 'success')
+        }
+      }
       if (key === 'K') setShowCTATemplates(true)
       if (key === 'J') setShowHookTester(true)
       if (key === 'Y') setShowHotTake(true)
@@ -10537,7 +10596,16 @@ function App() {
       if (key === 'V') setShowVirality(true)
       if (key === 'W') setShowQuickWrite(true)
       if (key === 'X') setShowThreadFormat(true)  // X for Thread Format
-      if (key === 'T' && e.shiftKey) setShowThread(true)  // Shift+T for Thread view
+      if (key === 'T' && e.shiftKey) {
+        e.preventDefault()
+        setSessionActive(!sessionActive)
+        if (!sessionActive) {
+          addToast('⏱️ Session started', 'info')
+        } else {
+          addToast(`📊 Session ended: ${Math.floor(sessionElapsed / 60)}m ${sessionElapsed % 60}s`, 'success')
+        }
+      }
+      if (key === 'T' && e.altKey) setShowThread(true)  // Alt+T for Thread view
       if (key === 'F') setShowFormula(true)
       if (key === 'G') setShowTopicGenerator(true)
       if (key === 'C' && !e.metaKey && !e.ctrlKey) setShowClipboard(true)
@@ -11449,6 +11517,26 @@ function App() {
             <span className="mood-text">
               {moods.find(m => m.id === mood)?.label || 'Neutral'}
             </span>
+          </div>
+
+          {/* Total Published Articles Counter (NEW v7.7) */}
+          <div 
+            className="total-published-counter"
+            title="Total articles published"
+          >
+            <span className="counter-icon">📝</span>
+            <span className="counter-value">{totalPublished}</span>
+            <span className="counter-label">published</span>
+          </div>
+          
+          {/* Writing Streak Indicator (NEW v7.7) */}
+          <div 
+            className={`writing-streak-indicator ${writingStreak > 0 ? 'active' : ''}`}
+            title={`${writingStreak} day writing streak`}
+          >
+            <span className="streak-fire">{writingStreak > 0 ? '🔥' : '💤'}</span>
+            <span className="streak-value">{writingStreak}</span>
+            <span className="streak-label">streak</span>
           </div>
 
           {/* Session Timer Widget (v5.5.1+) */}

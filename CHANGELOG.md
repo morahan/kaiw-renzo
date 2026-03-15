@@ -1,3 +1,27 @@
+## [7.7.0] — March 15, 2026 (1:52 AM) [TINKER SESSION]
+
+### Added
+- **Total Published Articles Counter (v7.7)**
+  - Persistent counter in header showing total articles published
+  - Click to see your publishing milestone
+  - Data persisted in localStorage
+  
+- **Writing Streak Indicator (v7.7)**
+  - Visual fire indicator in header showing consecutive days with writing
+  - Active state with orange glow when streak > 0
+  - Auto-tracks streak from daily word count activity
+  
+- **Session Timer Keyboard Shortcut (v7.7)**
+  - Press Shift+T to toggle session timer on/off
+  - Visual toast notifications for start/end
+  - Previously only accessible via click
+
+### Changed
+- Updated version badge to v7.7 in header, footer, and index.html
+- Shift+T now toggles session timer (moved Thread view to Alt+T)
+
+---
+
 ## [7.6.0] — March 14, 2026 (11:15 PM) [TINKER SESSION]
 
 ### Added

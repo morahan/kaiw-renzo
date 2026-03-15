@@ -7242,3 +7242,77 @@ input::placeholder, textarea::placeholder {
 .theme-toggle .theme-icon {
   font-size: 1.1rem;
 }
+
+/* ========== TOTAL PUBLISHED COUNTER (v7.7) ========== */
+.total-published-counter {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: default;
+  transition: all var(--transition-fast);
+}
+
+.total-published-counter:hover {
+  border-color: var(--accent-green);
+  background: var(--bg-hover);
+}
+
+.total-published-counter .counter-icon {
+  font-size: 0.9rem;
+}
+
+.total-published-counter .counter-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-green);
+}
+
+.total-published-counter .counter-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ========== WRITING STREAK INDICATOR (v7.7) ========== */
+.writing-streak-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: default;
+  transition: all var(--transition-fast);
+}
+
+.writing-streak-indicator.active {
+  border-color: var(--accent-orange);
+  background: rgba(255, 152, 0, 0.1);
+}
+
+.writing-streak-indicator:hover {
+  border-color: var(--accent-orange);
+}
+
+.writing-streak-indicator .streak-fire {
+  font-size: 0.9rem;
+}
+
+.writing-streak-indicator .streak-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-orange);
+}
+
+.writing-streak-indicator .streak-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
